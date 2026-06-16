@@ -1,0 +1,259 @@
+{
+    "schema_version": "1.0.0",
+    "global_rules": {
+        "date_format": "YYYY-MM-DD",
+        "number_format": "decimal",
+        "empty_values": [
+            null,
+            ""
+        ],
+        "normalization_rules": [
+            "Return enum values exactly as defined",
+            "Remove currency symbols from numbers",
+            "Convert dates to YYYY-MM-DD",
+            "Return null when value is missing",
+            "Do not infer missing data"
+        ]
+    },
+    "fields": {
+        "numero_escritura": {
+            "type": "text",
+            "label": "Número de escritura",
+            "required": true,
+            "ai_description": "Número de escritura pública"
+        },
+        "fecha_firma_escritura": {
+            "type": "date",
+            "label": "Fecha de firma",
+            "required": true,
+            "ai_description": "Fecha de firma de la escritura pública"
+        },
+        "tipo_inmueble": {
+            "type": "select",
+            "label": "Tipo de inmueble",
+            "required": true,
+            "source": "catalogo_inmuebles"
+        },
+        "especifica_inmueble": {
+            "type": "text",
+            "label": "Especificar inmueble",
+            "required_if": {
+                "tipo_inmueble": "9"
+            }
+        },
+        "avaluo_inmueble": {
+            "type": "number",
+            "label": "Avalúo del inmueble",
+            "default_if_missing": 0,
+            "required": true
+        },
+        "pagos_inmueble": {
+            "type": "array",
+            "items": {
+                "monto": {
+                    "type": "number",
+                    "required": true
+                },
+                "tipo_pago_inmueble": {
+                    "type": "select",
+                    "required": true,
+                    "source": "catalogo_tipos_pago"
+                },
+                "institucion_financiera": {
+                    "type": "select",
+                    "ai_description": "Cuenta de origen de banco",
+                    "required_if": {
+                        "tipo_pago_inmueble": [
+                            "2",
+                            "3"
+                        ]
+                    },
+                    "source": "catalogo_bancos"
+                },
+                "numero_cuenta": {
+                    "type": "text",
+                    "ai_description": "Cuenta de origen de banco",
+                    "required_if": {
+                        "tipo_pago_inmueble": [
+                            "2",
+                            "3"
+                        ]
+                    }
+                },
+                "otro": {
+                    "type": "text",
+                    "ai_description": "Cuenta de origen de banco",
+                    "required_if": {
+                        "institucion_financiera": [
+                            "999"
+                        ]
+                    }
+                }
+            }
+        },
+        "enajenantes": {
+            "type": "array",
+            "items": {
+                "tipo_enajenante": {
+                    "type": "select",
+                    "required": true,
+                    "source": "catalogo_tipos_domicilio"
+                },
+                "rfc": {
+                    "type": "text",
+                    "required": true,
+                    "validation": {
+                        "format": "rfc"
+                    },
+                    "aliases": [
+                        "rfc",
+                        "registro federal de contribuyentes"
+                    ]
+                },
+                "nombre": {
+                    "type": "text",
+                    "required": true
+                },
+                "apellido_paterno": {
+                    "type": "text"
+                },
+                "apellido_materno": {
+                    "type": "text"
+                },
+                "curp": {
+                    "type": "text",
+                    "required_if": {
+                        "tipo_enajenante": "1"
+                    },
+                    "validation": {
+                        "format": "curp"
+                    }
+                },
+                "razon_social":{
+                    "type": "text",
+                    "required_when": {
+                        "field": "rfc",
+                        "rule": "rfc invalid or generic moral"
+                    }
+                },
+                "nacionalidad": {
+                    "type": "select",
+                    "source": "catalogo_nacionalidad",
+                    "required_if": {
+                        "tipo_enajenante": "2"
+                    }
+                },
+                "fecha_nacimiento": {
+                    "type": "date",
+                    "required_if": {
+                        "tipo_enajenante": "2"
+                    }
+                },
+                "documento_oficial": {
+                    "type": "text",
+                    "required_if": {
+                        "tipo_enajenante": "2"
+                    }
+                },
+                "folio": {
+                    "type": "text",
+                    "required_if": {
+                        "tipo_enajenante": "2"
+                    }
+                }
+            }
+        },
+        "datos_informativos": {
+            "type": "object",
+            "items": {
+                "ingresos_exentos": {
+                    "type": "select",
+                    "default_if_missing_label": "No",
+                    "source": "catalogo_datos_informativos"
+                },
+                "monto": {
+                    "type": "number",
+                    "required_if": {
+                        "ingresos_exentos": "1"
+                    }
+                },
+                "impuesto": {
+                    "type": "number",
+                    "required_if": {
+                        "ingresos_exentos": "1"
+                    }
+                }
+            }
+        },
+        "adquirientes": {
+            "type": "array",
+            "items": {
+                "tipo_adquiriente": {
+                    "type": "select",
+                    "source": "catalogo_tipos_domicilio"
+                },
+                "rfc": {
+                    "type": "text",
+                    "required": true,
+                    "validation": {
+                        "format": "rfc"
+                    },
+                    "aliases": [
+                        "rfc",
+                        "registro federal de contribuyentes"
+                    ]
+                },
+                "nombre": {
+                    "type": "text"
+                },
+                "apellido_paterno": {
+                    "type": "text"
+                },
+                "apellido_materno": {
+                    "type": "text"
+                },
+                "curp": {
+                    "type": "text",
+                    "required_if": {
+                        "tipo_adquiriente": "1"
+                    },
+                    "validation": {
+                        "format": "curp"
+                    }
+                },
+                "razon_social":{
+                    "type": "text",
+                    "required_when": {
+                        "field": "rfc",
+                        "rule": "rfc invalid or generic moral"
+                    }
+                },
+                "nacionalidad": {
+                    "type": "select",
+                    "source": "catalogo_nacionalidad",
+                    "required_if": {
+                        "tipo_adquiriente": "2"
+                    }
+                },
+                "fecha_nacimiento": {
+                    "type": "date",
+                    "required_if": {
+                        "tipo_adquiriente": "2"
+                    }
+                },
+                "documento_oficial": {
+                    "type": "text",
+                    "required_if": {
+                        "tipo_adquiriente": "2"
+                    }
+                },
+                "folio": {
+                    "type": "text",
+                    "required_if": {
+                        "tipo_adquiriente": "2"
+                    }
+                }
+            }
+        }
+    }
+}

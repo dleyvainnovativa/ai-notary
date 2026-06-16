@@ -1,0 +1,65 @@
+{
+    "numero_escritura": "15482",
+    "fecha_firma_escritura": "2025-01-15",
+    "tipo_inmueble": "1",
+    "especifica_inmueble": null,
+    "avaluo_inmueble": 3250000,
+    "pagos_inmueble": [
+        {
+            "monto": 1500000,
+            "tipo_pago_inmueble": "3",
+            "institucion_financiera": "012",
+            "numero_cuenta": "1234567890",
+            "otro": null
+        },
+        {
+            "monto": 1500000,
+            "tipo_pago_inmueble": "3",
+            "institucion_financiera": "999",
+            "numero_cuenta": "1234567890",
+            "otro": "canada bank"
+        },
+        {
+            "monto": 1750000,
+            "tipo_pago_inmueble": "1",
+            "institucion_financiera": null,
+            "numero_cuenta": null,
+            "otro": null
+        }
+    ],
+    "enajenantes": [
+        {
+            "tipo_enajenante": "1",
+            "rfc": "CABJ850210ABC",
+            "nombre": "JUAN",
+            "apellido_paterno": "CABALLERO",
+            "apellido_materno": "BENITEZ",
+            "curp": "CABJ850210HVZRNN01",
+            "razon_social": null,
+            "nacionalidad": null,
+            "fecha_nacimiento": null,
+            "documento_oficial": null,
+            "folio": null
+        }
+    ],
+    "datos_informativos": {
+        "ingresos_exentos": "1",
+        "monto": 500000,
+        "impuesto": 0
+    },
+    "adquirientes": [
+        {
+            "tipo_adquiriente": "2",
+            "rfc": "XEXX010101000",
+            "nombre": "MICHAEL",
+            "apellido_paterno": "SMITH",
+            "apellido_materno": null,
+            "curp": null,
+            "razon_social": "Extranjero",
+            "nacionalidad": "AD",
+            "fecha_nacimiento": "1998-08-16",
+            "documento_oficial": "PASAPORTE",
+            "folio": "XEXX010101000"
+        }
+    ]
+}

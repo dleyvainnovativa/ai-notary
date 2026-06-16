@@ -1,0 +1,149 @@
+{
+    "numero_escritura": "26477",
+    "fecha_firma_escritura": "2025-12-23",
+    "tipo_inmueble": "4",
+    "especifica_inmueble": null,
+    "avaluo_inmueble": 0,
+    "pagos_inmueble": [
+        {
+            "monto": 1277,
+            "tipo_pago_inmueble": "3",
+            "institucion_financiera": "044",
+            "numero_cuenta": null,
+            "otro": null
+        },
+        {
+            "monto": 1271.94,
+            "tipo_pago_inmueble": "3",
+            "institucion_financiera": "999",
+            "numero_cuenta": null,
+            "otro": "canadian imperial bank of commerce"
+        },
+        {
+            "monto": 300000,
+            "tipo_pago_inmueble": "3",
+            "institucion_financiera": "999",
+            "numero_cuenta": null,
+            "otro": "canadian imperial bank of commerce"
+        },
+        {
+            "monto": 126000,
+            "tipo_pago_inmueble": "3",
+            "institucion_financiera": "044",
+            "numero_cuenta": null,
+            "otro": null
+        },
+        {
+            "monto": 126600,
+            "tipo_pago_inmueble": "3",
+            "institucion_financiera": "044",
+            "numero_cuenta": null,
+            "otro": null
+        },
+        {
+            "monto": 44852,
+            "tipo_pago_inmueble": "3",
+            "institucion_financiera": "044",
+            "numero_cuenta": null,
+            "otro": null
+        }
+    ],
+    "enajenantes": [
+        {
+            "tipo_enajenante": "1",
+            "rfc": "ZADE470405SG7",
+            "nombre": "EMILIA",
+            "apellido_paterno": "ZARATE",
+            "apellido_materno": "DÍAZ",
+            "curp": "ZADE470405MVZRZM02",
+            "razon_social": null,
+            "nacionalidad": null,
+            "fecha_nacimiento": null,
+            "documento_oficial": null,
+            "folio": null
+        }
+    ],
+    "datos_informativos": {
+        "ingresos_exentos": "2",
+        "monto": null,
+        "impuesto": null
+    },
+    "adquirientes": [
+        {
+            "tipo_adquiriente": "1",
+            "rfc": "SAVJ781103CX3",
+            "nombre": "JORGE ALBERTO",
+            "apellido_paterno": "SANCHEZ",
+            "apellido_materno": "VAZQUEZ",
+            "curp": "SAVJ781103HVZNZR18",
+            "razon_social": null,
+            "nacionalidad": null,
+            "fecha_nacimiento": null,
+            "documento_oficial": null,
+            "folio": null
+        },
+        {
+            "tipo_adquiriente": "1",
+            "rfc": "CURM880706DR0",
+            "nombre": "MARISELA",
+            "apellido_paterno": "CRUZ",
+            "apellido_materno": "RAMIREZ",
+            "curp": "CURM880706MVZRMR04",
+            "razon_social": null,
+            "nacionalidad": null,
+            "fecha_nacimiento": null,
+            "documento_oficial": null,
+            "folio": null
+        }
+    ],
+    "pago": [
+        {
+            "ingresos_enajenacion": 359200,
+            "ingresos_exentos": 0,
+            "ingreso_sismo_2017": null,
+            "deducciones_autorizadas": 53906.52,
+            "ganancia_perdida": 305293.48,
+            "years_adquisicion_venta": 20,
+            "ganancia_acumulable": 15264.68,
+            "ganancia_no_acumulable": 290028.8,
+            "isr_federacion": 0,
+            "numero_operacion_federacion": null,
+            "fecha_pago_federacion": null,
+            "isr_entidad": 5862,
+            "numero_operacion_entidad": null,
+            "fecha_pago_entidad": null,
+            "total_isr_pagado": 5862
+        }
+    ],
+    "copropiedad": {
+        "existe_copropiedad": "1",
+        "integrantes": [
+            {
+                "rfc": "LOVD021020J69",
+                "porcentaje": 50,
+                "ingresos_enajenacion": 179600,
+                "deducciones_autorizadas": 26953.26,
+                "ganancia_perdida": 152646.74,
+                "ganancia_acumulable": 7632.34,
+                "ganancia_no_acumulable": 145014.4,
+                "isr_federacion": 0,
+                "isr_entidad": 2931
+            },
+            {
+                "rfc": "MECA020418HG9",
+                "porcentaje": 50,
+                "ingresos_enajenacion": 179600,
+                "deducciones_autorizadas": 26953.26,
+                "ganancia_perdida": 152646.74,
+                "ganancia_acumulable": 7632.34,
+                "ganancia_no_acumulable": 145014.4,
+                "isr_federacion": 0,
+                "isr_entidad": 2931
+            }
+        ]
+    },
+    "representante_comun": {
+        "existe_representante_comun": "2",
+        "rfc_representante": null
+    }
+}

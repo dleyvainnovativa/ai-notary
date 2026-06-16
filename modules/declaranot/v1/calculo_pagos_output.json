@@ -1,0 +1,52 @@
+{
+    "pago": [
+        {
+            "ingresos_enajenacion": 3500000,
+            "ingresos_exentos": 500000,
+            "ingreso_sismo_2017": 0,
+            "deducciones_autorizadas": 250000,
+            "ganancia_perdida": 2750000,
+            "years_adquisicion_venta": 10,
+            "ganancia_acumulable": 2000000,
+            "ganancia_no_acumulable": 750000,
+            "isr_federacion": 120000,
+            "numero_operacion_federacion": 854721,
+            "fecha_pago_federacion": "2025-01-20",
+            "isr_entidad": 30000,
+            "numero_operacion_entidad": 963258,
+            "fecha_pago_entidad": "2025-01-21",
+            "total_isr_pagado": 150000
+        }
+    ],
+    "copropiedad": {
+        "existe_copropiedad": "1",
+        "integrantes": [
+            {
+                "rfc": "LOPR920101ABC",
+                "porcentaje": 50,
+                "ingresos_enajenacion": 1750000,
+                "deducciones_autorizadas": 125000,
+                "ganancia_perdida": 1375000,
+                "ganancia_acumulable": 1000000,
+                "ganancia_no_acumulable": 375000,
+                "isr_federacion": 60000,
+                "isr_entidad": 15000
+            },
+            {
+                "rfc": "MARG930202DEF",
+                "porcentaje": 50,
+                "ingresos_enajenacion": 1750000,
+                "deducciones_autorizadas": 125000,
+                "ganancia_perdida": 1375000,
+                "ganancia_acumulable": 1000000,
+                "ganancia_no_acumulable": 375000,
+                "isr_federacion": 60000,
+                "isr_entidad": 15000
+            }
+        ]
+    },
+    "representante_comun": {
+        "existe_representante_comun": 1,
+        "rfc_representante": "RKASFASFKAF"
+    }
+}

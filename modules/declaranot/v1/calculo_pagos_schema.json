@@ -1,0 +1,144 @@
+{
+    "schema_version": "1.0.0",
+    "global_rules": {
+        "date_format": "YYYY-MM-DD",
+        "number_format": "decimal",
+        "empty_values": [
+            null,
+            ""
+        ],
+        "normalization_rules": [
+            "Return enum values exactly as defined",
+            "Remove currency symbols from numbers",
+            "Convert dates to YYYY-MM-DD",
+            "Return null when value is missing",
+            "Do not infer missing data"
+        ]
+    },
+    "fields": {
+        "pago": {
+            "type": "array",
+            "items": {
+                "ingresos_enajenacion": {
+                    "type": "number"
+                },
+                "ingresos_exentos": {
+                    "type": "number"
+                },
+                "ingreso_sismo_2017": {
+                    "type": "number"
+                },
+                "deducciones_autorizadas": {
+                    "type": "number"
+                },
+                "ganancia_perdida": {
+                    "type": "number"
+                },
+                "years_adquisicion_venta": {
+                    "type": "number",
+                    "rules": [
+                        {
+                        "condition": "value >= 20",
+                        "set": 20
+                        }
+                    ]
+                },
+                "ganancia_acumulable": {
+                    "type": "number"
+                },
+                "ganancia_no_acumulable": {
+                    "type": "number"
+                },
+                "isr_federacion": {
+                    "type": "number"
+                },
+                "numero_operacion_federacion": {
+                    "type": "number"
+                },
+                "fecha_pago_federacion": {
+                    "type": "date"
+                },
+                "isr_entidad": {
+                    "type": "number"
+                },
+                "numero_operacion_entidad": {
+                    "type": "number"
+                },
+                "fecha_pago_entidad": {
+                    "type": "date"
+                },
+                "total_isr_pagado": {
+                    "type": "computed",
+                    "formula": "isr_federacion + isr_entidad"
+                }
+            }
+        },
+        "copropiedad": {
+            "type": "object",
+            "items": {
+                "existe_copropiedad": {
+                    "type": "select",
+                    "source": "catalogo_datos_informativos",
+                    "default_if_missing_label": "No",
+                    "derive_from_array_length": {
+                        "path": "copropiedad.integrantes",
+                        "if_gt": 0,
+                        "true_label": "Sí",
+                        "false_label": "No"
+                    }
+                },
+                "integrantes": {
+                    "type": "array",
+                    "enabled_if": {
+                        "existe_copropiedad": "1"
+                    },
+                    "items": {
+                        "rfc": {
+                            "type": "text"
+                        },
+                        "porcentaje": {
+                            "type": "number"
+                        },
+                        "ingresos_enajenacion": {
+                            "type": "number"
+                        },
+                        "deducciones_autorizadas": {
+                            "type": "number"
+                        },
+                        "ganancia_perdida": {
+                            "type": "number"
+                        },
+                        "ganancia_acumulable": {
+                            "type": "number"
+                        },
+                        "ganancia_no_acumulable": {
+                            "type": "number"
+                        },
+                        "isr_federacion": {
+                            "type": "number"
+                        },
+                        "isr_entidad": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "representante_comun": {
+            "type": "object",
+            "items": {
+                "existe_representante_comun": {
+                    "type": "select",
+                    "default_if_missing_label": "No",
+                    "source": "catalogo_datos_informativos"
+                },
+                "rfc_representante": {
+                    "type": "text",
+                    "required_if": {
+                        "existe_representante_comun": "1"
+                    }
+                }
+            }
+        }
+    }
+}

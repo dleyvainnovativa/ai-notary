@@ -1,0 +1,442 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Banco Nacional de México, S.A., Institución de Banca Múltiple, Grupo Financiero Banamex",
+        "value": "002"
+    },
+    {
+        "label": "Banco Nacional de Comercio Exterior, Sociedad Nacional de Crédito, Institución de Banca de desarrollo",
+        "value": "006"
+    },
+    {
+        "label": "Banco Nacional de Obras y Servicios Públicos, Sociedad Nacional de Crédito,  Institución de Banca de desarrollo",
+        "value": "009"
+    },
+    {
+        "label": "BBVA Bancomer, S.A., Institución de Banca Múltiple, Grupo Financiero BBVA Bancomer",
+        "value": "012"
+    },
+    {
+        "label": "Banco Santander (México), S.A., Institución de Banca Múltiple, Grupo Financiero Santander",
+        "value": "014"
+    },
+    {
+        "label": "Banco Nacional del Ejército, Fuerza Aérea y Armada, Sociedad Nacional de Crédito, Institución de Banca de desarrollo",
+        "value": "019"
+    },
+    {
+        "label": "HSBC México, S.A., Institución de Banca Múltiple, Grupo Financiero HSBC",
+        "value": "021"
+    },
+    {
+        "label": "Banco del Bajio, S.A., Institución de Banca Múltiple",
+        "value": "030"
+    },
+    {
+        "label": "Banco Inbursa, S.A., Institución de Banca Múltiple, Grupo Financiero Inbursa",
+        "value": "036"
+    },
+    {
+        "label": "Banco Interacciones, S.A., Institución de Banca Múltiple",
+        "value": "037"
+    },
+    {
+        "label": "Banca Mifel, S.A., Institución de Banca Múltiple, Grupo Financiero Mifel",
+        "value": "042"
+    },
+    {
+        "label": "Scotiabank Inverlat, S.A.",
+        "value": "044"
+    },
+    {
+        "label": "Banco Regional de Monterrey, S.A., Institución de Banca Múltiple, Banregio Grupo Financiero",
+        "value": "058"
+    },
+    {
+        "label": "Banco Invex, S.A., Institución de Banca Múltiple, Invex Grupo Financiero",
+        "value": "059"
+    },
+    {
+        "label": "Bansi, S.A., Institución de Banca Múltiple",
+        "value": "060"
+    },
+    {
+        "label": "Banca Afirme, S.A., Institución de Banca Múltiple",
+        "value": "062"
+    },
+    {
+        "label": "Banco Mercantil del Norte, S.A., Institución de Banca Múltiple, Grupo Financiero Banorte",
+        "value": "072"
+    },
+    {
+        "label": "Investa Bank, S.A., Institución de Banca Múltiple",
+        "value": "102"
+    },
+    {
+        "label": "American Express Bank (México), S.A., Institución de Banca Múltiple",
+        "value": "103"
+    },
+    {
+        "label": "Bank Of America México, S.A., Institución de Banca Múltiple, Grupo Financiero Bank Of America",
+        "value": "106"
+    },
+    {
+        "label": "Bank of Tokyo-Mitsubishi UFJ (México), S.A.",
+        "value": "108"
+    },
+    {
+        "label": "Banco J. P. Morgan, S.A., Institución de Banca Múltiple, J.P. Morgan Grupo Financiero",
+        "value": "110"
+    },
+    {
+        "label": "Banco Monex, S.A., Institución de Banca Múltiple",
+        "value": "112"
+    },
+    {
+        "label": "Banco Ve Por Mas, S.A., Institución de Banca Múltiple",
+        "value": "113"
+    },
+    {
+        "label": "Deutsche Bank México, S.A., Institución de Banca Múltiple",
+        "value": "124"
+    },
+    {
+        "label": "Banco Credit Suisse (México), S.A., Institución de Banca Múltiple, Grupo Financiero Credit Suisse (México)",
+        "value": "126"
+    },
+    {
+        "label": "Banco Azteca, S.A., Institución de Banca Múltiple",
+        "value": "127"
+    },
+    {
+        "label": "Banco Autofin México, S.A., Institución de Banca Múltiple",
+        "value": "128"
+    },
+    {
+        "label": "Barclays Bank México, S.A., Institución de Banca Múltiple, Grupo Financiero Barclays México",
+        "value": "129"
+    },
+    {
+        "label": "Banco Compartamos, S.A., Institución de Banca Múltiple",
+        "value": "130"
+    },
+    {
+        "label": "Banco Ahorro Famsa, S.A., Institución de Banca Múltiple",
+        "value": "131"
+    },
+    {
+        "label": "Banco Multiva, S.A., Institución de Banca Múltiple, Multivalores Grupo Financiero",
+        "value": "132"
+    },
+    {
+        "label": "Banco Actinver, S.A., Institución de Banca Múltiple, Grupo Financiero Actinver",
+        "value": "133"
+    },
+    {
+        "label": "Banco Wall-Mart de México Adelante, S.A., Institución de Banca Múltiple",
+        "value": "134"
+    },
+    {
+        "label": "Nacional Financiera, Sociedad Nacional de Crédito,  Institución de Banca de desarrollo",
+        "value": "135"
+    },
+    {
+        "label": "Inter Banco, S.A., Institución de Banca Múltiple",
+        "value": "136"
+    },
+    {
+        "label": "BanCoppel, S.A., Institución de Banca Múltiple",
+        "value": "137"
+    },
+    {
+        "label": "ABC Capital, S..A., Institución de Banca Múltiple",
+        "value": "138"
+    },
+    {
+        "label": "UBS Bank México, S.A., Institución de Banca Múltiple, UBS Grupo Financiero",
+        "value": "139"
+    },
+    {
+        "label": "Consubanco, S.A., Institución de Banca Múltiple",
+        "value": "140"
+    },
+    {
+        "label": "Volkswagen Bank, S.A., Institución de Banca Múltiple",
+        "value": "141"
+    },
+    {
+        "label": "CIBanco, S.A.",
+        "value": "143"
+    },
+    {
+        "label": "Banco Base, S.A., Institución de Banca Múltiple",
+        "value": "145"
+    },
+    {
+        "label": "Banco Bicentenario, S.A., Institución de Banca Múltiple",
+        "value": "146"
+    },
+    {
+        "label": "Bankaool, S.A., Institución de Banca Múltiple",
+        "value": "147"
+    },
+    {
+        "label": "Banco Pegatodo, S.A.",
+        "value": "148"
+    },
+    {
+        "label": "Banco Forjadores, S.A., Institución de Banca Múltiple",
+        "value": "149"
+    },
+    {
+        "label": "Banco Inmobiliario Mexicano, S.A., Institución de Banca Múltiple ",
+        "value": "150"
+    },
+    {
+        "label": "Fundación Dondé Banco, S.A.",
+        "value": "151"
+    },
+    {
+        "label": "Banco Bancrea,S.A, Institución de Banca Múltiple",
+        "value": "152"
+    },
+    {
+        "label": "Banco del Ahorro Nacional y Servicios Financieros, Sociedad Nacional de Crédito,  Institución de Banca de desarrollo",
+        "value": "166"
+    },
+    {
+        "label": "Sociedad Hipotecaria Federal, Sociedad Nacional de Crédito, Institución de Banca de desarrollo.",
+        "value": "168"
+    },
+    {
+        "label": "Monex Casa de Bolsa, S.A. de C.V. Monex Grupo Financiero",
+        "value": "600"
+    },
+    {
+        "label": "GBM Grupo Bursátil Mexicano, S.A. de C.V. Casa de Bolsa",
+        "value": "601"
+    },
+    {
+        "label": "Masari Casa de Bolsa, S.A.",
+        "value": "602"
+    },
+    {
+        "label": "Value, S.A. de C.V. Casa de Bolsa",
+        "value": "605"
+    },
+    {
+        "label": "Estructuradores del Mercado de Valores Casa de Bolsa, S.A de C.V.",
+        "value": "606"
+    },
+    {
+        "label": "Vector Casa de Bolsa, S.A de C.V.",
+        "value": "608"
+    },
+    {
+        "label": "B y B, Casa de Cambio, S.A. de C.V.",
+        "value": "610"
+    },
+    {
+        "label": "Acciones y Valores Banamex, S.A. de C.V., Casa de Bolsa",
+        "value": "614"
+    },
+    {
+        "label": "Merrill Lynch México, S.A. de C.V. Casa de Bolsa",
+        "value": "615"
+    },
+    {
+        "label": "Casa de Bolsa Finamex, S.A. de C.V.",
+        "value": "616"
+    },
+    {
+        "label": "Valores Mexicanos Casa de Bolsa, S.A. de C.V.",
+        "value": "617"
+    },
+    {
+        "label": "Unica Casa de Cambio, S.A. de C.V.",
+        "value": "618"
+    },
+    {
+        "label": "MAPFRE Tepeyac, S.A.",
+        "value": "619"
+    },
+    {
+        "label": "Profuturo G.N.P., S.A. de C.V., Afore",
+        "value": "620"
+    },
+    {
+        "label": "Actinver Casa de Bolsa, S.A. de C.V.",
+        "value": "621"
+    },
+    {
+        "label": "Operadora Actinver, S.A. de C.V. Sociedad Operadora de Sociedades de Inversión, Grupo Financiero Actinver",
+        "value": "622"
+    },
+    {
+        "label": "Skandia Vida, S.A. de C.V.",
+        "value": "623"
+    },
+    {
+        "label": "Deutsche Securities, S.A. de C.V. Casa de Bolsa",
+        "value": "626"
+    },
+    {
+        "label": "Zurich Compañía de Seguros, S.A.",
+        "value": "627"
+    },
+    {
+        "label": "Zurich Vida, Compañía de Seguros, S.A.",
+        "value": "628"
+    },
+    {
+        "label": "Intercam Casa de Bolsa, S.A. de C.V.",
+        "value": "630"
+    },
+    {
+        "label": "CI Casa de Bolsa, S.A. de C.V.",
+        "value": "631"
+    },
+    {
+        "label": "Fincomún, Servicios Financieros Comunitarios, S.A. de C.V.",
+        "value": "634"
+    },
+    {
+        "label": "HDI Seguros, S.A. de C.V.",
+        "value": "636"
+    },
+    {
+        "label": "Order Express Casa de Cambio, S.A. de C.V.",
+        "value": "637"
+    },
+    {
+        "label": "Akala, S.A. de C.V., Sociedad Financiera Popular",
+        "value": "638"
+    },
+    {
+        "label": "J.P. Morgan Casa de Bolsa, S.A. de C.V.,J.P. Morgan Grupo Financiero",
+        "value": "640"
+    },
+    {
+        "label": "Operadora de Recursos Reforma, S.A. de C.V.,S.F.P.",
+        "value": "642"
+    },
+    {
+        "label": "Sistema de Transferencias y Pagos STP, S.A. de C.V. SOFOM ENR",
+        "value": "646"
+    },
+    {
+        "label": "Telecomunicaciones de México",
+        "value": "647"
+    },
+    {
+        "label": "Evercore Casa de Bolsa, S.A. de C.V.",
+        "value": "648"
+    },
+    {
+        "label": "Skandia Operadora de Fondos, S.A. de C.V.",
+        "value": "649"
+    },
+    {
+        "label": "Seguros Monterrey New York Life, S.A de C.V.",
+        "value": "651"
+    },
+    {
+        "label": "Solución Asea, S.A. de C.V.,Sociedad Financiera Popular",
+        "value": "652"
+    },
+    {
+        "label": "Kuspit Casa de Bolsa, S.A. de C.V.",
+        "value": "653"
+    },
+    {
+        "label": "J.P. SOFIEXPRESS, S.A. de C.V., S.F.P.",
+        "value": "655"
+    },
+    {
+        "label": "UNAGRA, S.A de C.V., S.F.P.",
+        "value": "656"
+    },
+    {
+        "label": "Opciones Empresariales del Noreste",
+        "value": "659"
+    },
+    {
+        "label": "Libertad Servicios Financieros, S.A. de C.V., S.F.P.",
+        "value": "670"
+    },
+    {
+        "label": "Caja Popular las Huastecas, S.C. de A.P. de R.L. de C.V.",
+        "value": "671"
+    },
+    {
+        "label": "Grupo Nacional Provincial, S.A.B.",
+        "value": "673"
+    },
+    {
+        "label": "Axa Seguros, S.A. de C.V.",
+        "value": "674"
+    },
+    {
+        "label": "Caja Popular Mexicana, S.C. de A.P. de R.L. de C.V.",
+        "value": "677"
+    },
+    {
+        "label": "Afore Sura S.A. de C.V.",
+        "value": "678"
+    },
+    {
+        "label": "Financiera Nacional de Desarrollo Agropecuario, Rural, Forestal y Pesquero",
+        "value": "679"
+    },
+    {
+        "label": "Caja Popular Cristóbal Colón, S.C. de R.L. de C.V.",
+        "value": "680"
+    },
+    {
+        "label": "Principal Afore, S.A. de C.V.",
+        "value": "681"
+    },
+    {
+        "label": "La Perseverancia del Valle de Tehuacán, S.A de C.V., S.F.P.",
+        "value": "682"
+    },
+    {
+        "label": "Caja de Ahorro de los Telefonistas, S.C de A.P. de R.L. de C.V.",
+        "value": "683"
+    },
+    {
+        "label": "Fondo de Garantía y Fomento para la Agricultura, Ganadería y Avicultura",
+        "value": "685"
+    },
+    {
+        "label": "Afore Invercap, S.A. de C.V",
+        "value": "686"
+    },
+    {
+        "label": "Instituto del Fondo Nacional de la Vivienda para los Trabajadores",
+        "value": "687"
+    },
+    {
+        "label": "Fondo Mexicano del Petróleo para la Estabilización y el Desarrollo",
+        "value": "689"
+    },
+    {
+        "label": "Cls Bank Internacional",
+        "value": "901"
+    },
+    {
+        "label": "SD. Indeval, S.A. de C.V.",
+        "value": "902"
+    },
+    {
+        "label": "Fondo de la Vivienda del Instituto de Seguridad y Servicios Sociales de los Trabajadores del Estado",
+        "value": "688"
+    },
+    {
+        "label": "Otro",
+        "value": "999"
+    }
+]

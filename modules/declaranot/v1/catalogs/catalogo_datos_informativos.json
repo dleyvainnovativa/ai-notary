@@ -1,0 +1,14 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Sí",
+        "value": "1"
+    },
+    {
+        "label": "No",
+        "value": "2"
+    }
+]

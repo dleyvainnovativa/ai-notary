@@ -1,0 +1,22 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Efectivo",
+        "value": "1"
+    },
+    {
+        "label": "Cheque",
+        "value": "2"
+    },
+    {
+        "label": "Transferencia",
+        "value": "3"
+    },
+    {
+        "label": "Otro",
+        "value": "9"
+    }
+]

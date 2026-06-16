@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0.0",
+  "sections": {
+    "escritura": { "$ref": "declaranot_schema.json" },
+    "calculo":   { "$ref": "calculo_pagos_schema.json" }
+  }
+}

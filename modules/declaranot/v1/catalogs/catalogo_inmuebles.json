@@ -1,0 +1,22 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Casa Habitación",
+        "value": "1"
+    },
+    {
+        "label": "Industrial",
+        "value": "3"
+    },
+    {
+        "label": "Terreno",
+        "value": "4"
+    },
+    {
+        "label": "Otros",
+        "value": "9"
+    }
+]
