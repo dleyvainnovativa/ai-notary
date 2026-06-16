@@ -168,6 +168,7 @@
             "items": {
                 "ingresos_exentos": {
                     "type": "select",
+                    "default_if_missing": 0,
                     "default_if_missing_label": "No",
                     "source": "catalogo_datos_informativos"
                 },
