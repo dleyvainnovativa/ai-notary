@@ -9,42 +9,42 @@
             "monto": 1277,
             "tipo_pago_inmueble": "3",
             "institucion_financiera": "044",
-            "numero_cuenta": null,
+            "numero_cuenta": "1",
             "otro": null
         },
         {
             "monto": 1271.94,
             "tipo_pago_inmueble": "3",
             "institucion_financiera": "999",
-            "numero_cuenta": null,
+            "numero_cuenta": "2",
             "otro": "canadian imperial bank of commerce"
         },
         {
             "monto": 300000,
             "tipo_pago_inmueble": "3",
             "institucion_financiera": "999",
-            "numero_cuenta": null,
+            "numero_cuenta": "2",
             "otro": "canadian imperial bank of commerce"
         },
         {
             "monto": 126000,
             "tipo_pago_inmueble": "3",
             "institucion_financiera": "044",
-            "numero_cuenta": null,
+            "numero_cuenta": "1",
             "otro": null
         },
         {
             "monto": 126600,
             "tipo_pago_inmueble": "3",
             "institucion_financiera": "044",
-            "numero_cuenta": null,
+            "numero_cuenta": "1",
             "otro": null
         },
         {
             "monto": 44852,
             "tipo_pago_inmueble": "3",
             "institucion_financiera": "044",
-            "numero_cuenta": null,
+            "numero_cuenta": "1",
             "otro": null
         }
     ],

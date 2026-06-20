@@ -168,7 +168,7 @@
             "items": {
                 "ingresos_exentos": {
                     "type": "select",
-                    "default_if_missing": 2,
+                    "default_if_missing": "2",
                     "default_if_missing_label": "No",
                     "source": "catalogo_datos_informativos"
                 },
@@ -190,6 +190,7 @@
             "type": "array",
             "items": {
                 "tipo_adquiriente": {
+                    "required": true,
                     "type": "select",
                     "source": "catalogo_tipos_domicilio"
                 },

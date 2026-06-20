@@ -40,8 +40,14 @@ class Exporter implements ExporterContract
             if (!$value) return '';
             return \Carbon\Carbon::parse($value)->format('d/m/Y');
         };
+        $dateYear = function ($value) {
+            if (!$value) return '';
+            return \Carbon\Carbon::parse($value)->format('Y');
+        };
+        // dd($date($json['fecha_firma_escritura']));
+        // $yearEscritura = clone($json['fecha_firma_escritura']);
         $lines[] =
-            'Configuracion:2025|001|035|24|' .
+            'Configuracion:' . $dateYear($json['fecha_firma_escritura']) . '|001|035|24|' .
             $date($json['fecha_firma_escritura']);
 
         // ── Line: 900001 — Datos de la operación ──────────────────────────────────

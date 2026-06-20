@@ -241,7 +241,7 @@ class Controller implements ModuleControllerContract
                 'label' => 'Copropiedad',
                 'type' => 'object',
                 'itemSchema' => [
-                    'existe_copropiedad' => ['label' => '¿Existe Copropiedad?', 'type' => 'select', 'options' => $catalogDatosInformativos, 'default_if_missing_label' => 'No', 'derive_from_array_length' => ['path' => 'copropiedad.integrantes', 'if_gt' => 0, 'true_label' => 'Sí', 'false_label' => 'No']],
+                    'existe_copropiedad' => ['label' => '¿Existe Copropiedad?', 'type' => 'select', 'options' => $catalogDatosInformativos, 'default_if_missing_label' => 'No', 'derive_from_array_length' => ['path' => 'copropiedad.integrantes', 'if_gt' => 0, 'true_value' => '1', 'false_value' => '2']],
                     'integrantes' => [
                         'label' => 'Integrantes',
                         'col' => 'full',

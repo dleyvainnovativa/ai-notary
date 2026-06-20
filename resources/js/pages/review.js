@@ -490,14 +490,30 @@ function validateLive() {
 }
 
 function validateField(def, value, col) {
+    // if (!def) return null;
+    // const required = def.required || col.dataset.dynRequired === '1';
+    // const empty = value === '' || value == null;
+    // if (required && empty) return 'Este campo es obligatorio.';
+    // if (empty) return null;
+    // if (def.type === 'select' && def.options) {
+    //     if (!def.options.some(o => String(o.value) === String(value))) return 'Valor no permitido.';
+    // }
+    
     if (!def) return null;
     const required = def.required || col.dataset.dynRequired === '1';
-    const empty = value === '' || value == null;
+
+    // For selects, the placeholder value counts as "not selected"
+    const placeholder = def.placeholderValue ?? '0';   // default to "0" (Seleccionar opción)
+    const isPlaceholder = def.type === 'select' && String(value) === String(placeholder);
+    const empty = value === '' || value == null || isPlaceholder;
+
     if (required && empty) return 'Este campo es obligatorio.';
     if (empty) return null;
+
     if (def.type === 'select' && def.options) {
         if (!def.options.some(o => String(o.value) === String(value))) return 'Valor no permitido.';
     }
+
     if (def.type === 'number' && def.integer && /[.,]/.test(String(value))) {
         return 'Solo números enteros.';
     }
@@ -538,6 +554,7 @@ async function save() {
     }
 
     const data = collect(SCHEMA.fields, '');
+    console.log(data);
 
     // Validate server-side first; only export if valid
     let result;
@@ -607,7 +624,7 @@ function collect(fields, prefix) {
         if (type === 'array') {
             const wrap = document.querySelector(`.rv-array[data-path="${cssEsc(path)}"]`);
             // hidden array → null
-            if (!wrap || wrap.offsetParent === null) { out[name] = null; continue; }
+            if (!wrap || wrap.offsetParent === null) { out[name] = []; continue; }
             out[name] = [...wrap.querySelectorAll(':scope > .rv-array__rows > .rv-row')]
                 .map(row => collectScope(def.itemSchema, row.dataset.path));
         } else if (type === 'object') {

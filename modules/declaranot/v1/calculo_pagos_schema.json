@@ -80,11 +80,12 @@
                     "type": "select",
                     "source": "catalogo_datos_informativos",
                     "default_if_missing_label": "No",
+                    "default_if_missing_value": "2",
                     "derive_from_array_length": {
                         "path": "copropiedad.integrantes",
                         "if_gt": 0,
-                        "true_label": "Sí",
-                        "false_label": "No"
+                        "true_value": "1",
+                        "false_value": "2"
                     }
                 },
                 "integrantes": {

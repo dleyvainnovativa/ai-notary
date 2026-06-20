@@ -140,8 +140,16 @@ class SchemaEngine
                 $rule = $def['derive_from_array_length'];
                 $arr = data_get($root, $rule['path']);
                 $len = is_array($arr) ? count($arr) : 0;
-                $label = $len > ($rule['if_gt'] ?? 0) ? $rule['true_label'] : $rule['false_label'];
-                $data[$name] = $this->labelToValue($def, $label, $moduleDir);
+                $over = $len > ($rule['if_gt'] ?? 0);
+
+                if (isset($rule['true_value']) || isset($rule['false_value'])) {
+                    // value-based (preferred)
+                    $data[$name] = $over ? ($rule['true_value'] ?? null) : ($rule['false_value'] ?? null);
+                } else {
+                    // legacy label-based fallback
+                    $label = $over ? ($rule['true_label'] ?? null) : ($rule['false_label'] ?? null);
+                    $data[$name] = $this->labelToValue($def, $label, $moduleDir);
+                }
             }
         }
         return $data;
