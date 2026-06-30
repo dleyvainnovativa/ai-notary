@@ -5,6 +5,58 @@ import { notify } from '../helpers/toast.js';
 
 let SCHEMA, DOCUMENT_ID;
 
+/* ---------- Help modal ---------- */
+let helpModalEl = null;
+
+function ensureHelpModal() {
+    if (helpModalEl) return helpModalEl;
+
+    helpModalEl = document.createElement('div');
+    helpModalEl.className = 'rv-help-modal';
+    helpModalEl.hidden = true;
+    helpModalEl.innerHTML = `
+        <div class="rv-help-modal__backdrop" data-close></div>
+        <div class="rv-help-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="rv-help-title">
+            <div class="rv-help-modal__head">
+                <h3 class="rv-help-modal__title" id="rv-help-title"></h3>
+                <button type="button" class="rv-help-modal__close" data-close aria-label="Cerrar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="rv-help-modal__body"></div>
+            <div class="rv-help-modal__foot">
+                <button type="button" class="btn btn-primary btn-sm" data-close>Cerrar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(helpModalEl);
+
+    // close on backdrop / close buttons
+    helpModalEl.querySelectorAll('[data-close]').forEach(el =>
+        el.addEventListener('click', closeHelpModal));
+
+    // close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !helpModalEl.hidden) closeHelpModal();
+    });
+
+    return helpModalEl;
+}
+
+function openHelpModal(title, body) {
+    const m = ensureHelpModal();
+    m.querySelector('.rv-help-modal__title').textContent = title;
+    m.querySelector('.rv-help-modal__body').textContent = body;  // textContent = safe, no HTML injection
+    m.hidden = false;
+    document.body.style.overflow = 'hidden';   // prevent background scroll
+}
+
+function closeHelpModal() {
+    if (!helpModalEl) return;
+    helpModalEl.hidden = true;
+    document.body.style.overflow = '';
+}
+
 /* ---------- Persona classifier (enajenantes / adquirientes) ---------- */
 const GENERIC_RFC = {
     fisica: ['EXTF900101000'],   // extend as needed
@@ -196,6 +248,20 @@ function renderField(name, def, value, path, readOnly) {
     label.className = 'rv-field__label';
     label.innerHTML = (def.label || name) + (def.required ? ' <span class="rv-req">*</span>' : '');
     col.appendChild(label);
+
+    // help icon button
+    if (def.help) {
+        const helpBtn = document.createElement('button');
+        helpBtn.type = 'button';
+        helpBtn.className = 'rv-help-btn';
+        helpBtn.innerHTML = '<i class="fa-solid fa-circle-question"></i>';
+        helpBtn.setAttribute('aria-label', 'Ayuda');
+        helpBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openHelpModal(def.help.title || 'Ayuda', def.help.body || '');
+        });
+        label.appendChild(helpBtn);
+    }
 
     if (def.subtitle) {
         const sub = document.createElement('div');

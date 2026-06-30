@@ -894,3 +894,82 @@ a { color: var(--text); }
     background: var(--bg-muted); border-radius: var(--radius);
     padding: 0.5rem 0.75rem; margin-bottom: 0.85rem;
 }
+
+/* ---------- Help icon + modal ---------- */
+.rv-help-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-subtle);
+    padding: 0 0 0 0.35rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    line-height: 1;
+    vertical-align: middle;
+}
+.rv-help-btn:hover { color: var(--primary); }
+
+.rv-help-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+.rv-help-modal[hidden] { display: none; }
+.rv-help-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(2px);
+}
+.rv-help-modal__dialog {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    animation: fade-in 0.2s ease;
+}
+.rv-help-modal__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+.rv-help-modal__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.4;
+}
+.rv-help-modal__close {
+    border: none;
+    background: transparent;
+    color: var(--text-subtle);
+    width: 30px; height: 30px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.rv-help-modal__close:hover { background: var(--bg-muted); color: var(--text); }
+.rv-help-modal__body {
+    padding: 1rem 1.25rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    overflow-y: auto;
+}
+.rv-help-modal__foot {
+    padding: 0.75rem 1.25rem 1.25rem;
+    display: flex;
+    justify-content: flex-end;
+}

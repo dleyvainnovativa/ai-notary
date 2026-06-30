@@ -49,3 +49,21 @@ Rules for Transferors and Transferees:
 Example:
 - Text: "Juan Pérez, representing María López, sells the property…"
 - Correct seller: María López (the represented party), NOT Juan Pérez.
+
+RFC extraction (CRITICAL):
+- Only extract an RFC that is EXPLICITLY written in the document for that specific
+  transferor or transferee.
+- If a transferor or transferee is mentioned by name (whether persona física or
+  persona moral) but NO RFC is stated for them in the document, return null for
+  the "rfc" field. Do NOT invent, construct, infer, or assume an RFC.
+- This applies equally to persona moral (e.g. a named "Sociedad Anónima de Capital
+  Variable" with no RFC stated → rfc must be null) and to persona física.
+- Never use a generic RFC (such as XAXX010101000 or XEXX010101000) unless that
+  exact generic RFC is literally written in the document.
+- The presence of a company name, a representative, or a power of attorney does
+  NOT imply an RFC. Extract only what is explicitly present.
+
+Example:
+- Text: "INMOBILIARIA Y CONSTRUCTORA JUBRISA, SOCIEDAD ANÓNIMA DE CAPITAL VARIABLE,
+  representada por su Administrador Único…" (no RFC stated)
+- Correct: rfc = null (the company is the transferor, but no RFC appears in the text).

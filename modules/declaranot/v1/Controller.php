@@ -66,8 +66,18 @@ class Controller implements ModuleControllerContract
             'fecha_firma_escritura' => ['label' => 'Fecha de Firma', 'type' => 'date', 'required' => true],
             'tipo_inmueble' => ['label' => 'Tipo de Inmueble', 'type' => 'select', 'required' => true, 'options' => $catalogInmuebles],
             'especifica_inmueble' => ['label' => 'Especificar Inmueble', 'type' => 'text', 'required_if' => ['tipo_inmueble' => '9']],
-            'avaluo_inmueble' => ['label' => 'Avalúo del Inmueble', "description" => "Mapear.", 'type' => 'number', 'format' => 'round', 'integer' => true, 'required' => true],
-
+            // 'avaluo_inmueble' => ['label' => 'Avalúo del Inmueble', 'type' => 'number', 'format' => 'round', 'integer' => true, 'required' => true],
+            'avaluo_inmueble' => [
+                'label' => 'Avalúo del Inmueble',
+                'type' => 'number',
+                'format' => 'round',
+                'integer' => true,
+                'required' => true,
+                'help' => [
+                    'title' => '¿Qué valor de avalúo debo señalar en el aplicativo DeclaraNOT en línea, cuando los contribuyentes no estén obligados a practicar un avalúo?',
+                    'body' => 'En caso de que se trate de contribuyentes que realicen la enajenación o adquisición de bienes en una entidad federativa en la que, conforme a la legislación de dicha entidad, no estén obligados a realizar un avalúo, puedes señalar el valor cero en lugar del valor de avalúo. Fundamento legal. Regla 2.7.1.43. de la RMF para 2025, publicada en el DOF el 30 de diciembre de 2024.',
+                ],
+            ],
             'pagos_inmueble' => [
                 'label' => 'Pagos del Inmueble',
                 'type' => 'array',
@@ -147,7 +157,7 @@ class Controller implements ModuleControllerContract
                 'label' => 'Datos Informativos',
                 'type' => 'object',
                 'itemSchema' => [
-                    'ingresos_exentos' => ['label' => 'Ingresos Exentos', 'type' => 'select', "description" => "Mapear.", 'options' => $catalogDatosInformativos, 'default_if_missing_label' => 'No'],
+                    'ingresos_exentos' => ['label' => 'Ingresos Exentos', 'type' => 'select', 'options' => $catalogDatosInformativos, 'default_if_missing_label' => 'No'],
                     'monto' => ['label' => 'Monto', 'type' => 'number', 'format' => 'round', 'integer' => true, 'required_if' => ['ingresos_exentos' => '1']],
                     'impuesto' => ['label' => 'Impuesto', 'type' => 'number', 'format' => 'round', 'integer' => true, 'required_if' => ['ingresos_exentos' => '1']],
                 ],
@@ -228,8 +238,8 @@ class Controller implements ModuleControllerContract
                     'ganancia_acumulable' => ['label' => 'Ganancia Acumulable', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true],
                     'ganancia_no_acumulable' => ['label' => 'Ganancia No Acumulable', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true],
                     'isr_federacion' => ['label' => 'ISR Federación', 'type' => 'number', 'required' => true, 'format' => 'round', 'integer' => true],
-                    'numero_operacion_federacion' => ['label' => 'Número de Operación Federación', 'type' => 'number', 'format' => 'round', 'integer' => true],
-                    'fecha_pago_federacion' => ['label' => 'Fecha de Pago Federación', 'type' => 'date'],
+                    'numero_operacion_federacion' => ['label' => 'Número de Operación Federación', 'required_if' => ['isr_federacion' => ['op' => '>', 'value' => 0]], 'type' => 'number', 'format' => 'round', 'integer' => true],
+                    'fecha_pago_federacion' => ['label' => 'Fecha de Pago Federación', 'required_if' => ['isr_federacion' => ['op' => '>', 'value' => 0]], 'type' => 'date'],
                     'isr_entidad' => ['label' => 'ISR Entidad', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true],
                     'numero_operacion_entidad' => ['label' => 'Número de Operación Entidad', 'required_if' => ['isr_entidad' => ['op' => '>', 'value' => 0]], 'type' => 'number', 'format' => 'round', 'integer' => true],
                     'fecha_pago_entidad' => ['label' => 'Fecha de Pago Entidad', 'required_if' => ['isr_entidad' => ['op' => '>', 'value' => 0]], 'type' => 'date'],
