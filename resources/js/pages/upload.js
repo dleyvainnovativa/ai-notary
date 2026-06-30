@@ -146,8 +146,8 @@ function setProcessingState(state, message) {
 
 /* ---------- Status polling ---------- */
 async function pollStatus(documentId, attempt = 0, errorStreak = 0) {
-    if (attempt > 90) { setProcessingState('failed', 'Still processing — check back shortly.'); return; }
-    if (errorStreak >= 3) { setProcessingState('failed', 'Lost connection. Please refresh.'); return; }
+    if (attempt > 90) { setProcessingState('failed', 'Sigue procesando — check back shortly.'); return; }
+    if (errorStreak >= 3) { setProcessingState('failed', 'Conexión Perdida. Favor de recargar.'); return; }
 
     try {
         const { status, error } = await http.get(`/documents/${documentId}/status`);
@@ -159,15 +159,15 @@ async function pollStatus(documentId, attempt = 0, errorStreak = 0) {
     goToStep(3);
     initReview(documentId);
 }, { once: true });
-            notify.success('Document processed.');
+            notify.success('Documento Procesado.');
             return;
         }
         if (status === 'failed') {
-            setProcessingState('failed', error ?? 'Processing failed.');
+            setProcessingState('failed', error ?? 'Error al Procesar.');
             return;
         }
         // still working — update the subtext by stage
-        const labels = { uploaded: 'Queued…', extracting: 'Extracting text…', processing: 'Analyzing with AI…' };
+        const labels = { uploaded: 'En fila…', extracting: 'Extrayendo texto…', processing: 'Analizando con IA…' };
         const t = document.getElementById('processing-text');
         if (t && labels[status]) t.textContent = labels[status];
 
