@@ -53,7 +53,7 @@
                     "type": "number"
                 },
                 "numero_operacion_federacion": {
-                    "type": "number"
+                    "type": "text"
                 },
                 "fecha_pago_federacion": {
                     "type": "date"
@@ -62,7 +62,7 @@
                     "type": "number"
                 },
                 "numero_operacion_entidad": {
-                    "type": "number"
+                    "type": "text"
                 },
                 "fecha_pago_entidad": {
                     "type": "date"
