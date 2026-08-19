@@ -27,6 +27,29 @@ class SchemaEngine
         return new EngineResult($data, $this->issues);
     }
 
+    /**
+     * Dispatches classification to a named rule declared on the array's
+     * 'classifier' => ['rule' => '...']. Additive seam: declaranot uses
+     * 'persona_case' (RFC-derived, unchanged); UIF uses 'persona_tipo_select'
+     * (reads the user-selected tipo_persona). Returns the case string.
+     */
+    private function classifyRow(array $classifier, array $row): string
+    {
+        $rule = $classifier['rule'] ?? 'persona_case';
+
+        return match ($rule) {
+            'persona_case' => $this->personaCase(
+                $row[$classifier['tipo_field']] ?? null,
+                $row[$classifier['rfc_field']] ?? null
+            ),
+            'persona_tipo_select' => $this->personaTipoSelect(
+                $row[$classifier['tipo_field']] ?? null
+            ),
+            default => 'unknown',
+        };
+    }
+
+    // declaranot classifier — UNCHANGED behavior (RFC-derived + generic extranjera)
     private function personaCase(?string $tipo, ?string $rfc): string
     {
         $r = strtoupper(trim((string) $rfc));
@@ -45,18 +68,29 @@ class SchemaEngine
         return 'unknown';
     }
 
+    // UIF classifier — user selects tipo_persona (1=física, 2=moral, 3=fideicomiso)
+    private function personaTipoSelect(?string $tipo): string
+    {
+        return match ((string) $tipo) {
+            '1' => 'fisica',
+            '2' => 'moral',
+            '3' => 'fideicomiso',
+            default => 'unknown',
+        };
+    }
+
     /* ---------- Pass 1: value rules ---------- */
     private function applyValueRules(array $fields, array $data): array
     {
         foreach ($fields as $name => $def) {
             if (($def['type'] ?? null) === 'array' && isset($data[$name]) && is_array($data[$name])) {
                 foreach ($data[$name] as $i => $row) {
-                    $data[$name][$i] = $this->applyValueRules($def['items'], $row);
+                    $data[$name][$i] = $this->applyValueRules($def['itemSchema'], $row);  // ← itemSchema
                 }
                 continue;
             }
             if (($def['type'] ?? null) === 'object' && isset($data[$name]) && is_array($data[$name])) {
-                $data[$name] = $this->applyValueRules($def['items'], $data[$name]);
+                $data[$name] = $this->applyValueRules($def['itemSchema'], $data[$name]);  // ← itemSchema
                 continue;
             }
             if (!empty($def['rules']) && isset($data[$name]) && is_numeric($data[$name])) {
@@ -101,12 +135,12 @@ class SchemaEngine
         foreach ($fields as $name => $def) {
             if (($def['type'] ?? null) === 'array' && isset($data[$name]) && is_array($data[$name])) {
                 foreach ($data[$name] as $i => $row) {
-                    $data[$name][$i] = $this->applyComputed($def['items'], $row);
+                    $data[$name][$i] = $this->applyComputed($def['itemSchema'], $row);  // ← itemSchema
                 }
                 continue;
             }
             if (($def['type'] ?? null) === 'object' && isset($data[$name]) && is_array($data[$name])) {
-                $data[$name] = $this->applyComputed($def['items'], $data[$name]);
+                $data[$name] = $this->applyComputed($def['itemSchema'], $data[$name]);  // ← itemSchema
                 continue;
             }
             if (($def['type'] ?? null) === 'computed' && !empty($def['formula'])) {
@@ -133,7 +167,7 @@ class SchemaEngine
 
         foreach ($fields as $name => $def) {
             if (($def['type'] ?? null) === 'object' && isset($data[$name]) && is_array($data[$name])) {
-                $data[$name] = $this->applyDerived($def['items'], $data[$name], $moduleDir, $root);
+                $data[$name] = $this->applyDerived($def['itemSchema'], $data[$name], $moduleDir, $root);  // ← itemSchema
                 continue;
             }
             if (!empty($def['derive_from_array_length'])) {
@@ -183,10 +217,7 @@ class SchemaEngine
                 foreach (($value ?? []) as $i => $row) {
                     $kase = null;
                     if ($classifier) {
-                        $kase = $this->personaCase(
-                            $row[$classifier['tipo_field']] ?? null,
-                            $row[$classifier['rfc_field']] ?? null
-                        );
+                        $kase = $this->classifyRow($classifier, $row);
                         if ($kase === 'extranjera_invalid' && !$this->isEmpty($row[$classifier['rfc_field']] ?? null)) {
                             $this->addIssue(
                                 "{$fieldPath}.{$i}.{$classifier['rfc_field']}",
@@ -196,13 +227,13 @@ class SchemaEngine
                             );
                         }
                     }
-                    $this->validateRow($def['items'], $row, $moduleDir, "{$fieldPath}.{$i}", $kase);
+                    $this->validateRow($def['itemSchema'], $row, $moduleDir, "{$fieldPath}.{$i}", $kase);  // ← itemSchema
                 }
                 continue;
             }
 
             if ($type === 'object') {
-                $this->validate($def['items'], $value ?? [], $moduleDir, $fieldPath);
+                $this->validate($def['itemSchema'], $value ?? [], $moduleDir, $fieldPath);  // ← itemSchema
                 continue;
             }
 
@@ -210,26 +241,77 @@ class SchemaEngine
         }
     }
 
+    // private function validateRow(array $fields, array $data, string $moduleDir, string $path, ?string $kase): void
+    // {
+    //     foreach ($fields as $name => $def) {
+    //         $fieldPath = "{$path}.{$name}";
+    //         $value = $data[$name] ?? null;
+
+    //         // case-based requirement: if field declares cases and the row's case
+    //         // isn't among them, the field is hidden → skip entirely.
+    //         if (!empty($def['required_in_cases']) || !empty($def['show_in_cases'])) {
+    //             $requiredHere = $kase && in_array($kase, $def['required_in_cases'] ?? [], true);
+    //             $shownHere = $requiredHere || ($kase && in_array($kase, $def['show_in_cases'] ?? [], true));
+
+    //             if (!$shownHere) {
+    //                 continue; // hidden field → don't validate
+    //             }
+    //             if ($requiredHere && $this->isEmpty($value)) {
+    //                 $this->addIssue($fieldPath, $name, 'required_case', 'Este campo es obligatorio.');
+    //                 continue;
+    //             }
+    //             // shown & filled (or shown-optional) → fall through to format checks
+    //         }
+
+    //         $this->validateLeaf($name, $def, $value, $data, $moduleDir, $fieldPath);
+    //     }
+    // }
     private function validateRow(array $fields, array $data, string $moduleDir, string $path, ?string $kase): void
     {
         foreach ($fields as $name => $def) {
             $fieldPath = "{$path}.{$name}";
             $value = $data[$name] ?? null;
+            $type = $def['type'] ?? 'text';
 
-            // case-based requirement: if field declares cases and the row's case
-            // isn't among them, the field is hidden → skip entirely.
+            // NEW: recurse into nested arrays inside a row
+            if ($type === 'array') {
+                if (!empty($def['enabled_if']) && !$this->conditionMet($def['enabled_if'], $data)) {
+                    continue;
+                }
+                $classifier = $def['classifier'] ?? null;
+                foreach (($value ?? []) as $i => $subRow) {
+                    $subKase = null;
+                    if ($classifier) {
+                        $subKase = $this->classifyRow($classifier, $subRow);
+                        if ($subKase === 'extranjera_invalid' && !$this->isEmpty($subRow[$classifier['rfc_field']] ?? null)) {
+                            $this->addIssue(
+                                "{$fieldPath}.{$i}.{$classifier['rfc_field']}",
+                                $classifier['rfc_field'],
+                                'rfc_generic',
+                                'Para extranjeros, use un RFC genérico (EXTF900101000 o EXT990101000).'
+                            );
+                        }
+                    }
+                    $this->validateRow($def['itemSchema'], $subRow, $moduleDir, "{$fieldPath}.{$i}", $subKase);
+                }
+                continue;
+            }
+
+            // NEW: recurse into nested objects inside a row
+            if ($type === 'object') {
+                $this->validateRow($def['itemSchema'], $value ?? [], $moduleDir, $fieldPath, null);
+                continue;
+            }
+
+            // case-based requirement (existing)
             if (!empty($def['required_in_cases']) || !empty($def['show_in_cases'])) {
                 $requiredHere = $kase && in_array($kase, $def['required_in_cases'] ?? [], true);
                 $shownHere = $requiredHere || ($kase && in_array($kase, $def['show_in_cases'] ?? [], true));
-
-                if (!$shownHere) {
-                    continue; // hidden field → don't validate
-                }
+                if (!$shownHere) continue;
                 if ($requiredHere && $this->isEmpty($value)) {
                     $this->addIssue($fieldPath, $name, 'required_case', 'Este campo es obligatorio.');
                     continue;
                 }
-                // shown & filled (or shown-optional) → fall through to format checks
             }
 
             $this->validateLeaf($name, $def, $value, $data, $moduleDir, $fieldPath);
@@ -270,7 +352,25 @@ class SchemaEngine
         if ($this->isEmpty($value)) return;
 
         // catalog membership (formSchema embeds options; extraction schema uses source)
-        if ($type === 'select') {
+        // if ($type === 'select') {
+        //     $options = $def['options'] ?? null;
+        //     if ($options !== null) {
+        //         $ok = false;
+        //         foreach ($options as $opt) {
+        //             if ((string) ($opt['value'] ?? null) === (string) $value) {
+        //                 $ok = true;
+        //                 break;
+        //             }
+        //         }
+        //         if (!$ok) $this->addIssue($fieldPath, $name, 'catalog', 'Valor no permitido.');
+        //     } elseif (!empty($def['source'])) {
+        //         if (!$this->catalogs->isValidValue($def['source'], $moduleDir, $value)) {
+        //             $this->addIssue($fieldPath, $name, 'catalog', 'Valor no permitido.');
+        //         }
+        //     }
+        // }
+        // catalog membership (formSchema embeds options; extraction schema uses source)
+        if ($type === 'select' && empty($def['cp_target'])) {   // ← skip cp_target selects
             $options = $def['options'] ?? null;
             if ($options !== null) {
                 $ok = false;

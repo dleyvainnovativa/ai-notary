@@ -1,0 +1,74 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Sin alerta.",
+        "value": "100"
+    },
+    {
+        "label": "Los sujetos o partes involucradas se rehúsan a proporcionar documentos personales que los identifiquen.",
+        "value": "4001"
+    },
+    {
+        "label": "La operación no es acorde con la actividad económica o giro mercantil declarado por el cliente.",
+        "value": "4002"
+    },
+    {
+        "label": "Hay indicios, o certeza, que los sujetos o partes involucradas no están actuando en nombre propio y están tratando de ocultar la identidad del beneficiario o controlador real.",
+        "value": "4003"
+    },
+    {
+        "label": "La información y documentación presentada por las partes involucradas es inconsistente o de difícil verificación por parte del Sujeto Obligado.",
+        "value": "4004"
+    },
+    {
+        "label": "Los sujetos o partes involucradas intentan sobornar, extorsionar o amenazan con el fin de realizar la operación fuera de los parámetros establecidos, o con la finalidad de evitar el envío del Aviso.",
+        "value": "4005"
+    },
+    {
+        "label": "De acuerdo con medios informativos u otras fuentes de información pública, se tiene conocimiento o sospecha de que los sujetos, un familiar o persona relacionada, está vinculada con actividades ilícitas o se encuentra bajo proceso de investigación.",
+        "value": "4006"
+    },
+    {
+        "label": "Los sujetos o partes involucradas hacen uso de un intermediario (ejemplo: apoderado o representante legal) para realizar la operación o acto sin que exista una causa que lo justifique.",
+        "value": "4007"
+    },
+    {
+        "label": "Los sujetos o partes involucradas en la operación o acto insisten en liquidar o pagar la operación en efectivo rebasando el umbral permitido en la Ley.",
+        "value": "4008"
+    },
+    {
+        "label": "Los sujetos o partes involucradas en la operación o acto no quieren ser relacionados con la compra del inmueble.",
+        "value": "4009"
+    },
+    {
+        "label": "Los sujetos o partes involucradas en la operación o acto realizan múltiples operaciones en un periodo muy corto de tiempo sin razón aparente.",
+        "value": "4010"
+    },
+    {
+        "label": "El pago por el inmueble es realizado por un tercero sin relación aparente con los sujetos o partes involucradas en la operación o acto.",
+        "value": "4011"
+    },
+    {
+        "label": "La operación se liquida por medio de una transferencia proveniente de un país extranjero.",
+        "value": "4012"
+    },
+    {
+        "label": "La operación se lleva acabo a un valor de venta o compra significativamente diferente (mucho mayor o mucho menor) a partir del valor real de la propiedad o a los valores de mercado.",
+        "value": "4013"
+    },
+    {
+        "label": "Transacciones sucesivas de compra y venta de la misma propiedad en un periodo corto de tiempo, con cambios injustificados del valor de la misma.",
+        "value": "4014"
+    },
+    {
+        "label": "Uso de divisas en efectivo sin justificación alguna.",
+        "value": "4015"
+    },
+    {
+        "label": "Otra alerta.",
+        "value": "9999"
+    }
+]

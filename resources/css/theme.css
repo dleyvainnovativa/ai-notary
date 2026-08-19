@@ -973,3 +973,49 @@ a { color: var(--text); }
     display: flex;
     justify-content: flex-end;
 }
+/* Nested object block (domicilio, inmueble) — labeled container */
+.rv-subsection {
+    grid-column: 1 / -1;
+    background: var(--bg-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    margin-top: 0.75rem;
+}
+.rv-subsection__title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+.rv-subsection .rv-grid {
+    grid-column: auto; /* reset so the grid inside can be 2-col again */
+}
+
+.rv-row {
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+.rv-row .rv-subsection {
+    background: var(--surface);  /* differentiate from the row's own bg */
+}
+
+.rv-nav__item--child {
+    padding-left: 1.75rem;
+    font-size: 0.8rem;
+}
+.rv-nav__item--child .rv-nav__label {
+    color: var(--text-muted);
+}
+.rv-nav__item--child.is-current .rv-nav__label { color: var(--primary); }
+
+/* On mobile chip bar, children still render as chips — just smaller */
+@media (max-width: 860px) {
+    .rv-nav__item--child { padding-left: 0.8rem; }
+}
+
+.rv-array__title { font-size: 0.9rem; font-weight: 600; color: var(--text); display: block; }
+.rv-array__subtitle { font-size: 0.78rem; color: var(--text-muted); display: block; margin-top: 0.15rem; }
+.rv-array__count { font-size: 0.75rem; color: var(--text-subtle); }

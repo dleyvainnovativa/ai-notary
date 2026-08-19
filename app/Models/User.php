@@ -31,4 +31,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(TokenTransaction::class);
     }
+    public function notarioProfile()
+    {
+        return $this->hasOne(NotarioProfile::class);
+    }
 }

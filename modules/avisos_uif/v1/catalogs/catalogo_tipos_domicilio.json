@@ -1,0 +1,82 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Casa \/Casa en condominio",
+        "value": "1"
+    },
+    {
+        "label": "Departamento",
+        "value": "2"
+    },
+    {
+        "label": "Edificio habitacional",
+        "value": "3"
+    },
+    {
+        "label": "Edificio comercial",
+        "value": "4"
+    },
+    {
+        "label": "Edificio oficinas",
+        "value": "5"
+    },
+    {
+        "label": "Local comercial independiente",
+        "value": "6"
+    },
+    {
+        "label": "Local en centro comercial",
+        "value": "7"
+    },
+    {
+        "label": "Oficina",
+        "value": "8"
+    },
+    {
+        "label": "Bodega comercial",
+        "value": "9"
+    },
+    {
+        "label": "Bodega industrial",
+        "value": "10"
+    },
+    {
+        "label": "Nave Industrial",
+        "value": "11"
+    },
+    {
+        "label": "Terreno urbano habitacional",
+        "value": "12"
+    },
+    {
+        "label": "Terreno no urbano habitacional",
+        "value": "13"
+    },
+    {
+        "label": "Terreno urbano comercial o industrial",
+        "value": "14"
+    },
+    {
+        "label": "Terreno no urbano comercial o industrial",
+        "value": "15"
+    },
+    {
+        "label": "Terreno ejidal",
+        "value": "16"
+    },
+    {
+        "label": "Rancho\/Hacienda\/Quinta",
+        "value": "17"
+    },
+    {
+        "label": "Huerta",
+        "value": "18"
+    },
+    {
+        "label": "Otro",
+        "value": "99"
+    }
+]

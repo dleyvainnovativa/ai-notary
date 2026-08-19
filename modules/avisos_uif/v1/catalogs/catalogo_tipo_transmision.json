@@ -1,0 +1,46 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Compraventa de inmuebles",
+        "value": "1"
+    },
+    {
+        "label": "Adjudicaciones por herencia",
+        "value": "2"
+    },
+    {
+        "label": "Donaciones",
+        "value": "3"
+    },
+    {
+        "label": "Compraventa de ejidatarios",
+        "value": "4"
+    },
+    {
+        "label": "Hipotecas",
+        "value": "5"
+    },
+    {
+        "label": "Cesión onerosa",
+        "value": "6"
+    },
+    {
+        "label": "Cesión gratuita",
+        "value": "7"
+    },
+    {
+        "label": "Servidumbre con indemnización",
+        "value": "8"
+    },
+    {
+        "label": "Servidumbre sin indemnización",
+        "value": "9"
+    },
+    {
+        "label": "Adjudicación judicial",
+        "value": "10"
+    }
+]

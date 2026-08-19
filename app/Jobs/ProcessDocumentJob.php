@@ -12,6 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class ProcessDocumentJob implements ShouldQueue
 {
@@ -80,6 +81,7 @@ class ProcessDocumentJob implements ShouldQueue
             }
             throw $e;
         } catch (\Throwable $e) {
+            Log::error('Error processing document ID ' . $document->id . ': ' . $e->getMessage());
             $this->failGracefully($document, $tokens, 'Processing error.');
             return;
         }

@@ -25,13 +25,12 @@ class DocumentController extends Controller
         $module = $this->registry->controller($document->module_slug);
         $dir = $this->registry->moduleDir($document->module_slug);
 
-        $formSchema = $module->formSchema();      // for rendering
-        $engineSchema = $module->schema();        // raw, for validation engine
+        $formSchema = $module->formSchema();   // ← use formSchema for BOTH rendering and engine
 
         $raw = json_decode($document->ai_output_encrypted, true);
         $flat = $this->flatten($raw);
 
-        $result = $this->engine->process($engineSchema, $flat, $dir);
+        $result = $this->engine->process($formSchema, $flat, $dir);   // ← formSchema, not schema()
 
         return response()->json([
             'schema' => $formSchema,
@@ -42,6 +41,7 @@ class DocumentController extends Controller
                 'rule' => $i->rule,
                 'message' => $i->message,
             ])->values(),
+            'formats' => $this->registry->manifest($document->module_slug)['exports'] ?? ['txt'],
         ]);
     }
 
@@ -52,7 +52,8 @@ class DocumentController extends Controller
 
         $module = $this->registry->controller($document->module_slug);
         $dir = $this->registry->moduleDir($document->module_slug);
-        $schema = $module->schema();
+        // $schema = $module->schema();
+        $schema = $module->formSchema();
 
         $submitted = $request->input('data', []);
         $result = $this->engine->process($schema, $submitted, $dir);
@@ -82,9 +83,11 @@ class DocumentController extends Controller
 
         $module = $this->registry->controller($document->module_slug);
         $dir = $this->registry->moduleDir($document->module_slug);
-        $schema = $module->schema();
+        // $schema = $module->schema();
+        $schema = $module->formSchema();
 
         $submitted = $request->input('data', []);
+        $format = $request->input('format', 'txt');
 
         // Server re-runs the engine — authoritative validation + computed/derived
         $result = $this->engine->process($schema, $submitted, $dir);
@@ -106,16 +109,29 @@ class DocumentController extends Controller
         $exporterClass = $manifest['exporter_class'];
         $exporter = new $exporterClass();
 
-        $content = $exporter->export($result->data, 'txt');
+        abort_unless(in_array($format, $exporter->supportedFormats(), true), 422, 'Formato no soportado.');
+
+        // before calling $exporter->export(...)
+        $profile = $document->user->notarioProfile;
+        $result->data['_notaria'] = [
+            'clave' => $profile->clave ?? '001',
+            'entidad' => $profile->entidad ?? '035',
+            'num_notaria' => $profile->num_notaria ?? '28',
+        ];
+        $content = $exporter->export($result->data, $format);
 
         // Mark the document completed + clear stored AI output (privacy: purge after export)
         // $document->update(['status' => 'completed', 'reviewed_at' => now(), 'ai_output_encrypted' => null]);
         $document->update(['status' => 'completed', 'reviewed_at' => now()]);
 
-        $filename = 'declaranot_' . ($result->data['numero_escritura'] ?? $document->id) . '.txt';
+        $ref = $result->data['numero_escritura']
+            ?? $result->data['referencia_aviso']
+            ?? $document->id;
+        $filename = $document->module_slug . '_' . $ref . '.' . $format;
+        $mime = $format === 'xml' ? 'application/xml' : 'text/plain';
 
         return response($content, 200, [
-            'Content-Type' => 'text/plain; charset=UTF-8',
+            'Content-Type' => $mime . '; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
@@ -178,21 +194,18 @@ class DocumentController extends Controller
         $dir = $this->registry->moduleDir($slug);
 
         $formSchema = $module->formSchema();
-        $engineSchema = $module->schema();
 
-        // Load a sample from the module folder (the *_output.json files you already have)
         $samplePath = $dir . '/debug_sample.json';
         if (file_exists($samplePath)) {
             $flat = json_decode(file_get_contents($samplePath), true);
         } else {
-            // fall back to merging the per-input output examples
             $flat = [];
             foreach ($module->inputs() as $input) {
                 $flat = array_merge($flat, $input->outputExample($dir));
             }
         }
 
-        $result = $this->engine->process($engineSchema, $flat, $dir);
+        $result = $this->engine->process($formSchema, $flat, $dir);
 
         return response()->json([
             'schema' => $formSchema,
@@ -203,6 +216,7 @@ class DocumentController extends Controller
                 'rule' => $i->rule,
                 'message' => $i->message,
             ])->values(),
+            'formats' => $this->registry->manifest($slug)['exports'] ?? ['txt'],
         ]);
     }
 }

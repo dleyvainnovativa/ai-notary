@@ -1,0 +1,18 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Persona Física",
+        "value": "1"
+    },
+    {
+        "label": "Persona Moral",
+        "value": "2"
+    },
+    {
+        "label": "Fideicomiso",
+        "value": "3"
+    }
+]

@@ -1,0 +1,550 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "NO APLICA",
+        "value": "1000000"
+    },
+    {
+        "label": "SECTOR PRIMARIO - AGRICULTURA",
+        "value": "1100001"
+    },
+    {
+        "label": "SECTOR PRIMARIO - GANADERIA",
+        "value": "1200001"
+    },
+    {
+        "label": "SECTOR PRIMARIO - EXPLOTACION DE OTROS ANIMALES (AVICULTURA, APICULTURA, ETC.)",
+        "value": "1300001"
+    },
+    {
+        "label": "SECTOR PRIMARIO - APROVECHAMIENTO FORESTAL",
+        "value": "1400002"
+    },
+    {
+        "label": "SECTOR PRIMARIO - PESCA",
+        "value": "1500001"
+    },
+    {
+        "label": "MINERIA - MINERIA DE OTROS RECURSOS",
+        "value": "2100002"
+    },
+    {
+        "label": "MINERIA - ACTIVIDADES RELACIONADAS CON EL PETROLEO Y EL GAS",
+        "value": "2200002"
+    },
+    {
+        "label": "MINERIA - ORO",
+        "value": "2300003"
+    },
+    {
+        "label": "MINERIA - PLATA",
+        "value": "2400002"
+    },
+    {
+        "label": "MINERIA - PIEDRAS PRECIOSAS",
+        "value": "2500002"
+    },
+    {
+        "label": "GENERACION, TRANSMISION Y DISTRIBUCION DE ENERGIA ELECTRICA, SUMINISTRO DE AGUA Y DE GAS",
+        "value": "2600003"
+    },
+    {
+        "label": "CONSTRUCCION - OTRAS ACTIVIDADES RELACIONADAS CON LA CONSTRUCCION",
+        "value": "2710004"
+    },
+    {
+        "label": "CONSTRUCCION - EDIFICACION RESIDENCIAL Y NO RESIDENCIAL",
+        "value": "2720004"
+    },
+    {
+        "label": "CONSTRUCCION - OBRAS DE INGENIERIA CIVIL",
+        "value": "2730004"
+    },
+    {
+        "label": "CONSTRUCCION - TRABAJOS ESPECIALIZADOS PARA LA CONSTRUCCION",
+        "value": "2740004"
+    },
+    {
+        "label": "CONSTRUCCION - SERVICIOS DE BLINDAJE PARCIAL O TOTAL DE INMUEBLES",
+        "value": "2754004"
+    },
+    {
+        "label": "INDUSTRIA - ALIMENTARIA",
+        "value": "3110005"
+    },
+    {
+        "label": "INDUSTRIA - BEBIDAS Y DEL TABACO",
+        "value": "3120005"
+    },
+    {
+        "label": "INDUSTRIA - PRODUCTOS TEXTILES",
+        "value": "3140005"
+    },
+    {
+        "label": "INDUSTRIA - PRENDAS DE VESTIR",
+        "value": "3150005"
+    },
+    {
+        "label": "INDUSTRIA - MADERA",
+        "value": "3210005"
+    },
+    {
+        "label": "INDUSTRIA - PAPEL",
+        "value": "3220005"
+    },
+    {
+        "label": "INDUSTRIA - IMPRESION E INDUSTRIAS CONEXAS",
+        "value": "3230005"
+    },
+    {
+        "label": "INDUSTRIA - PRODUCTOS DERIVADOS DEL PETROLEO Y DEL CARBON",
+        "value": "3240005"
+    },
+    {
+        "label": "INDUSTRIA - QUIMICA",
+        "value": "3250005"
+    },
+    {
+        "label": "INDUSTRIA - PLASTICO Y DEL HULE",
+        "value": "3260005"
+    },
+    {
+        "label": "INDUSTRIA - PRODUCTOS A BASE DE MINERALES NO METALICOS (ALFARERIA, PORCELANA, LOZA, VIDRIO, CEMENTO)",
+        "value": "3270005"
+    },
+    {
+        "label": "INDUSTRIA - METALICAS BASICAS",
+        "value": "3310005"
+    },
+    {
+        "label": "INDUSTRIA - PRODUCTOS METALICOS (HERRAMIENTAS, UTENSILIOS, ESTRUCTURAS, PIEZAS)",
+        "value": "3320005"
+    },
+    {
+        "label": "INDUSTRIA - MAQUINARIA Y EQUIPO",
+        "value": "3330005"
+    },
+    {
+        "label": "INDUSTRIA - EQUIPO DE COMPUTACION, COMUNICACION, MEDICION Y DE OTROS EQUIPOS, COMPONENTES Y ACCESORIOS ELECTRONICOS",
+        "value": "3340005"
+    },
+    {
+        "label": "INDUSTRIA - ACCESORIOS, APARATOS ELECTRICOS Y EQUIPO DE GENERACION DE ENERGIA ELECTRICA",
+        "value": "3350005"
+    },
+    {
+        "label": "INDUSTRIA - EQUIPO DE TRANSPORTE SIN MOTOR",
+        "value": "3360005"
+    },
+    {
+        "label": "INDUSTRIA - AUTOMOTRIZ",
+        "value": "3370005"
+    },
+    {
+        "label": "INDUSTRIA - VEHICULOS BLINDADOS Y EQUIPO PARA EL BLINDAJE DE VEHICULOS",
+        "value": "3380005"
+    },
+    {
+        "label": "INDUSTRIA - MUEBLES, COLCHONES Y PERSIANAS",
+        "value": "3410005"
+    },
+    {
+        "label": "INDUSTRIA - OTRAS INDUSTRIAS MANUFACTURERAS",
+        "value": "3420005"
+    },
+    {
+        "label": "INDUSTRIA - ORFEBRERIA Y JOYERIA DE METALES Y PIEDRAS PRECIOSOS",
+        "value": "3430005"
+    },
+    {
+        "label": "INDUSTRIA - JOYERIA DE METALES Y PIEDRAS NO PRECIOSOS Y DE OTROS MATERIALES",
+        "value": "3440005"
+    },
+    {
+        "label": "COMERCIO - ABARROTES, ALIMENTOS, BEBIDAS, HIELO Y TABACO",
+        "value": "4310006"
+    },
+    {
+        "label": "COMERCIO - PRODUCTOS FARMACEUTICOS, DE PERFUMERIA, ARTICULOS PARA EL ESPARCIMIENTO, ELECTRODOMESTICOS Y APARATOS DE LINEA BLANCA",
+        "value": "4320006"
+    },
+    {
+        "label": "COMERCIO - MATERIAS PRIMAS AGROPECUARIAS Y FORESTALES, PARA LA INDUSTRIA, Y MATERIALES DE DESECHO",
+        "value": "4330006"
+    },
+    {
+        "label": "COMERCIO - MAQUINARIA, EQUIPO DE COMPUTO Y MOBILIARIO DE USO GENERAL",
+        "value": "4340006"
+    },
+    {
+        "label": "COMERCIO - TIENDAS DE AUTOSERVICIO Y DEPARTAMENTALES",
+        "value": "4620006"
+    },
+    {
+        "label": "COMERCIO - PRODUCTOS TEXTILES, BISUTERIA, ACCESORIOS DE VESTIR Y CALZADO",
+        "value": "4630006"
+    },
+    {
+        "label": "COMERCIO - ARTICULOS DE PAPELERIA",
+        "value": "4650006"
+    },
+    {
+        "label": "COMERCIO - ARTICULOS DE JOYERIA Y RELOJES",
+        "value": "4660026"
+    },
+    {
+        "label": "COMERCIO - ARTICULOS PARA LA DECORACION DE INTERIORES",
+        "value": "4670006"
+    },
+    {
+        "label": "COMERCIO - ANTIGÜEDADES Y OBRAS DE ARTE",
+        "value": "4680006"
+    },
+    {
+        "label": "COMERCIO - ARTICULOS DE FERRETERIA, TLAPALERIA Y VIDRIOS",
+        "value": "4710006"
+    },
+    {
+        "label": "COMERCIO - VEHICULOS NUEVOS",
+        "value": "4720006"
+    },
+    {
+        "label": "COMERCIO - VEHICULOS USADOS",
+        "value": "4730006"
+    },
+    {
+        "label": "COMERCIO - PARTES Y REFACCIONES PARA VEHICULOS",
+        "value": "4740006"
+    },
+    {
+        "label": "COMERCIO - COMBUSTIBLES Y LUBRICANTES",
+        "value": "4750006"
+    },
+    {
+        "label": "COMERCIO - A TRAVES DE INTERNET, Y CATALOGOS IMPRESOS, TELEVISION Y SIMILARES",
+        "value": "4760006"
+    },
+    {
+        "label": "TRANSPORTE - AEREO",
+        "value": "4810007"
+    },
+    {
+        "label": "TRANSPORTE - FERROVIARIO",
+        "value": "4820007"
+    },
+    {
+        "label": "TRANSPORTE - MARITIMO Y FLUVIAL",
+        "value": "4830007"
+    },
+    {
+        "label": "TRANSPORTE - TERRESTRE",
+        "value": "4850007"
+    },
+    {
+        "label": "TRANSPORTE - TRANSPORTACION Y DISTRIBUCION POR DUCTOS",
+        "value": "4860007"
+    },
+    {
+        "label": "TRANSPORTE - SERVICIOS RELACIONADOS CON EL TRANSPORTE",
+        "value": "4880007"
+    },
+    {
+        "label": "TRANSPORTE - SERVICIOS DE AGENCIAS ADUANALES",
+        "value": "4890007"
+    },
+    {
+        "label": "TRANSPORTE - SERVICIOS DE TRANSPORTE Y\/O CUSTODIA DE VALORES",
+        "value": "4840007"
+    },
+    {
+        "label": "SERVICIOS POSTALES",
+        "value": "4910008"
+    },
+    {
+        "label": "SERVICIOS DE MENSAJERIA Y PAQUETERIA",
+        "value": "4920009"
+    },
+    {
+        "label": "SERVICIOS DE ALMACENAMIENTO",
+        "value": "4930010"
+    },
+    {
+        "label": "INFORMACION EN MEDIOS MASIVOS",
+        "value": "5100011"
+    },
+    {
+        "label": "PROCESAMIENTO ELECTRONICO DE INFORMACION Y OTROS SERVICIOS WEB",
+        "value": "5180012"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - BANCA CENTRAL",
+        "value": "5210013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - BANCA MULTIPLE",
+        "value": "5220013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - BANCA DE DESARROLLO",
+        "value": "5230013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - FONDOS Y FIDEICOMISOS FINANCIEROS",
+        "value": "5240013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - UNIONES DE CREDITO",
+        "value": "5250013"
+    },
+    {
+        "label": "SREVICIOS FINANCIEROS - CAJAS DE AHORRO POPULAR",
+        "value": "5260013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - OTRAS INSTITUCIONES DE INTERMEDIACION CREDITICIA Y FINANCIERA NO BURSATIL (OPERACION Y PROMOCION DE TARJETAS DE CREDITO NO BANCARIAS,  FINANCIAMIENTO DE BIENES DURADEROS), SOCIEDADES FINANCIERAS DE OBJETO LIMITADO",
+        "value": "5270013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - OTRAS INSTITUCIONES DE AHORRO Y PRESTAMO",
+        "value": "5280013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - COMPAÑIAS DE AUTOFINANCIAMIENTO",
+        "value": "5290013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - MONTEPIOS",
+        "value": "5310013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - CASAS DE EMPEÑO",
+        "value": "5320013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - SOCIEDADES FINANCIERAS DE OBJETO MULTIPLE",
+        "value": "5330013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - CASAS DE BOLSA",
+        "value": "5350013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - CASAS DE CAMBIO Y CENTROS CAMBIARIOS",
+        "value": "5360013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - TRANSMISORES DE DINERO",
+        "value": "5370013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - OTROS SERVICIOS RELACIONADOS CON LA INTERMEDIACION BURSATIL",
+        "value": "5390013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - COMPAÑIAS DE SEGUROS",
+        "value": "5410013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - COMPAÑIAS AFIANZADORAS",
+        "value": "5420013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - AGENTES, AJUSTADORES Y GESTORES DE SEGUROS Y FIANZAS",
+        "value": "5430013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - ADMINISTRACION DE FONDOS PARA EL RETIRO",
+        "value": "5440013"
+    },
+    {
+        "label": "SERVICIOS FINANCIEROS - EMISORA Y\/O COMERCIALIZACION DE CHEQUES DE VIAJERO",
+        "value": "5450013"
+    },
+    {
+        "label": "OTRAS EMPRESAS DE INTERMEDIACION CREDITICIA NO FINANCIERAS",
+        "value": "5340013"
+    },
+    {
+        "label": "SERVICIOS INMOBILIARIOS Y DE ALQUILER - ALQUILER SIN INTERMEDIACION DE BIENES RAICES",
+        "value": "5510014"
+    },
+    {
+        "label": "SERVICIOS INMOBILIARIOS Y DE ALQUILER - INMOBILIARIAS Y CORREDORES DE BIENES RAICES",
+        "value": "5520014"
+    },
+    {
+        "label": "SERVICIOS INMOBILIARIOS Y DE ALQUILER - SERVICIOS DE ALQUILER DE BIENES MUEBLES EXCEPTO VEHICULOS",
+        "value": "5530014"
+    },
+    {
+        "label": "SERVICIOS INMOBILIARIOS Y DE ALQUILER - ALQUILER DE VEHICULOS",
+        "value": "5540014"
+    },
+    {
+        "label": "SERVICIOS INMOBILIARIOS Y DE ALQUILER - SERVICIOS DE ALQUILER DE MARCAS REGISTRADAS, PATENTES Y FRANQUICIAS",
+        "value": "5550014"
+    },
+    {
+        "label": "SERVICIOS PROFESIONALES Y TECNICOS - SERVICIOS JURIDICOS",
+        "value": "5610015"
+    },
+    {
+        "label": "SERVICIOS PROFESIONALES Y TECNICOS - NOTARIA Y CORREDURIA PUBLICA",
+        "value": "5620015"
+    },
+    {
+        "label": "SERVICIOS PROFESIONALES Y TECNICOS - CONTABILIDAD Y AUDITORIA",
+        "value": "5690015"
+    },
+    {
+        "label": "SERVICIOS PROFESIONALES Y TECNICOS - ARQUITECTURA, INGENIERIA Y ACTIVIDADES RELACIONADAS",
+        "value": "5630015"
+    },
+    {
+        "label": "SERVICIOS PROFESIONALES Y TECNICOS - DISEÑO DE SISTEMAS DE COMPUTO Y SERVICIOS RELACIONADOS",
+        "value": "5640015"
+    },
+    {
+        "label": "SERVICIOS PROFESIONALES Y TECNICOS - CONSULTORIA ADMINISTRATIVA, CIENTIFICA Y TECNICA",
+        "value": "5650015"
+    },
+    {
+        "label": "SERVICIOS PROFESIONALES Y TECNICOS - INVESTIGACION CIENTIFICA Y DESARROLLO",
+        "value": "5660015"
+    },
+    {
+        "label": "SERVICIOS PROFESIONALES Y TECNICOS - PUBLICIDAD Y ACTIVIDADES RELACIONADAS",
+        "value": "5670015"
+    },
+    {
+        "label": "SERVICIOS PROFESIONALES Y TECNICOS - OTROS SERVICIOS DE OUTSOURCING",
+        "value": "5680015"
+    },
+    {
+        "label": "SERVICIOS DE APOYO A LOS NEGOCIOS - SERVICIOS DE ADMINISTRACION DE NEGOCIOS",
+        "value": "5710016"
+    },
+    {
+        "label": "SERVICIOS DE APOYO A LOS NEGOCIOS - AGENCIAS DE COBRANZA, DESPACHOS DE INVESTIGACION",
+        "value": "5720016"
+    },
+    {
+        "label": "SERVICIOS DE APOYO A LOS NEGOCIOS - SERVICIOS DE PROTECCION Y SEGURIDAD",
+        "value": "5730016"
+    },
+    {
+        "label": "SERVICIOS DE APOYO A LOS NEGOCIOS - SERVICIOS DE LIMPIEZA Y MANTENIMIENTO",
+        "value": "5740016"
+    },
+    {
+        "label": "SERVICIOS DE APOYO A LOS NEGOCIOS - OTROS SERVICIOS",
+        "value": "5750016"
+    },
+    {
+        "label": "SERVICIOS EDUCATIVOS",
+        "value": "6100017"
+    },
+    {
+        "label": "SERVICIOS DE SALUD Y DE ASISTENCIA SOCIAL",
+        "value": "6200018"
+    },
+    {
+        "label": "SERVICIOS DE ESPARCIMIENTO CULTURALES Y DEPORTIVOS, Y OTROS SERVICIOS RECREATIVOS",
+        "value": "7110019"
+    },
+    {
+        "label": "SERVICIOS DE ESPARCIMIENTO - MUSEOS, SITIOS HISTORICOS, ZOOLOGICOS Y SIMILARES",
+        "value": "7120019"
+    },
+    {
+        "label": "SERVICIOS DE ESPARCIMIENTO - CASAS DE JUEGOS ELECTRONICOS",
+        "value": "7130019"
+    },
+    {
+        "label": "SERVICIOS DE ESPARCIMIENTO - CASINOS O CENTROS DE APUESTA ",
+        "value": "7140019"
+    },
+    {
+        "label": "SERVICIOS DE ESPARCIMIENTO - VENTA DE BILLETES DE LOTERIA, PRONOSTICOS DEPORTIVOS U OTROS SORTEOS",
+        "value": "7150019"
+    },
+    {
+        "label": "SERVICIOS DE ALOJAMIENTO TEMPORAL Y DE PREPARACION DE ALIMENTOS Y BEBIDAS",
+        "value": "7200020"
+    },
+    {
+        "label": "SERVICIOS DE REPARACION Y MANTENIMIENTO - EQUIPO INDUSTRIAL, COMERCIAL, SERVICIOS Y AUTOMOTRIZ",
+        "value": "8100021"
+    },
+    {
+        "label": "SERVICIOS PERSONALES - LAVANDERIAS, SERVICIOS FUNERARIOS, BAÑOS PUBLICOS, SERVICIOS DE ESTACIONAMIENTO, REVELADO E IMPRESION DE FOTOGRAFIAS",
+        "value": "8200022"
+    },
+    {
+        "label": "ASOCIACIONES - ORGANIZACIONES Y CAMARAS DE PRODUCTORES, COMERCIANTES Y PRESTADORES DE SERVICIOS",
+        "value": "8310023"
+    },
+    {
+        "label": "ASOCIACIONES - ORGANIZACIONES LABORALES Y SINDICALES",
+        "value": "8320023"
+    },
+    {
+        "label": "ASOCIACIONES - ORGANIZACIONES DE PROFESIONISTAS",
+        "value": "8330023"
+    },
+    {
+        "label": "ASOCIACIONES - ORGANIZACIONES DE ACTIVIDADES RECREATIVAS",
+        "value": "8340023"
+    },
+    {
+        "label": "ASOCIACIONES - ORGANIZACIONES RELIGIOSAS",
+        "value": "8350023"
+    },
+    {
+        "label": "ASOCIACIONES - ORGANIZACIONES POLITICAS",
+        "value": "8360023"
+    },
+    {
+        "label": "ASOCIACIONES - ORGANIZACIONES CIVILES",
+        "value": "8370023"
+    },
+    {
+        "label": "ORGANISMOS INTERNACIONALES Y EXTRATERRITORIALES",
+        "value": "9100025"
+    },
+    {
+        "label": "SECTOR PUBLICO - PODER EJECUTIVO FEDERAL",
+        "value": "9810024"
+    },
+    {
+        "label": "SECTOR PUBLICO - PODER EJECUTIVO ESTATAL Y DEL DISTRITO FEDERAL",
+        "value": "9820024"
+    },
+    {
+        "label": "SECTOR PUBLICO - PODER EJECUTIVO MUNICIPAL Y DELEGACIONAL",
+        "value": "9830024"
+    },
+    {
+        "label": "SECTOR PUBLICO - PODER JUDICIAL FEDERAL",
+        "value": "9840024"
+    },
+    {
+        "label": "SECTOR PUBLICO - PODER JUDICIAL ESTATAL Y DEL DISTRITO FEDERAL",
+        "value": "9850024"
+    },
+    {
+        "label": "SECTOR PUBLICO - PODER LEGISLATIVO FEDERAL",
+        "value": "9860024"
+    },
+    {
+        "label": "SECTOR PUBLICO - PODER LEGISLATIVO ESTATAL Y DEL DISTRITO FEDERAL",
+        "value": "9870024"
+    },
+    {
+        "label": "SECTOR PUBLICO - ORGANOS AUTONOMOS Y ENTIDADES PARAESTATALES",
+        "value": "9880024"
+    }
+]

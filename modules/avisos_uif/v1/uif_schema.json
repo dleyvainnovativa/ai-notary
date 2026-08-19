@@ -1,0 +1,360 @@
+{
+  "schema_version": "1.0.0",
+  "global_rules": {
+    "date_format": "YYYY-MM-DD",
+    "number_format": "decimal",
+    "normalization_rules": [
+      "Return enum values exactly as defined",
+      "Remove currency symbols from numbers",
+      "Convert dates to YYYY-MM-DD",
+      "Return null when value is missing",
+      "Do not infer missing data"
+    ]
+  },
+  "fields": {
+    "referencia_aviso": {
+      "type": "text",
+      "required": true,
+      "ai_description": "Número de escritura pública"
+    },
+    "prioridad": {
+      "type": "select",
+      "source": "catalogo_prioridad"
+    },
+    "tipo_alerta": {
+      "type": "select",
+      "source": "catalogo_tipos_alerta"
+    },
+    "descripcion_alerta": {
+      "type": "text"
+    },
+    "solicitante": {
+      "type": "object",
+      "ai_description": "Datos de la PRIMERA persona física que aparece en la operación reportada. Es siempre una persona física (nunca una persona moral). Toma la primera persona física mencionada entre las partes de la operación (adquirentes o vendedores), en el orden en que aparecen en el documento.",
+      "items": {
+        "rfc": {
+          "type": "text",
+          "required": true,
+          "validation": {
+            "format": "rfc"
+          },
+          "aliases": [
+            "rfc",
+            "registro federal de contribuyentes"
+          ]
+        },
+        "curp": {
+          "type": "text",
+          "validation": {
+            "format": "curp"
+          }
+        },
+        "fecha_nacimiento": {
+          "type": "date"
+        },
+        "nombre": {
+          "type": "text",
+          "required": true
+        },
+        "apellido_paterno": {
+          "type": "text",
+          "required": true
+        },
+        "apellido_materno": {
+          "type": "text"
+        }
+      }
+    },
+    "operaciones_acumuladas": {
+      "type": "select",
+      "source": "catalogo_operaciones_acumuladas"
+    },
+    "operaciones": {
+      "type": "array",
+      "items": {
+        "fecha_operacion": {
+          "type": "date",
+          "required": true
+        },
+        "tipo_transmision": {
+          "type": "select",
+          "required": true,
+          "source": "catalogo_tipo_transmision"
+        },
+        "adquirentes": {
+          "type": "array",
+          "items": {
+            "tipo_persona": {
+              "type": "select",
+              "required": true,
+              "source": "catalogo_persona",
+              "ai_description": "Tipo de persona: 1=Física, 2=Moral, 3=Fideicomiso. El fideicomiso se identifica por el lenguaje (fiduciario, fideicomiso, F/número), no por el RFC."
+            },
+            "rfc": {
+              "type": "text",
+              "validation": {
+                "format": "rfc"
+              }
+            },
+            "nombre": {
+              "type": "text"
+            },
+            "apellido_paterno": {
+              "type": "text"
+            },
+            "apellido_materno": {
+              "type": "text"
+            },
+            "razon_social": {
+              "type": "text"
+            },
+            "curp": {
+              "type": "text",
+              "validation": {
+                "format": "curp"
+              }
+            },
+            "fecha_nacimiento": {
+              "type": "date"
+            },
+            "nacionalidad": {
+              "type": "select",
+              "source": "catalogo_nacionalidad",
+              "ai_description": "País de nacionalidad. Código de país (MX, US, etc.)."
+            },
+            "documento_oficial": {
+              "type": "text"
+            },
+            "folio": {
+              "type": "text"
+            },
+            "actividad_economica": {
+              "type": "select",
+              "source": "catalogo_actividad_economica"
+            },
+            "domicilio": {
+              "type": "object",
+              "items": {
+                "tipo_domicilio": {
+                  "type": "select",
+                  "source": "catalogo_domicilio"
+                },
+                "entidad_federativa": {
+                  "type": "select",
+                  "source": "catalogo_entidades_federativas"
+                },
+                "calle": {
+                  "type": "text"
+                },
+                "num_ext": {
+                  "type": "text"
+                },
+                "num_int": {
+                  "type": "text"
+                },
+                "codigo_postal": {
+                  "type": "text"
+                },
+                "colonia": {
+                  "type": "text"
+                },
+                "municipio": {
+                  "type": "text"
+                }
+              }
+            },
+            "fecha_constitucion": {
+              "type": "date",
+              "ai_description": "Fecha de constitución de la persona moral."
+            },
+            "giro_mercantil": {
+              "type": "select",
+              "source": "catalogo_giro_mercantil",
+              "ai_description": "Giro mercantil u objeto social de la persona moral."
+            },
+            "numero_fideicomiso": {
+              "type": "text",
+              "ai_description": "Número, referencia o identificador del fideicomiso."
+            }
+          }
+        },
+        "vendedores": {
+          "type": "array",
+          "items": {
+            "tipo_persona": {
+              "type": "select",
+              "required": true,
+              "source": "catalogo_persona",
+              "ai_description": "Tipo de persona: 1=Física, 2=Moral, 3=Fideicomiso. El fideicomiso se identifica por el lenguaje (fiduciario, fideicomiso, F/número), no por el RFC."
+            },
+            "rfc": {
+              "type": "text",
+              "validation": {
+                "format": "rfc"
+              }
+            },
+            "nombre": {
+              "type": "text"
+            },
+            "apellido_paterno": {
+              "type": "text"
+            },
+            "apellido_materno": {
+              "type": "text"
+            },
+            "razon_social": {
+              "type": "text"
+            },
+            "curp": {
+              "type": "text",
+              "validation": {
+                "format": "curp"
+              }
+            },
+            "fecha_nacimiento": {
+              "type": "date"
+            },
+            "nacionalidad": {
+              "type": "select",
+              "source": "catalogo_nacionalidad",
+              "ai_description": "País de nacionalidad. Código de país (MX, US, etc.)."
+            },
+            "documento_oficial": {
+              "type": "text"
+            },
+            "folio": {
+              "type": "text"
+            },
+            "actividad_economica": {
+              "type": "select",
+              "source": "catalogo_actividad_economica"
+            },
+            "domicilio": {
+              "type": "object",
+              "items": {
+                "tipo_domicilio": {
+                  "type": "select",
+                  "source": "catalogo_domicilio"
+                },
+                "entidad_federativa": {
+                  "type": "select",
+                  "source": "catalogo_entidades_federativas"
+                },
+                "calle": {
+                  "type": "text"
+                },
+                "num_ext": {
+                  "type": "text"
+                },
+                "num_int": {
+                  "type": "text"
+                },
+                "codigo_postal": {
+                  "type": "text"
+                },
+                "colonia": {
+                  "type": "text"
+                },
+                "municipio": {
+                  "type": "text"
+                }
+              }
+            },
+            "fecha_constitucion": {
+              "type": "date",
+              "ai_description": "Fecha de constitución de la persona moral."
+            },
+            "giro_mercantil": {
+              "type": "select",
+              "source": "catalogo_giro_mercantil",
+              "ai_description": "Giro mercantil u objeto social de la persona moral."
+            },
+            "numero_fideicomiso": {
+              "type": "text",
+              "ai_description": "Número, referencia o identificador del fideicomiso."
+            }
+          }
+        },
+        "inmueble": {
+          "type": "object",
+          "items": {
+            "tipo_bien": {
+              "type": "select",
+              "source": "catalogo_tipos_domicilio"
+            },
+            "valor_pactado": {
+              "type": "number"
+            },
+            "m2_terreno": {
+              "type": "number"
+            },
+            "m2_construidos": {
+              "type": "number"
+            },
+            "folio_real": {
+              "type": "text"
+            },
+            "num_instrumento": {
+              "type": "text"
+            },
+            "valor_avaluo": {
+              "type": "number"
+            },
+            "domicilio": {
+              "type": "object",
+              "items": {
+                "entidad_federativa": {
+                  "type": "select",
+                  "source": "catalogo_entidades_federativas"
+                },
+                "calle": {
+                  "type": "text"
+                },
+                "num_ext": {
+                  "type": "text"
+                },
+                "num_int": {
+                  "type": "text"
+                },
+                "codigo_postal": {
+                  "type": "text"
+                },
+                "colonia": {
+                  "type": "text"
+                },
+                "municipio": {
+                  "type": "text"
+                }
+              }
+            }
+          }
+        },
+        "pagos": {
+          "type": "array",
+          "items": {
+            "fecha_pago": {
+              "type": "date",
+              "required": true
+            },
+            "forma_pago": {
+              "type": "select",
+              "source": "catalogo_formas_de_pago"
+            },
+            "instrumento": {
+              "type": "select",
+              "source": "catalogo_instrumentos_monetarios"
+            },
+            "moneda": {
+              "type": "select",
+              "source": "catalogo_tipos_moneda"
+            },
+            "monto": {
+              "type": "number",
+              "required": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

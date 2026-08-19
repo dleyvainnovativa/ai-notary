@@ -57,5 +57,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('auth')->name('debug.review-data');
     Route::get('/debug-review', fn() => view('debug-review'))
         ->middleware('auth')->name('debug.review');
+
+    // routes/web.php (inside auth group)
+    Route::get('/api/postal-codes/{cp}', [\App\Http\Controllers\PostalCodeController::class, 'search'])
+        ->name('postal-codes.search');
 });
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');

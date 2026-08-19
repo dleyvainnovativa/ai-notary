@@ -1,0 +1,74 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Efectivo",
+        "value": "1"
+    },
+    {
+        "label": "Tarjeta de Crédito",
+        "value": "2"
+    },
+    {
+        "label": "Tarjeta de Debito",
+        "value": "3"
+    },
+    {
+        "label": "Tarjeta de Prepago",
+        "value": "4"
+    },
+    {
+        "label": "Cheque Nominativo",
+        "value": "5"
+    },
+    {
+        "label": "Cheque de Caja",
+        "value": "6"
+    },
+    {
+        "label": "Cheques de Viajero",
+        "value": "7"
+    },
+    {
+        "label": "Transferencia Interbancaria",
+        "value": "8"
+    },
+    {
+        "label": "Transferencia Misma Institución",
+        "value": "9"
+    },
+    {
+        "label": "Transferencia Internacional",
+        "value": "10"
+    },
+    {
+        "label": "Orden de Pago",
+        "value": "11"
+    },
+    {
+        "label": "Giro",
+        "value": "12"
+    },
+    {
+        "label": "Oro o Platino Amonedados",
+        "value": "13"
+    },
+    {
+        "label": "Plata Amonedada",
+        "value": "14"
+    },
+    {
+        "label": "Metales Preciosos",
+        "value": "15"
+    },
+    {
+        "label": "Activos Virtuales",
+        "value": "16"
+    },
+    {
+        "label": "Otros",
+        "value": "99"
+    }
+]

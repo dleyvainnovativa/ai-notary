@@ -1,0 +1,742 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Peso mexicano",
+        "value": "1"
+    },
+    {
+        "label": "Dólar estadounidense",
+        "value": "2"
+    },
+    {
+        "label": "Euro",
+        "value": "3"
+    },
+    {
+        "label": "Dirham de los Emiratos Árabes Unidos",
+        "value": "4"
+    },
+    {
+        "label": "Afgani afgano",
+        "value": "5"
+    },
+    {
+        "label": "Lek albanés",
+        "value": "6"
+    },
+    {
+        "label": "Dram armenio",
+        "value": "7"
+    },
+    {
+        "label": "Florín antillano neerlandés",
+        "value": "8"
+    },
+    {
+        "label": "Kwanza angoleño",
+        "value": "9"
+    },
+    {
+        "label": "Peso argentino",
+        "value": "10"
+    },
+    {
+        "label": "Dólar australiano",
+        "value": "11"
+    },
+    {
+        "label": "Florín arubeño",
+        "value": "12"
+    },
+    {
+        "label": "Manat azerbaiyano",
+        "value": "13"
+    },
+    {
+        "label": "Manat azerbaiyano",
+        "value": "14"
+    },
+    {
+        "label": "Marco convertible de Bosnia-Herzegovina",
+        "value": "15"
+    },
+    {
+        "label": "Dólar de Barbados",
+        "value": "16"
+    },
+    {
+        "label": "Taka de Bangladesh",
+        "value": "17"
+    },
+    {
+        "label": "Lev búlgaro",
+        "value": "18"
+    },
+    {
+        "label": "Dinar bahreiní",
+        "value": "19"
+    },
+    {
+        "label": "Franco burundés",
+        "value": "20"
+    },
+    {
+        "label": "Dólar de Bermuda",
+        "value": "21"
+    },
+    {
+        "label": "Dólar de Brunéi",
+        "value": "22"
+    },
+    {
+        "label": "Boliviano",
+        "value": "23"
+    },
+    {
+        "label": "Real brasileño",
+        "value": "24"
+    },
+    {
+        "label": "Dólar bahameño",
+        "value": "25"
+    },
+    {
+        "label": "Ngultrum de Bután",
+        "value": "26"
+    },
+    {
+        "label": "Pula de Botsuana",
+        "value": "27"
+    },
+    {
+        "label": "Rublo bielorruso",
+        "value": "28"
+    },
+    {
+        "label": "Dólar de Belice",
+        "value": "29"
+    },
+    {
+        "label": "Dólar canadiense",
+        "value": "30"
+    },
+    {
+        "label": "Franco congoleño, o congolés",
+        "value": "31"
+    },
+    {
+        "label": "Franco suizo",
+        "value": "32"
+    },
+    {
+        "label": "Peso chileno",
+        "value": "33"
+    },
+    {
+        "label": "Yuan chino",
+        "value": "34"
+    },
+    {
+        "label": "Peso colombiano",
+        "value": "35"
+    },
+    {
+        "label": "Colón costarricense",
+        "value": "36"
+    },
+    {
+        "label": "Dinar serbio",
+        "value": "37"
+    },
+    {
+        "label": "Peso cubano convertible",
+        "value": "38"
+    },
+    {
+        "label": "Peso cubano",
+        "value": "39"
+    },
+    {
+        "label": "Escudo caboverdiano",
+        "value": "40"
+    },
+    {
+        "label": "Koruna checa",
+        "value": "41"
+    },
+    {
+        "label": "Franco yibutiano",
+        "value": "42"
+    },
+    {
+        "label": "Corona danesa",
+        "value": "43"
+    },
+    {
+        "label": "Peso dominicano",
+        "value": "44"
+    },
+    {
+        "label": "Dinar algerino",
+        "value": "45"
+    },
+    {
+        "label": "Libra egipcia",
+        "value": "46"
+    },
+    {
+        "label": "Nakfa eritreo",
+        "value": "47"
+    },
+    {
+        "label": "Birr etíope",
+        "value": "48"
+    },
+    {
+        "label": "Dólar fiyiano",
+        "value": "49"
+    },
+    {
+        "label": "Libra malvinense",
+        "value": "50"
+    },
+    {
+        "label": "Libra esterlina (libra de Gran Bretaña)",
+        "value": "51"
+    },
+    {
+        "label": "Lari georgiano",
+        "value": "52"
+    },
+    {
+        "label": "Cedi ghanés",
+        "value": "53"
+    },
+    {
+        "label": "Libra de Gibraltar",
+        "value": "54"
+    },
+    {
+        "label": "Dalasi gambiano",
+        "value": "55"
+    },
+    {
+        "label": "Franco guineano",
+        "value": "56"
+    },
+    {
+        "label": "Quetzal guatemalteco",
+        "value": "57"
+    },
+    {
+        "label": "Dólar guyanés",
+        "value": "58"
+    },
+    {
+        "label": "Dólar de Hong Kong",
+        "value": "59"
+    },
+    {
+        "label": "Lempira hondureño",
+        "value": "60"
+    },
+    {
+        "label": "Kuna croata",
+        "value": "61"
+    },
+    {
+        "label": "Gourde haitiano",
+        "value": "62"
+    },
+    {
+        "label": "Forint húngaro",
+        "value": "63"
+    },
+    {
+        "label": "Rupiah indonesia",
+        "value": "64"
+    },
+    {
+        "label": "Nuevo shéquel israelí",
+        "value": "65"
+    },
+    {
+        "label": "Rupia india",
+        "value": "66"
+    },
+    {
+        "label": "Dinar iraquí",
+        "value": "67"
+    },
+    {
+        "label": "Rial iraní",
+        "value": "68"
+    },
+    {
+        "label": "Króna islandesa",
+        "value": "69"
+    },
+    {
+        "label": "Dólar jamaicano",
+        "value": "70"
+    },
+    {
+        "label": "Dinar jordano",
+        "value": "71"
+    },
+    {
+        "label": "Yen japonés",
+        "value": "72"
+    },
+    {
+        "label": "Chelín keniata",
+        "value": "73"
+    },
+    {
+        "label": "Som kirguís (de Kirguistán)",
+        "value": "74"
+    },
+    {
+        "label": "Riel camboyano",
+        "value": "75"
+    },
+    {
+        "label": "Franco comoriano (de Comoras)",
+        "value": "76"
+    },
+    {
+        "label": "Won norcoreano",
+        "value": "77"
+    },
+    {
+        "label": "Won surcoreano",
+        "value": "78"
+    },
+    {
+        "label": "Dinar kuwaití",
+        "value": "79"
+    },
+    {
+        "label": "Dólar caimano (de Islas Caimán)",
+        "value": "80"
+    },
+    {
+        "label": "Tenge kazajo",
+        "value": "81"
+    },
+    {
+        "label": "Kip lao",
+        "value": "82"
+    },
+    {
+        "label": "Libra libanesa",
+        "value": "83"
+    },
+    {
+        "label": "Rupia de Sri Lanka",
+        "value": "84"
+    },
+    {
+        "label": "Dólar liberiano",
+        "value": "85"
+    },
+    {
+        "label": "Loti lesotense",
+        "value": "86"
+    },
+    {
+        "label": "Litas lituano",
+        "value": "87"
+    },
+    {
+        "label": "Lat letón",
+        "value": "88"
+    },
+    {
+        "label": "Dinar libio",
+        "value": "89"
+    },
+    {
+        "label": "Dirham marroquí",
+        "value": "90"
+    },
+    {
+        "label": "Leu moldavo",
+        "value": "91"
+    },
+    {
+        "label": "Ariary malgache",
+        "value": "92"
+    },
+    {
+        "label": "Denar macedonio",
+        "value": "93"
+    },
+    {
+        "label": "Kyat birmano",
+        "value": "94"
+    },
+    {
+        "label": "Tughrik mongol",
+        "value": "95"
+    },
+    {
+        "label": "Pataca de Macao",
+        "value": "96"
+    },
+    {
+        "label": "Ouguiya mauritana",
+        "value": "97"
+    },
+    {
+        "label": "Rupia mauricia",
+        "value": "98"
+    },
+    {
+        "label": "Rufiyaa maldiva",
+        "value": "99"
+    },
+    {
+        "label": "Kwacha malauí",
+        "value": "100"
+    },
+    {
+        "label": "Ringgit malayo",
+        "value": "101"
+    },
+    {
+        "label": "Metical mozambiqueño",
+        "value": "102"
+    },
+    {
+        "label": "Dólar namibio",
+        "value": "103"
+    },
+    {
+        "label": "Naira nigeriana",
+        "value": "104"
+    },
+    {
+        "label": "Córdoba nicaragüense",
+        "value": "105"
+    },
+    {
+        "label": "Corona noruega",
+        "value": "106"
+    },
+    {
+        "label": "Rupia nepalesa",
+        "value": "107"
+    },
+    {
+        "label": "Dólar neozelandés",
+        "value": "108"
+    },
+    {
+        "label": "Rial omaní",
+        "value": "109"
+    },
+    {
+        "label": "Balboa panameña",
+        "value": "110"
+    },
+    {
+        "label": "Nuevo sol peruano",
+        "value": "111"
+    },
+    {
+        "label": "Kina de Papúa Nueva Guinea",
+        "value": "112"
+    },
+    {
+        "label": "Peso filipino",
+        "value": "113"
+    },
+    {
+        "label": "Rupia pakistaní",
+        "value": "114"
+    },
+    {
+        "label": "zloty polaco",
+        "value": "115"
+    },
+    {
+        "label": "Guaraní paraguayo",
+        "value": "116"
+    },
+    {
+        "label": "Rial qatarí",
+        "value": "117"
+    },
+    {
+        "label": "Leu rumano",
+        "value": "118"
+    },
+    {
+        "label": "Dinar serbio",
+        "value": "119"
+    },
+    {
+        "label": "Rublo ruso",
+        "value": "120"
+    },
+    {
+        "label": "Franco ruandés",
+        "value": "121"
+    },
+    {
+        "label": "Riyal saudí",
+        "value": "122"
+    },
+    {
+        "label": "Dólar de las Islas Salomón",
+        "value": "123"
+    },
+    {
+        "label": "Rupia de Seychelles",
+        "value": "124"
+    },
+    {
+        "label": "Dinar sudanés",
+        "value": "125"
+    },
+    {
+        "label": "Corona sueca",
+        "value": "126"
+    },
+    {
+        "label": "Dólar de Singapur",
+        "value": "127"
+    },
+    {
+        "label": "Libra de Santa Helena",
+        "value": "128"
+    },
+    {
+        "label": "Leone de Sierra Leona",
+        "value": "129"
+    },
+    {
+        "label": "Chelín somalí",
+        "value": "130"
+    },
+    {
+        "label": "Dólar surinamés",
+        "value": "131"
+    },
+    {
+        "label": "Libra de Sudán del Sur",
+        "value": "132"
+    },
+    {
+        "label": "Dobra de Santo Tomé y Príncipe",
+        "value": "133"
+    },
+    {
+        "label": "Colón Salvadoreño",
+        "value": "134"
+    },
+    {
+        "label": "Libra siria",
+        "value": "135"
+    },
+    {
+        "label": "Lilangeni suazi",
+        "value": "136"
+    },
+    {
+        "label": "Baht tailandés",
+        "value": "137"
+    },
+    {
+        "label": "Somoni tayik (de Tayikistán)",
+        "value": "138"
+    },
+    {
+        "label": "Manat turcomano",
+        "value": "139"
+    },
+    {
+        "label": "Dinar tunecino",
+        "value": "140"
+    },
+    {
+        "label": "Paanga tongano",
+        "value": "141"
+    },
+    {
+        "label": "Lira turca",
+        "value": "142"
+    },
+    {
+        "label": "Dólar de Trinidad y Tobago",
+        "value": "143"
+    },
+    {
+        "label": "Dólar taiwanés",
+        "value": "144"
+    },
+    {
+        "label": "Chelín tanzano",
+        "value": "145"
+    },
+    {
+        "label": "Grivna ucraniana",
+        "value": "146"
+    },
+    {
+        "label": "Chelín ugandés",
+        "value": "147"
+    },
+    {
+        "label": "Peso uruguayo",
+        "value": "148"
+    },
+    {
+        "label": "Som uzbeko",
+        "value": "149"
+    },
+    {
+        "label": "Bolívar fuerte venezolano",
+        "value": "150"
+    },
+    {
+        "label": "Dong vietnamita",
+        "value": "151"
+    },
+    {
+        "label": "Vatu vanuatense",
+        "value": "152"
+    },
+    {
+        "label": "Tala samoana",
+        "value": "153"
+    },
+    {
+        "label": "Rial yemení (de Yemen)",
+        "value": "154"
+    },
+    {
+        "label": "Rand sudafricano",
+        "value": "155"
+    },
+    {
+        "label": "Kwacha zambiano",
+        "value": "156"
+    },
+    {
+        "label": "Kwacha zambiano",
+        "value": "157"
+    },
+    {
+        "label": "Dólar zimbabuense",
+        "value": "158"
+    },
+    {
+        "label": "CENTENARIO",
+        "value": "159"
+    },
+    {
+        "label": "AZTECA",
+        "value": "160"
+    },
+    {
+        "label": "HIDALGO",
+        "value": "161"
+    },
+    {
+        "label": "1\/2 HIDALGO",
+        "value": "162"
+    },
+    {
+        "label": "1\/4 HIDALGO",
+        "value": "163"
+    },
+    {
+        "label": "1\/5 HIDALGO",
+        "value": "164"
+    },
+    {
+        "label": "1 OZ LIBERTAD DE ORO",
+        "value": "165"
+    },
+    {
+        "label": "1\/2 OZ LIBERTAD DE ORO",
+        "value": "166"
+    },
+    {
+        "label": "1\/4 OZ LIBERTAD DE ORO",
+        "value": "167"
+    },
+    {
+        "label": "1\/10 OZ LIBERTAD DE ORO",
+        "value": "168"
+    },
+    {
+        "label": "1\/20 OZ LIBERTAD DE ORO",
+        "value": "169"
+    },
+    {
+        "label": "1 OZ LIBERTAD DE PLATA",
+        "value": "170"
+    },
+    {
+        "label": "1\/2 OZ LIBERTAD DE PLATA",
+        "value": "171"
+    },
+    {
+        "label": "1\/4 OZ LIBERTAD DE PLATA",
+        "value": "172"
+    },
+    {
+        "label": "1\/10 OZ LIBERTAD DE PLATA",
+        "value": "173"
+    },
+    {
+        "label": "1\/20 OZ LIBERTAD DE PLATA",
+        "value": "174"
+    },
+    {
+        "label": "Onza de plata",
+        "value": "175"
+    },
+    {
+        "label": "Onza de oro",
+        "value": "176"
+    },
+    {
+        "label": "Franco de oro (Special settlement currency)",
+        "value": "177"
+    },
+    {
+        "label": "Onza de paladio",
+        "value": "178"
+    },
+    {
+        "label": "Onza de platino",
+        "value": "179"
+    },
+    {
+        "label": "Franco CFA de África Central",
+        "value": "180"
+    },
+    {
+        "label": "Dólar del Caribe Oriental",
+        "value": "181"
+    },
+    {
+        "label": "Franco UIC (Special settlement currency)",
+        "value": "182"
+    },
+    {
+        "label": "Franco CFA de África Occidental",
+        "value": "183"
+    },
+    {
+        "label": "Franco CFP",
+        "value": "184"
+    }
+]

@@ -1,0 +1,14 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Normal",
+        "value": "1"
+    },
+    {
+        "label": "24 horas con operaciones",
+        "value": "2"
+    }
+]

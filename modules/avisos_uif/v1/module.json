@@ -1,0 +1,14 @@
+{
+  "slug": "avisos_uif",
+  "version": "1",
+  "name": "Avisos UIF",
+  "active": true,
+  "exports": ["xml", "txt"],
+  "catalogs_used": [
+    "catalogo_tipo_aviso", "catalogo_tipo_operacion", "catalogo_moneda",
+    "catalogo_instrumento_monetario", "catalogo_tipo_persona",
+    "catalogo_caracter_persona", "catalogo_nacionalidad", "catalogo_datos_informativos"
+  ],
+  "controller_class": "Modules\\AvisosUif\\V1\\Controller",
+  "exporter_class": "Modules\\AvisosUif\\V1\\Exporter"
+}

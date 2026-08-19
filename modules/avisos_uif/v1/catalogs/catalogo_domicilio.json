@@ -1,0 +1,14 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Nacional",
+        "value": "1"
+    },
+    {
+        "label": "Extranjero",
+        "value": "2"
+    }
+]

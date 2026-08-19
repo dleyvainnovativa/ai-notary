@@ -1,0 +1,134 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Aguascalientes",
+        "value": "1"
+    },
+    {
+        "label": "Baja California",
+        "value": "2"
+    },
+    {
+        "label": "Baja California Sur",
+        "value": "3"
+    },
+    {
+        "label": "Campeche",
+        "value": "4"
+    },
+    {
+        "label": "Coahuila",
+        "value": "5"
+    },
+    {
+        "label": "Colima",
+        "value": "6"
+    },
+    {
+        "label": "Chiapas",
+        "value": "7"
+    },
+    {
+        "label": "Chihuahua",
+        "value": "8"
+    },
+    {
+        "label": "Distrito Federal",
+        "value": "9"
+    },
+    {
+        "label": "Durango",
+        "value": "10"
+    },
+    {
+        "label": "Guanajuato",
+        "value": "11"
+    },
+    {
+        "label": "Guerrero",
+        "value": "12"
+    },
+    {
+        "label": "Hidalgo",
+        "value": "13"
+    },
+    {
+        "label": "Jalisco",
+        "value": "14"
+    },
+    {
+        "label": "México",
+        "value": "15"
+    },
+    {
+        "label": "Michoacán",
+        "value": "16"
+    },
+    {
+        "label": "Morelos",
+        "value": "17"
+    },
+    {
+        "label": "Nayarit",
+        "value": "18"
+    },
+    {
+        "label": "Nuevo León",
+        "value": "19"
+    },
+    {
+        "label": "Oaxaca",
+        "value": "20"
+    },
+    {
+        "label": "Puebla",
+        "value": "21"
+    },
+    {
+        "label": "Querétaro",
+        "value": "22"
+    },
+    {
+        "label": "Quintana Roo",
+        "value": "23"
+    },
+    {
+        "label": "San Luis Potosí",
+        "value": "24"
+    },
+    {
+        "label": "Sinaloa",
+        "value": "25"
+    },
+    {
+        "label": "Sonora",
+        "value": "26"
+    },
+    {
+        "label": "Tabasco",
+        "value": "27"
+    },
+    {
+        "label": "Tamaulipas",
+        "value": "28"
+    },
+    {
+        "label": "Tlaxcala",
+        "value": "29"
+    },
+    {
+        "label": "Veracruz",
+        "value": "30"
+    },
+    {
+        "label": "Yucatán",
+        "value": "31"
+    },
+    {
+        "label": "Zacatecas",
+        "value": "32"
+    }
+]

@@ -1,0 +1,26 @@
+[
+    {
+        "label": "Seleccionar opción",
+        "value": "0"
+    },
+    {
+        "label": "Contado",
+        "value": "1"
+    },
+    {
+        "label": "Financiamiento",
+        "value": "2"
+    },
+    {
+        "label": "Dación en pago",
+        "value": "3"
+    },
+    {
+        "label": "Préstamo o crédito",
+        "value": "4"
+    },
+    {
+        "label": "Permuta",
+        "value": "5"
+    }
+]

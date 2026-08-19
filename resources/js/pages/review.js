@@ -63,21 +63,42 @@ const GENERIC_RFC = {
     moral:  ['EXT990101000'],
 };
 
+/* ---------- Persona classifier dispatcher ---------- */
+// classifier = { rule, tipo_field, rfc_field? }
+function classifyRow(classifier, rowValues) {
+    const rule = classifier?.rule || 'persona_case';
+    if (rule === 'persona_tipo_select') {
+        return personaTipoSelect(rowValues[classifier.tipo_field]);
+    }
+    // default: declaranot RFC-derived
+    return personaCase(rowValues[classifier.tipo_field], rowValues[classifier.rfc_field]);
+}
+
+// declaranot — UNCHANGED (keep your existing body)
 function personaCase(tipo, rfc) {
     const r = String(rfc ?? '').trim().toUpperCase();
     const t = String(tipo ?? '');
-
-    if (t === '1') { // Nacional → classify by RFC structure
+    if (t === '1') {
         if (/^[A-ZÑ&]{4}\d{6}[A-Z0-9]{3}$/.test(r)) return 'nacional_fisica';
         if (/^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/.test(r)) return 'nacional_moral';
         return 'unknown';
     }
-    if (t === '2') { // Extranjera → list membership only
+    if (t === '2') {
         if (GENERIC_RFC.fisica.includes(r)) return 'extranjera_fisica';
         if (GENERIC_RFC.moral.includes(r)) return 'extranjera_moral';
         return 'extranjera_invalid';
     }
     return 'unknown';
+}
+
+// UIF — user selects tipo_persona (1=física, 2=moral, 3=fideicomiso)
+function personaTipoSelect(tipo) {
+    switch (String(tipo ?? '')) {
+        case '1': return 'fisica';
+        case '2': return 'moral';
+        case '3': return 'fideicomiso';
+        default:  return 'unknown';
+    }
 }
 
 /* ---------- Shared render logic ---------- */
@@ -134,20 +155,49 @@ function renderReview(container, payload) {
         sec.appendChild(body);
         formCol.appendChild(sec);
 
-        // Nav item for this section
-        const navItem = document.createElement('a');
-        navItem.className = 'rv-nav__item';
-        navItem.href = `#${sectionId}`;
-        navItem.dataset.target = sectionId;
-        navItem.innerHTML = `
-            <span class="rv-nav__label">${section.title}</span>
-            <span class="rv-nav__badge" hidden></span>
-        `;
-        navItem.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-        nav.appendChild(navItem);
+         // --- nav item for the section ---
+    const navItem = document.createElement('a');
+    navItem.className = 'rv-nav__item';
+    navItem.href = `#${sectionId}`;
+    navItem.dataset.target = sectionId;
+    navItem.innerHTML = `
+        <span class="rv-nav__label">${section.title}</span>
+        <span class="rv-nav__badge" hidden></span>
+    `;
+    navItem.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    nav.appendChild(navItem);
+
+    // --- sub-nav children (e.g. per operation: Adquirentes, Vendedores...) ---
+    if (section.subnav) {
+        const opData = payload.data?.[section.subnav.array] ?? [];
+        const opCount = Math.max(opData.length, 1); // at least one shown
+        const multi = opCount > 1;
+
+        for (let opIndex = 0; opIndex < opCount; opIndex++) {
+            for (const child of section.subnav.children) {
+                // target path in the rendered DOM
+                const targetPath = `${section.subnav.array}.${opIndex}.${child.field}`;
+                const childItem = document.createElement('a');
+                childItem.className = 'rv-nav__item rv-nav__item--child';
+                childItem.dataset.targetPath = targetPath;
+                childItem.dataset.parentTarget = sectionId;
+                const label = multi ? `Op ${opIndex + 1} · ${child.label}` : child.label;
+                childItem.innerHTML = `
+                    <span class="rv-nav__label">${label}</span>
+                    <span class="rv-nav__badge" hidden></span>
+                `;
+                childItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const el = document.querySelector(`[data-path="${cssEsc(targetPath)}"]`);
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                nav.appendChild(childItem);
+            }
+        }
+    }
     });
 
     layout.appendChild(nav);
@@ -189,11 +239,15 @@ export async function initReviewDebug() {
     const container = document.getElementById('review-form');
     if (!container) return;
 
+    // read ?module= from the page URL, default to declaranot
+    const params = new URLSearchParams(window.location.search);
+    const module = params.get('module') || 'declaranot';
+
     container.innerHTML = '<div class="text-center py-4" style="color:var(--text-muted)">Cargando (debug)…</div>';
 
     let payload;
     try {
-        payload = await http.get('/debug/review-data?module=declaranot');
+        payload = await http.get(`/debug/review-data?module=${encodeURIComponent(module)}`);
     } catch {
         container.innerHTML = '<p class="text-danger">No se pudo cargar el sample de debug.</p>';
         return;
@@ -201,25 +255,36 @@ export async function initReviewDebug() {
     renderReview(container, payload);
 }
 
-/* ---------- Scroll spy ---------- */
 function initScrollSpy() {
-    const sections = [...document.querySelectorAll('.rv-section')];
-    if (!sections.length) return;
+    const targets = [
+        ...document.querySelectorAll('.rv-section'),
+        ...[...document.querySelectorAll('.rv-nav__item--child')]
+            .map(n => document.querySelector(`[data-path="${cssEsc(n.dataset.targetPath)}"]`))
+            .filter(Boolean),
+    ];
+    if (!targets.length) return;
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                document.querySelectorAll('.rv-nav__item').forEach(n => n.classList.remove('is-current'));
-                const navItem = document.querySelector(`.rv-nav__item[data-target="${entry.target.id}"]`);
-                navItem?.classList.add('is-current');
+            if (!entry.isIntersecting) return;
+            document.querySelectorAll('.rv-nav__item').forEach(n => n.classList.remove('is-current'));
+
+            // match either a section nav item or a child nav item
+            const id = entry.target.id;
+            const path = entry.target.dataset.path;
+            let navItem = null;
+            if (id) navItem = document.querySelector(`.rv-nav__item[data-target="${id}"]`);
+            if (!navItem && path) navItem = document.querySelector(`.rv-nav__item--child[data-target-path="${cssEsc(path)}"]`);
+            if (navItem) {
+                navItem.classList.add('is-current');
+                if (window.matchMedia('(max-width: 860px)').matches) {
+                    navItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
             }
         });
-    }, {
-        rootMargin: '-20% 0px -70% 0px',  // triggers when section is near the top
-        threshold: 0,
-    });
+    }, { rootMargin: '-15% 0px -75% 0px', threshold: 0 });
 
-    sections.forEach(s => observer.observe(s));
+    targets.forEach(t => observer.observe(t));
 }
 
 /* ---------- Node dispatch ---------- */
@@ -269,7 +334,6 @@ function renderField(name, def, value, path, readOnly) {
         sub.textContent = def.subtitle;
         col.appendChild(sub);
     }
-
 
     let input;
     if (def.type === 'select' && def.options) {
@@ -321,6 +385,17 @@ function renderField(name, def, value, path, readOnly) {
     if (readOnly) { input.readOnly = true; input.disabled = true; input.classList.add('is-computed'); }
     col.appendChild(input);
 
+    // CP → colonia lookup (input now exists)
+    if (def.cp_lookup) {
+        input.addEventListener('blur', () => cpLookup(input, def.cp_lookup));
+        if ((input.value ?? '').length === 5) {
+            setTimeout(() => cpLookup(input, def.cp_lookup, true), 0);
+        }
+    }
+    if (def.cp_target) {
+        input.dataset.pendingValue = value ?? '';
+    }
+
     if (def.description) {
         const desc = document.createElement('div');
         desc.className = 'rv-field__desc';
@@ -371,11 +446,23 @@ function applyFormat(rawValue, def) {
 /* ---------- Object ---------- */
 function renderObject(name, def, value, path) {
     const wrap = document.createElement('div');
-    wrap.className = 'rv-grid';
+    wrap.className = 'rv-subsection';
     wrap.dataset.path = path;
-    for (const [childName, childDef] of Object.entries(def.itemSchema)) {
-        renderNode(childName, childDef, value?.[childName], wrap, `${path}.${childName}`);
+
+    // label for the object (Domicilio, Inmueble, etc.)
+    if (def.label) {
+        const title = document.createElement('div');
+        title.className = 'rv-subsection__title';
+        title.textContent = def.label;
+        wrap.appendChild(title);
     }
+
+    const grid = document.createElement('div');
+    grid.className = 'rv-grid';
+    for (const [childName, childDef] of Object.entries(def.itemSchema)) {
+        renderNode(childName, childDef, value?.[childName], grid, `${path}.${childName}`);
+    }
+    wrap.appendChild(grid);
     return wrap;
 }
 
@@ -388,7 +475,15 @@ function renderArray(name, def, rows, path) {
 
     const head = document.createElement('div');
     head.className = 'rv-array__head';
-    head.innerHTML = `<span class="rv-array__count"></span>`;
+    // add the array title
+    head.innerHTML = `
+        <div class="rv-array__titles">
+            <span class="rv-array__title">${def.label || name}</span>
+            ${def.subtitle ? `<span class="rv-array__subtitle">${def.subtitle}</span>` : ''}
+            <span class="rv-array__count"></span>
+        </div>
+    `;
+    // ... the Agregar button appends after
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
     addBtn.className = 'btn btn-sm btn-outline-secondary';
@@ -451,6 +546,70 @@ function updateCount(wrap) {
     if (el) el.textContent = `${n} elemento(s)`;
 }
 
+/* ---------- CP → colonia lookup ---------- */
+async function cpLookup(cpInput, targetField, preserveValue = false) {
+    const cp = (cpInput.value ?? '').replace(/\D/g, '');
+    if (cp.length !== 5) return;
+
+    // Find the colonia select in the SAME scope (same domicilio object).
+    // The CP path is e.g. operaciones.0.adquirentes.1.domicilio.codigo_postal
+    // The colonia is  ...domicilio.colonia — same parent path, different field.
+    const cpPath = cpInput.dataset.path;
+    const scope = cpPath.substring(0, cpPath.lastIndexOf('.'));  // ...domicilio
+    const coloniaSelect = document.querySelector(`.rv-input[data-path="${cssEsc(scope + '.' + targetField)}"]`);
+    if (!coloniaSelect) return;
+
+    const currentValue = preserveValue ? coloniaSelect.dataset.pendingValue || coloniaSelect.value : null;
+
+    let colonias = [];
+    try {
+        const res = await http.get(`/api/postal-codes/${cp}`);
+        colonias = res.colonias ?? [];
+    } catch {
+        return;
+    }
+
+    populateColoniaSelect(coloniaSelect, colonias, currentValue);
+}
+
+function populateColoniaSelect(select, colonias, keepValue) {
+    // 1. Destroy any existing Choices instance (by reference OR by detecting the wrapper)
+    if (select._choices) {
+        try { select._choices.destroy(); } catch (e) {}
+        select._choices = null;
+    }
+    select.classList.remove('choices-done');
+
+    // 2. Get a clean reference to the (now un-wrapped) select.
+    //    After destroy(), Choices restores the original select element.
+    //    Reset it to a single placeholder option.
+    select.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = colonias.length ? 'Seleccione una colonia' : 'Sin colonias para este CP';
+    select.appendChild(placeholder);
+
+    // 3. Init a single fresh Choices and load options via setChoices
+    const instance = new Choices(select, {
+        searchEnabled: true,
+        itemSelectText: '',
+        shouldSort: false,
+        allowHTML: false,
+    });
+    instance.setChoices(
+        colonias.map(c => ({
+            value: c.value,
+            label: c.label,
+            selected: keepValue && String(keepValue) === String(c.value),
+        })),
+        'value', 'label', true
+    );
+
+    select._choices = instance;
+    select.classList.add('choices-done');
+    onChange();
+}
+
 function reindex(wrap) {
     const base = wrap.dataset.path;
     [...wrap.querySelectorAll(':scope > .rv-array__rows > .rv-row')].forEach((row, i) => {
@@ -463,12 +622,11 @@ function reindex(wrap) {
     });
 }
 
-/* ---------- Tom Select ---------- */
 /* ---------- Choices.js ---------- */
 function initChoices(scope) {
     scope.querySelectorAll('select.rv-input:not(.choices-done)').forEach(sel => {
         sel.classList.add('choices-done');
-        new Choices(sel, {
+        sel._choices = new Choices(sel, {   // ← store the instance
             searchEnabled: true,
             itemSelectText: '',
             shouldSort: false,
@@ -485,9 +643,14 @@ function applyConditional() {
         if (!arrDef?.classifier) return;
 
         arr.querySelectorAll(':scope > .rv-array__rows > .rv-row').forEach(row => {
-            const tipoInput = row.querySelector(`.rv-input[data-field="${arrDef.classifier.tipo_field}"]`);
-            const rfcInput = row.querySelector(`.rv-input[data-field="${arrDef.classifier.rfc_field}"]`);
-            const kase = personaCase(tipoInput?.value, rfcInput?.value);
+            const rowValues = {};
+            (arrDef.classifier.tipo_field ? [arrDef.classifier.tipo_field] : []).forEach(() => {});
+            // gather the fields the classifier needs
+            [arrDef.classifier.tipo_field, arrDef.classifier.rfc_field].filter(Boolean).forEach(f => {
+                const el = row.querySelector(`.rv-input[data-field="${f}"]`);
+                rowValues[f] = el?.value;
+            });
+            const kase = classifyRow(arrDef.classifier, rowValues);
             row.dataset.personaCase = kase;
         });
     });
@@ -576,7 +739,10 @@ function validateField(def, value, col) {
     if (required && empty) return 'Este campo es obligatorio.';
     if (empty) return null;
 
-    if (def.type === 'select' && def.options) {
+    // if (def.type === 'select' && def.options) {
+    //     if (!def.options.some(o => String(o.value) === String(value))) return 'Valor no permitido.';
+    // }
+    if (def.type === 'select' && def.options && !def.cp_target) {
         if (!def.options.some(o => String(o.value) === String(value))) return 'Valor no permitido.';
     }
 
@@ -787,31 +953,42 @@ function compare(actual, op, target) {
     }
 }
 
-/* ---------- Error badges per section + summary ---------- */
 function refreshErrorBadges() {
-    const sections = document.querySelectorAll('.rv-section');
-    let totalErrors = 0;
+    let grandTotal = 0;
 
-    sections.forEach(sec => {
-        // count visible error fields within this section
-        const errors = [...sec.querySelectorAll('.rv-field.has-error')]
-            .filter(f => f.offsetParent !== null).length;
-        totalErrors += errors;
-
-        const navItem = document.querySelector(`.rv-nav__item[data-target="${sec.id}"]`);
-        if (!navItem) return;
-        const badge = navItem.querySelector('.rv-nav__badge');
-        if (errors > 0) {
-            badge.textContent = errors;
-            badge.hidden = false;
-            navItem.classList.add('has-errors');
-        } else {
-            badge.hidden = true;
-            navItem.classList.remove('has-errors');
-        }
+    // 1. Child nav items — count errors within their specific DOM subtree
+    document.querySelectorAll('.rv-nav__item--child').forEach(navChild => {
+        const targetPath = navChild.dataset.targetPath;
+        const subtree = document.querySelector(`[data-path="${cssEsc(targetPath)}"]`);
+        const errors = subtree
+            ? [...subtree.querySelectorAll('.rv-field.has-error')].filter(f => f.offsetParent !== null).length
+            : 0;
+        setBadge(navChild, errors);
     });
 
-    updateSummary(totalErrors);
+    // 2. Section nav items — count ALL errors in the section (includes its children's)
+    document.querySelectorAll('.rv-section').forEach((sec, i) => {
+        const errors = [...sec.querySelectorAll('.rv-field.has-error')]
+            .filter(f => f.offsetParent !== null).length;
+        grandTotal += errors;
+        const navItem = document.querySelector(`.rv-nav__item[data-target="${sec.id}"]`);
+        if (navItem) setBadge(navItem, errors);
+    });
+
+    updateSummary(grandTotal);
+}
+
+function setBadge(navItem, count) {
+    const badge = navItem.querySelector('.rv-nav__badge');
+    if (!badge) return;
+    if (count > 0) {
+        badge.textContent = count;
+        badge.hidden = false;
+        navItem.classList.add('has-errors');
+    } else {
+        badge.hidden = true;
+        navItem.classList.remove('has-errors');
+    }
 }
 
 function updateSummary(totalErrors) {

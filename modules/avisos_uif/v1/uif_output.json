@@ -1,0 +1,68 @@
+{
+  "referencia_aviso": "26688",
+  "prioridad": null,
+  "tipo_alerta": null,
+  "descripcion_alerta": null,
+  "solicitante": {
+    "rfc": "CUSP620317SN3",
+    "curp": "CUSP620317MVZRLT07",
+    "fecha_nacimiento": "1962-03-17",
+    "nombre": "PATRICIA",
+    "apellido_paterno": "CRUZ",
+    "apellido_materno": "SOLORZANO"
+  },
+  "operaciones_acumuladas": null,
+  "operaciones": [
+    {
+      "fecha_operacion": "2026-06-17",
+      "tipo_transmision": null,
+      "adquirentes": [
+        {
+          "tipo_persona": "1", "rfc": "RACG640925IB1", "nombre": "GRACIELA",
+          "apellido_paterno": "RAMON", "apellido_materno": "CORTES", "razon_social": null,
+          "curp": "RACG640925MVZMRR02", "fecha_nacimiento": "1964-09-25",
+          "nacionalidad": null, "documento_oficial": null, "folio": null,
+          "actividad_economica": null,
+          "domicilio": {
+            "tipo_domicilio": null, "entidad_federativa": null,
+            "calle": "LAGUNA MISTERIOSA", "num_ext": "438", "num_int": null,
+            "codigo_postal": "94296", "colonia": "Unidad Habitacional El Coyol",
+            "municipio": "VERACRUZ"
+          }
+        }
+      ],
+      "vendedores": [
+        {
+          "tipo_persona": "1", "rfc": "CUSP620317SN3", "nombre": "PATRICIA",
+          "apellido_paterno": "CRUZ", "apellido_materno": "SOLORZANO", "razon_social": null,
+          "curp": "CUSP620317MVZRLT07", "fecha_nacimiento": "1962-03-17",
+          "nacionalidad": null, "documento_oficial": null, "folio": null,
+          "actividad_economica": null,
+          "domicilio": {
+            "tipo_domicilio": null, "entidad_federativa": null,
+            "calle": "JINETE", "num_ext": "125", "num_int": null,
+            "codigo_postal": "94296", "colonia": "Fraccionamiento Hípico",
+            "municipio": "BOCA DEL RIO"
+          }
+        }
+      ],
+      "inmueble": {
+        "tipo_bien": null, "valor_pactado": 0, "m2_terreno": 210, "m2_construidos": 0,
+        "folio_real": "5184", "num_instrumento": "26688", "valor_avaluo": 0,
+        "domicilio": {
+          "entidad_federativa": null,
+          "calle": "CALLE JINETE NUMERO CIENTO VEINTICINCO LOTE TREINTA Y CUATRO MANZANA TRES FRACCIONAMIENTO HIPICO",
+          "num_ext": "125", "num_int": null, "codigo_postal": "94296",
+          "colonia": "Fraccionamiento Hípico", "municipio": "VIRGINIA CORDERO DE MURILLO VIDAL"
+        }
+      },
+      "pagos": [
+        { "fecha_pago": "2026-05-27", "forma_pago": null, "instrumento": null, "moneda": "1", "monto": 50000 },
+        { "fecha_pago": "2026-06-10", "forma_pago": null, "instrumento": null, "moneda": "1", "monto": 50000 },
+        { "fecha_pago": "2026-06-16", "forma_pago": null, "instrumento": null, "moneda": "1", "monto": 179691 },
+        { "fecha_pago": "2026-06-17", "forma_pago": null, "instrumento": null, "moneda": "1", "monto": 421000 },
+        { "fecha_pago": "2026-06-17", "forma_pago": null, "instrumento": null, "moneda": "1", "monto": 4220309 }
+      ]
+    }
+  ]
+}
