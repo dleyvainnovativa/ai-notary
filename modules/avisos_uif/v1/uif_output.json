@@ -23,6 +23,7 @@
           "curp": "RACG640925MVZMRR02", "fecha_nacimiento": "1964-09-25",
           "nacionalidad": null, "documento_oficial": null, "folio": null,
           "actividad_economica": null,
+          "giro_mercantil": null,
           "domicilio": {
             "tipo_domicilio": null, "entidad_federativa": null,
             "calle": "LAGUNA MISTERIOSA", "num_ext": "438", "num_int": null,
@@ -38,6 +39,7 @@
           "curp": "CUSP620317MVZRLT07", "fecha_nacimiento": "1962-03-17",
           "nacionalidad": null, "documento_oficial": null, "folio": null,
           "actividad_economica": null,
+          "giro_mercantil": null,
           "domicilio": {
             "tipo_domicilio": null, "entidad_federativa": null,
             "calle": "JINETE", "num_ext": "125", "num_int": null,

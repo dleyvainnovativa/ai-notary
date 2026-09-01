@@ -30,6 +30,7 @@
           "documento_oficial": null,
           "folio": null,
           "actividad_economica": null,
+          "giro_mercantil": null,
           "domicilio": {
             "tipo_domicilio": null,
             "entidad_federativa": null,
@@ -54,6 +55,7 @@
           "documento_oficial": null,
           "folio": null,
           "actividad_economica": null,
+          "giro_mercantil": null,
           "domicilio": {
             "tipo_domicilio": null,
             "entidad_federativa": null,
@@ -114,6 +116,7 @@
           "documento_oficial": null,
           "folio": null,
           "actividad_economica": null,
+          "giro_mercantil": null,
           "domicilio": {
             "tipo_domicilio": null,
             "entidad_federativa": null,

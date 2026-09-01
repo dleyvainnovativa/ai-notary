@@ -118,8 +118,8 @@ FORMA_PAGO (formas_de_pago):
 - Se refiere a la NATURALEZA del pago, no al instrumento:
   - Pago único o de contado (una sola exhibición, sin crédito) → 1 (Contado)
   - Pago con crédito hipotecario o financiamiento bancario → 2 (Financiamiento)
-  - Pago mediante préstamo o crédito → 4 (Préstamo o crédito)
   - Dación en pago (se entrega un bien en lugar de dinero) → 3 (Dación en pago)
+  - Pago mediante préstamo o crédito → 4 (Préstamo o crédito)
   - Permuta (intercambio de bienes) → 5 (Permuta)
   - Si no se especifica claramente la forma de pago, retorna null.
 

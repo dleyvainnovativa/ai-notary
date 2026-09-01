@@ -46,9 +46,11 @@ class Exporter implements ExporterContract
         $lines[] = '930001-DatosIdentificacion:';
 
         // 930002 — referencia|prioridad|tipoAlerta|desc||
+        // Real avisos always carry prioridad=1, tipoAlerta=100. Default to those
+        // when the data leaves them blank, so we never emit an empty required field.
         $lines[] = '930002-Datos del Aviso:' . $referencia . '|' .
-            $v($json['prioridad'] ?? '') . '|' .
-            $v($json['tipo_alerta'] ?? '') . '|' .
+            ($v($json['prioridad'] ?? '') ?: '1') . '|' .
+            ($v($json['tipo_alerta'] ?? '') ?: '100') . '|' .
             $v($json['descripcion_alerta'] ?? '') . '||';
 
         // 930003 — solicitante
@@ -81,17 +83,18 @@ class Exporter implements ExporterContract
             $personGuidSeq = $this->emitPersonasFisicas($lines, '930006-Datos comprador Persona Fisica-grid', $compFisicas, $guidPrefix, $opGuid, $personGuidSeq, $v, $date);
             $personGuidSeq = $this->emitPersonasMorales($lines, '930007-Datos comprador Persona Moral-grid', '930008-Representante legal realiza operacion a nombre persona moral-grid', $compMorales, $guidPrefix, $opGuid, $personGuidSeq, $v, $date);
 
-            // empty fideicomiso lines (930009/930010) — examples always empty
-            $lines[] = '930009-Datos comprador fideicomiso-grid:' . str_repeat('|', 23);
-            $lines[] = '930010-Representante legal realiza operacion a nombre fideicomiso-grid:' . str_repeat('|', 5);
+            // empty fideicomiso lines (930009/930010). Real avisos: 25 and 7 cols.
+            // (Item 4 pending: populate these when tipo_persona=3 parties exist.)
+            $lines[] = '930009-Datos comprador fideicomiso-grid:' . str_repeat('|', 24);
+            $lines[] = '930010-Representante legal realiza operacion a nombre fideicomiso-grid:' . str_repeat('|', 6);
 
             // Split vendedores by persona_case
             [$vendFisicas, $vendMorales] = $this->splitByCase($op['vendedores'] ?? []);
             $personGuidSeq = $this->emitPersonasFisicas($lines, '930011-Datos vendedor Persona Fisica-grid', $vendFisicas, $guidPrefix, $opGuid, $personGuidSeq, $v, $date);
             $personGuidSeq = $this->emitPersonasMorales($lines, '930012-Datos vendedor Persona Moral-grid', '930013-Representante legal realiza operacion a nombre persona moral-grid', $vendMorales, $guidPrefix, $opGuid, $personGuidSeq, $v, $date);
 
-            $lines[] = '930014-Datos vendedor fideicomiso-grid:' . str_repeat('|', 23);
-            $lines[] = '930015-Representante legal realiza operacion a nombre fideicomiso-grid:' . str_repeat('|', 5);
+            $lines[] = '930014-Datos vendedor fideicomiso-grid:' . str_repeat('|', 24);
+            $lines[] = '930015-Representante legal realiza operacion a nombre fideicomiso-grid:' . str_repeat('|', 6);
 
             // 930016 — inmueble
             $inm = $op['inmueble'] ?? [];
@@ -132,7 +135,18 @@ class Exporter implements ExporterContract
         return mb_convert_encoding($text, 'Windows-1252', 'UTF-8');
     }
 
-    /* ---------- persona emission ---------- */
+    /* ---------- persona emission ----------
+     *
+     * COLUMN ORDER IS DEFINED ONCE, BY NAME, in the *Cols() helpers below and
+     * assembled with row()/implode. No more magic str_repeat('|', N) counts:
+     * an empty line is the same named column list with every value blank, so
+     * the empty and populated variants can never drift out of alignment.
+     *
+     * ⚠️ VALIDATION GATE: the column ORDER and COUNT here follow the SAT manual's
+     * field tables (pp. 33–39), but the page-30 layout string is truncated at
+     * "...GuidGeneralOperacion". These positions are a HYPOTHESIS — diff against a
+     * real SAT-generated aviso TXT before trusting them in production.
+     */
 
     private function splitByCase(array $personas): array
     {
@@ -146,30 +160,155 @@ class Exporter implements ExporterContract
         return [$fisicas, $morales];
     }
 
+    /** Join an ordered, named column map into a pipe-delimited row body. */
+    private function row(array $cols): string
+    {
+        return implode('|', array_values($cols));
+    }
+
+    /**
+     * Física person columns (930006 comprador / 930011 vendedor), in manual order.
+     * Domicilio has a NACIONAL block and an EXTRANJERO block; only one is filled,
+     * the other stays blank, but both sets of columns are always present so the
+     * width is constant. $opGuid is the closing parent-GUID column.
+     */
+    private function fisicaCols(array $p, string $opGuid, $v, $date): array
+    {
+        $d = $p['domicilio'] ?? [];
+        $esExtranjero = ($v($d['tipo_domicilio'] ?? '') === '2'); // 1=nacional, 2=extranjero
+
+        return [
+            'rfc'                => $v($p['rfc'] ?? ''),
+            'curp'               => $v($p['curp'] ?? ''),
+            'fecha_nacimiento'   => $date($p['fecha_nacimiento'] ?? null),
+            'nombre'             => $v($p['nombre'] ?? ''),
+            'apellido_paterno'   => $v($p['apellido_paterno'] ?? ''),
+            'apellido_materno'   => $v($p['apellido_materno'] ?? ''),
+            'pais_nacionalidad'  => $v($p['nacionalidad'] ?? 'MX'),
+            // ActividadEconomica (manual: required). Data-driven; NO APLICA (1000000) fallback.
+            'actividad_economica' => ($v($p['actividad_economica'] ?? '') ?: '1000000'),
+            'tipo_domicilio'     => $v($d['tipo_domicilio'] ?? '1'),
+
+            // --- Domicilio NACIONAL ---
+            'nac_entidad'   => $esExtranjero ? '' : $v($d['entidad_federativa'] ?? ''),
+            'nac_calle'     => $esExtranjero ? '' : $v($d['calle'] ?? ''),
+            'nac_num_ext'   => $esExtranjero ? '' : $v($d['num_ext'] ?? ''),
+            'nac_num_int'   => $esExtranjero ? '' : $v($d['num_int'] ?? ''),
+            'nac_correo'    => $esExtranjero ? '' : $v($d['correo'] ?? ''),
+            'nac_cp'        => $esExtranjero ? '' : $v($d['codigo_postal'] ?? ''),
+            'nac_colonia'   => $esExtranjero ? '' : $v($d['colonia'] ?? ''),
+            'nac_municipio' => $esExtranjero ? '' : $v($d['municipio'] ?? ''),
+            'nac_telefono'  => $esExtranjero ? '' : $v($d['telefono'] ?? ''),
+
+            // --- Domicilio EXTRANJERO ---
+            'ext_pais'      => $esExtranjero ? $v($d['pais'] ?? '') : '',
+            'ext_estado'    => $esExtranjero ? $v($d['estado'] ?? '') : '',
+            'ext_ciudad'    => $esExtranjero ? $v($d['ciudad'] ?? '') : '',
+            'ext_calle'     => $esExtranjero ? $v($d['calle'] ?? '') : '',
+            'ext_num_ext'   => $esExtranjero ? $v($d['num_ext'] ?? '') : '',
+            'ext_num_int'   => $esExtranjero ? $v($d['num_int'] ?? '') : '',
+            'ext_cp'        => $esExtranjero ? $v($d['codigo_postal'] ?? '') : '',
+            'ext_colonia'   => $esExtranjero ? $v($d['colonia'] ?? '') : '',
+            'ext_telefono'  => $esExtranjero ? $v($d['telefono'] ?? '') : '',
+            'ext_correo'    => $esExtranjero ? $v($d['correo'] ?? '') : '',
+
+            'op_guid'       => $opGuid,
+        ];
+    }
+
+    /** Empty física row: same keys, all blank except the closing GUID. */
+    private function fisicaColsEmpty(): array
+    {
+        $cols = $this->fisicaCols([], '', fn($x) => '', fn($x) => '');
+        foreach ($cols as $k => $_) $cols[$k] = '';
+        return $cols;
+    }
+
+    /**
+     * Moral person columns (930007 comprador / 930012 vendedor), in manual order.
+     * Note: moral has razon_social instead of nombre/apellidos, giro instead of
+     * actividad, fecha_constitucion instead of fecha_nacimiento, and a closing
+     * person-GUID after op_guid (parent op → child person).
+     */
+    private function moralCols(array $p, string $opGuid, string $personGuid, $v, $date): array
+    {
+        $d = $p['domicilio'] ?? [];
+        $esExtranjero = ($v($d['tipo_domicilio'] ?? '') === '2');
+
+        return [
+            'rfc'                => $v($p['rfc'] ?? ''),
+            'razon_social'       => $v($p['razon_social'] ?? ''),
+            'fecha_constitucion' => $date($p['fecha_constitucion'] ?? ($p['fecha_nacimiento'] ?? null)),
+            'pais_nacionalidad'  => $v($p['nacionalidad'] ?? 'MX'),
+            // Giro mercantil (manual: required). Data-driven; NO APLICA (1000000) fallback.
+            'giro_mercantil'     => ($v($p['giro_mercantil'] ?? '') ?: '1000000'),
+            'tipo_domicilio'     => $v($d['tipo_domicilio'] ?? '1'),
+
+            // --- Domicilio NACIONAL ---
+            'nac_entidad'   => $esExtranjero ? '' : $v($d['entidad_federativa'] ?? ''),
+            'nac_calle'     => $esExtranjero ? '' : $v($d['calle'] ?? ''),
+            'nac_num_ext'   => $esExtranjero ? '' : $v($d['num_ext'] ?? ''),
+            'nac_num_int'   => $esExtranjero ? '' : $v($d['num_int'] ?? ''),
+            'nac_correo'    => $esExtranjero ? '' : $v($d['correo'] ?? ''),
+            'nac_cp'        => $esExtranjero ? '' : $v($d['codigo_postal'] ?? ''),
+            'nac_colonia'   => $esExtranjero ? '' : $v($d['colonia'] ?? ''),
+            'nac_municipio' => $esExtranjero ? '' : $v($d['municipio'] ?? ''),
+            'nac_telefono'  => $esExtranjero ? '' : $v($d['telefono'] ?? ''),
+
+            // --- Domicilio EXTRANJERO ---
+            'ext_pais'      => $esExtranjero ? $v($d['pais'] ?? '') : '',
+            'ext_estado'    => $esExtranjero ? $v($d['estado'] ?? '') : '',
+            'ext_ciudad'    => $esExtranjero ? $v($d['ciudad'] ?? '') : '',
+            'ext_calle'     => $esExtranjero ? $v($d['calle'] ?? '') : '',
+            'ext_num_ext'   => $esExtranjero ? $v($d['num_ext'] ?? '') : '',
+            'ext_num_int'   => $esExtranjero ? $v($d['num_int'] ?? '') : '',
+            'ext_cp'        => $esExtranjero ? $v($d['codigo_postal'] ?? '') : '',
+            'ext_colonia'   => $esExtranjero ? $v($d['colonia'] ?? '') : '',
+            'ext_telefono'  => $esExtranjero ? $v($d['telefono'] ?? '') : '',
+            'ext_correo'    => $esExtranjero ? $v($d['correo'] ?? '') : '',
+
+            'op_guid'       => $opGuid,
+            'person_guid'   => $personGuid,
+        ];
+    }
+
+    /** Empty moral row: same keys, all blank. */
+    private function moralColsEmpty(): array
+    {
+        $cols = $this->moralCols([], '', '', fn($x) => '', fn($x) => '');
+        foreach ($cols as $k => $_) $cols[$k] = '';
+        return $cols;
+    }
+
+    /** Representante legal columns (930008/930013), in manual order. */
+    private function repCols(array $rep, string $personGuid, $v, $date): array
+    {
+        return [
+            'rfc'              => $v($rep['rfc'] ?? ''),
+            'curp'             => $v($rep['curp'] ?? ''),
+            'fecha_nacimiento' => $date($rep['fecha_nacimiento'] ?? null),
+            'nombre'           => $v($rep['nombre'] ?? ''),
+            'apellido_paterno' => $v($rep['apellido_paterno'] ?? ''),
+            'apellido_materno' => $v($rep['apellido_materno'] ?? ''),
+            'person_guid'      => $personGuid,
+        ];
+    }
+
+    private function repColsEmpty(): array
+    {
+        $cols = $this->repCols([], '', fn($x) => '', fn($x) => '');
+        foreach ($cols as $k => $_) $cols[$k] = '';
+        return $cols;
+    }
+
     private function emitPersonasFisicas(array &$lines, string $tag, array $personas, string $prefix, string $opGuid, int $seq, $v, $date): int
     {
         if (empty($personas)) {
-            $lines[] = $tag . ':' . str_repeat('|', 27); // empty física line (28 cols)
+            $lines[] = $tag . ':' . $this->row($this->fisicaColsEmpty());
             return $seq;
         }
         foreach ($personas as $p) {
-            $d = $p['domicilio'] ?? [];
-            $lines[] = $tag . ':' .
-                $v($p['rfc'] ?? '') . '|' . $v($p['curp'] ?? '') . '|' . $date($p['fecha_nacimiento'] ?? null) . '|' .
-                $v($p['nombre'] ?? '') . '|' . $v($p['apellido_paterno'] ?? '') . '|' . $v($p['apellido_materno'] ?? '') . '|' .
-                $v($p['nacionalidad'] ?? 'MX') . '|' .
-                '1000000' . '|' .   // placeholder column seen in examples (actividad?) — CONFIRM
-                $v($d['tipo_domicilio'] ?? '1') . '|' .
-                $v($d['entidad_federativa'] ?? '') . '|' .
-                $v($d['calle'] ?? '') . '|' .
-                $v($d['num_ext'] ?? '') . '|' .
-                $v($d['num_int'] ?? '') . '|' .
-                '|' .
-                $v($d['codigo_postal'] ?? '') . '|' .
-                $v($d['colonia'] ?? '') . '|' .
-                $v($d['municipio'] ?? '') . '|' .
-                str_repeat('|', 10) .  // trailing empty cols before GUID (examples show many)
-                $opGuid;
+            $lines[] = $tag . ':' . $this->row($this->fisicaCols($p, $opGuid, $v, $date));
         }
         return $seq;
     }
@@ -177,40 +316,19 @@ class Exporter implements ExporterContract
     private function emitPersonasMorales(array &$lines, string $tag, string $repTag, array $personas, string $prefix, string $opGuid, int $seq, $v, $date): int
     {
         if (empty($personas)) {
-            $lines[] = $tag . ':' . str_repeat('|', 25);
-            $lines[] = $repTag . ':' . str_repeat('|', 6);
+            $lines[] = $tag . ':' . $this->row($this->moralColsEmpty());
+            $lines[] = $repTag . ':' . $this->row($this->repColsEmpty());
             return $seq;
         }
         foreach ($personas as $p) {
-            $d = $p['domicilio'] ?? [];
             $personGuid = $this->guid($prefix, 0, ++$seq);
-            $lines[] = $tag . ':' .
-                $v($p['rfc'] ?? '') . '|' . $v($p['razon_social'] ?? '') . '|' . $date($p['fecha_nacimiento'] ?? null) . '|' .
-                $v($p['nacionalidad'] ?? 'MX') . '|' .
-                '4340006' . '|' .   // placeholder seen in examples — CONFIRM
-                $v($d['tipo_domicilio'] ?? '1') . '|' .
-                $v($d['entidad_federativa'] ?? '') . '|' .
-                $v($d['calle'] ?? '') . '|' .
-                $v($d['num_ext'] ?? '') . '|' .
-                $v($d['num_int'] ?? '') . '|' .
-                '|' .
-                $v($d['codigo_postal'] ?? '') . '|' .
-                $v($d['colonia'] ?? '') . '|' .
-                $v($d['municipio'] ?? '') . '|' .
-                '|' . $v($p['nacionalidad'] ?? 'MX') . '|' .
-                str_repeat('|', 9) .
-                $opGuid . '|' . $personGuid;
+            $lines[] = $tag . ':' . $this->row($this->moralCols($p, $opGuid, $personGuid, $v, $date));
 
             // 930008/930013 — representante legal for this moral
             $rep = $p['representante'] ?? null;
-            if ($rep) {
-                $lines[] = $repTag . ':' .
-                    $v($rep['rfc'] ?? '') . '|' . $v($rep['curp'] ?? '') . '|' . $date($rep['fecha_nacimiento'] ?? null) . '|' .
-                    $v($rep['nombre'] ?? '') . '|' . $v($rep['apellido_paterno'] ?? '') . '|' . $v($rep['apellido_materno'] ?? '') . '|' .
-                    $personGuid;
-            } else {
-                $lines[] = $repTag . ':' . str_repeat('|', 6);
-            }
+            $lines[] = $repTag . ':' . $this->row(
+                $rep ? $this->repCols($rep, $personGuid, $v, $date) : $this->repColsEmpty()
+            );
         }
         return $seq;
     }
@@ -219,9 +337,10 @@ class Exporter implements ExporterContract
 
     private function guidPrefix(string $referencia): string
     {
-        // 26600 → "02660000"  (02 + referencia + trailing to 8 chars)
-        $ref = preg_replace('/\D/', '', $referencia);
-        return '02' . str_pad($ref, 4, '0', STR_PAD_LEFT) . '00';
+        // Real SAT format: block1 = referencia * 100, zero-padded to 8 digits.
+        //   ref 26640 -> 02664000, ref 26659 -> 02665900. (Verified vs real avisos.)
+        $ref = (int) preg_replace('/\D/', '', $referencia);
+        return sprintf('%08d', $ref * 100);
     }
 
     private function guid(string $prefix, int $thirdGroup, int $lastSeq): string
