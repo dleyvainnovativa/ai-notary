@@ -108,7 +108,7 @@ class Controller implements ModuleControllerContract
             // --- Persona Física ---
             'rfc' => ['label' => 'RFC', 'type' => 'text', 'validation' => ['format' => 'rfc'], 'required_in_cases' => ['fisica', 'moral', 'fideicomiso']],
             'curp' => ['label' => 'CURP', 'type' => 'text', 'validation' => ['format' => 'curp'], 'required_in_cases' => ['fisica']],
-            'fecha_nacimiento' => ['label' => 'Fecha de Nacimiento', 'type' => 'date', 'required_in_cases' => ['fisica']],
+            'fecha_nacimiento' => ['label' => 'Fecha de Nacimiento', 'type' => 'date', 'required_in_cases' => ['fisica'], 'derive' => ['rule' => 'birthdate_from_id', 'curp' => 'curp', 'rfc' => 'rfc']],
             'nombre' => ['label' => 'Nombre(s)', 'type' => 'text', 'required_in_cases' => ['fisica']],
             'apellido_paterno' => ['label' => 'Apellido Paterno', 'type' => 'text', 'required_in_cases' => ['fisica']],
             'apellido_materno' => ['label' => 'Apellido Materno', 'type' => 'text', 'show_in_cases' => ['fisica']],
@@ -116,7 +116,7 @@ class Controller implements ModuleControllerContract
 
             // --- Persona Moral (razon_social reused; also used by fideicomiso) ---
             'razon_social' => ['label' => 'Denominación o Razón Social', 'type' => 'text', 'col' => 'full', 'required_in_cases' => ['moral', 'fideicomiso'], 'subtitle' => 'Para fideicomiso: razón social del fiduciario.'],
-            'fecha_constitucion' => ['label' => 'Fecha de Constitución', 'type' => 'date', 'required_in_cases' => ['moral']],
+            'fecha_constitucion' => ['label' => 'Fecha de Constitución', 'type' => 'date', 'required_in_cases' => ['moral'], 'derive' => ['rule' => 'date_from_rfc_moral', 'rfc' => 'rfc']],
             'giro_mercantil' => ['label' => 'Actividad Económica, Giro Mercantil u Objeto Social', 'type' => 'select', 'col' => 'full', 'options' => $catGiro, 'required_in_cases' => ['moral']],
 
             // --- Fideicomiso ---
@@ -143,7 +143,7 @@ class Controller implements ModuleControllerContract
                 'itemSchema' => [
                     'rfc' => ['label' => 'RFC', 'type' => 'text', 'required' => true, 'validation' => ['format' => 'rfc']],
                     'curp' => ['label' => 'CURP', 'type' => 'text', 'required' => true, 'validation' => ['format' => 'curp']],
-                    'fecha_nacimiento' => ['label' => 'Fecha Nac.', 'type' => 'date'],
+                    'fecha_nacimiento' => ['label' => 'Fecha Nac.', 'type' => 'date', 'derive' => ['rule' => 'birthdate_from_id', 'curp' => 'curp', 'rfc' => 'rfc']],
                     'nombre' => ['label' => 'Nombre', 'type' => 'text', 'required' => true],
                     'apellido_paterno' => ['label' => 'Apellido Paterno', 'type' => 'text', 'required' => true],
                     'apellido_materno' => ['label' => 'Apellido Materno', 'type' => 'text'],

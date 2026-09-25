@@ -170,6 +170,20 @@ class SchemaEngine
                 $data[$name] = $this->applyDerived($def['itemSchema'], $data[$name], $moduleDir, $root);  // ← itemSchema
                 continue;
             }
+            // Rows of arrays (adquirentes, vendedores, enajenantes…) — previously skipped.
+            if (($def['type'] ?? null) === 'array' && isset($data[$name]) && is_array($data[$name])) {
+                foreach ($data[$name] as $i => $row) {
+                    if (is_array($row)) {
+                        $data[$name][$i] = $this->applyDerived($def['itemSchema'], $row, $moduleDir, $root);
+                    }
+                }
+                continue;
+            }
+            // Dates encoded in IDs: fecha_nacimiento from CURP/RFC, fecha_constitucion from RFC moral.
+            if (!empty($def['derive']['rule'])) {
+                $data[$name] = IdDates::derive($def['derive'], $data, $data[$name] ?? null);
+                continue;
+            }
             if (!empty($def['derive_from_array_length'])) {
                 $rule = $def['derive_from_array_length'];
                 $arr = data_get($root, $rule['path']);

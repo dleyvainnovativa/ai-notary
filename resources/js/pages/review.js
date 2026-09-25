@@ -213,6 +213,7 @@ function renderReview(container, payload) {
 
     container.addEventListener('input', onChange);
     container.addEventListener('change', onChange);
+    container.addEventListener('change', onDeriveSource);   // CURP/RFC → fecha_nacimiento / fecha_constitucion
     document.getElementById('review-save')?.addEventListener('click', save);
 }
 
@@ -337,7 +338,13 @@ function renderField(name, def, value, path, readOnly) {
     }
 
     let input;
-    if (def.type === 'select' && def.options) {
+    if (def.cp_target) {
+        // Colonia starts as TEXT holding the deed's value; it becomes a select
+        // once the CP lookup returns colonias (see cpLookup / swapColonia).
+        input = makeColoniaText(value);
+        col.dataset.coloniaMode = 'text';
+        col.dataset.subtitleDefault = def.subtitle || '';
+    } else if (def.type === 'select' && def.options) {
         input = document.createElement('select');
         input.className = 'form-select rv-input';
         // const blank = document.createElement('option');
@@ -403,6 +410,8 @@ function renderField(name, def, value, path, readOnly) {
     }
     if (def.cp_target) {
         input.dataset.pendingValue = value ?? '';
+        // No CP → no lookup will run: tell the user why it's a text field.
+        setColoniaHint(col, COLONIA_HINT_TEXT);
     }
 
     if (def.description) {
@@ -555,30 +564,131 @@ function updateCount(wrap) {
     if (el) el.textContent = `${n} elemento(s)`;
 }
 
-/* ---------- CP → colonia lookup ---------- */
+/* ---------- CP → colonia lookup ----------
+ * The colonia field has two modes:
+ *   text   — no CP (or the CP has no colonias in the catalog): keeps the deed's value.
+ *   select — CP found: colonias from the catalog; the deed's value is preselected
+ *            by fuzzy match, or kept as an extra option if it isn't in the list.
+ */
+const COLONIA_HINT_TEXT = 'Sin C.P.: se muestra la colonia de la escritura. Captura el C.P. para elegirla del catálogo.';
+const COLONIA_HINT_EMPTY = 'Este C.P. no tiene colonias en el catálogo: captura la colonia manualmente.';
+
 async function cpLookup(cpInput, targetField, preserveValue = false) {
     const cp = (cpInput.value ?? '').replace(/\D/g, '');
-    if (cp.length !== 5) return;
 
-    // Find the colonia select in the SAME scope (same domicilio object).
+    // Find the colonia field in the SAME scope (same domicilio object).
     // The CP path is e.g. operaciones.0.adquirentes.1.domicilio.codigo_postal
     // The colonia is  ...domicilio.colonia — same parent path, different field.
     const cpPath = cpInput.dataset.path;
     const scope = cpPath.substring(0, cpPath.lastIndexOf('.'));  // ...domicilio
-    const coloniaSelect = document.querySelector(`.rv-input[data-path="${cssEsc(scope + '.' + targetField)}"]`);
-    if (!coloniaSelect) return;
+    const target = document.querySelector(`.rv-input[data-path="${cssEsc(scope + '.' + targetField)}"]`);
+    if (!target) return;
 
-    const currentValue = preserveValue ? coloniaSelect.dataset.pendingValue || coloniaSelect.value : null;
+    const isText = target.tagName === 'INPUT';
+    const currentValue = isText
+        ? target.value
+        : (preserveValue ? (target.dataset.pendingValue || target.value) : target.value);
+
+    // CP cleared → back to text, keeping whatever colonia was chosen.
+    if (cp.length === 0) {
+        if (!isText) swapColonia(target, 'text', { value: currentValue, hint: COLONIA_HINT_TEXT });
+        return;
+    }
+    if (cp.length !== 5) return;
 
     let colonias = [];
     try {
         const res = await http.get(`/api/postal-codes/${cp}`);
         colonias = res.colonias ?? [];
     } catch {
+        return;   // network error: leave the field exactly as it is
+    }
+
+    if (!colonias.length) {
+        swapColonia(target, 'text', { value: currentValue, hint: COLONIA_HINT_EMPTY });
         return;
     }
 
-    populateColoniaSelect(coloniaSelect, colonias, currentValue);
+    // Deed/typed text → try to match it; if no match keep it visible as an extra option.
+    const matched = matchColonia(currentValue, colonias);
+    const extra = isText && currentValue && !matched ? currentValue : null;
+    swapColonia(target, 'select', { colonias, selected: matched, extra });
+}
+
+/** Normalize colonia names: no accents/case/punctuation, no type prefix (FRACC., COL., U.H.…). */
+function normColonia(s) {
+    let n = String(s ?? '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase().replace(/[^A-Z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const PREFIX = /^(COLONIA|COL|FRACCIONAMIENTO|FRACC|FRAC|UNIDAD HABITACIONAL|U H|UH|BARRIO|BO|CONJUNTO HABITACIONAL|CONJ HAB|RESIDENCIAL|RES|EJIDO|PUEBLO|CONGREGACION|INFONAVIT) /;
+    let prev;
+    do { prev = n; n = n.replace(PREFIX, ''); } while (n !== prev);
+    return n;
+}
+
+/**
+ * Catalog value matching the deed's colonia: exact (normalized), else a unique
+ * catalog name that CONTAINS the deed's name ("HIPICO" → "Hípico Residencial").
+ * Never the reverse: deed "LAGUNA ENCANTADA" must not match catalog "Laguna".
+ */
+function matchColonia(value, colonias) {
+    const v = normColonia(value);
+    if (!v) return null;
+    const exact = colonias.find(c => normColonia(c.label) === v);
+    if (exact) return exact.value;
+    if (v.length < 4) return null;
+    const partial = colonias.filter(c => {
+        const n = normColonia(c.label);
+        return n.includes(v);
+    });
+    return partial.length === 1 ? partial[0].value : null;
+}
+
+function makeColoniaText(value) {
+    const input = document.createElement('input');
+    input.className = 'form-control rv-input';
+    input.type = 'text';
+    input.value = value ?? '';
+    return input;
+}
+
+function setColoniaHint(col, text) {
+    let sub = col.querySelector(':scope > .rv-field__subtitle');
+    if (!sub) {
+        sub = document.createElement('div');
+        sub.className = 'rv-field__subtitle';
+        col.querySelector(':scope > .rv-field__label')?.after(sub);
+    }
+    sub.textContent = text;
+}
+
+/** Replace the colonia element (text ⇄ select) keeping path/field/pending data. */
+function swapColonia(current, mode, { value = '', hint = '', colonias = [], selected = null, extra = null } = {}) {
+    const col = current.closest('.rv-field');
+    if (current._choices) {
+        try { current._choices.destroy(); } catch (e) {}
+        current._choices = null;
+    }
+
+    let el;
+    if (mode === 'text') {
+        el = makeColoniaText(value);
+    } else {
+        el = document.createElement('select');
+        el.className = 'form-select rv-input';
+    }
+    el.dataset.path = current.dataset.path;
+    el.dataset.field = current.dataset.field;
+    el.dataset.pendingValue = current.dataset.pendingValue ?? '';
+    current.replaceWith(el);
+
+    if (col) {
+        col.dataset.coloniaMode = mode;
+        setColoniaHint(col, mode === 'text' ? hint : (col.dataset.subtitleDefault || 'Selecciona la Colonia cargada del CP.'));
+    }
+    if (mode === 'select') populateColoniaSelect(el, colonias, selected, extra);
+    else onChange();
+    return el;
 }
 
 /* ---------- CP → entidad federativa ----------
@@ -632,38 +742,37 @@ function cpEntidad(cpInput, targetField) {
     if (typeof onChange === 'function') onChange();
 }
 
-function populateColoniaSelect(select, colonias, keepValue) {
-    // 1. Destroy any existing Choices instance (by reference OR by detecting the wrapper)
+function populateColoniaSelect(select, colonias, selectedValue = null, extraValue = null) {
     if (select._choices) {
         try { select._choices.destroy(); } catch (e) {}
         select._choices = null;
     }
     select.classList.remove('choices-done');
 
-    // 2. Get a clean reference to the (now un-wrapped) select.
-    //    After destroy(), Choices restores the original select element.
-    //    Reset it to a single placeholder option.
     select.innerHTML = '';
     const placeholder = document.createElement('option');
     placeholder.value = '';
-    placeholder.textContent = colonias.length ? 'Seleccione una colonia' : 'Sin colonias para este CP';
+    placeholder.textContent = 'Seleccione una colonia';
     select.appendChild(placeholder);
 
-    // 3. Init a single fresh Choices and load options via setChoices
+    const choices = colonias.map(c => ({
+        value: c.value,
+        label: c.label,
+        selected: selectedValue != null && String(selectedValue) === String(c.value),
+    }));
+    // The deed's colonia isn't in this CP's catalog: keep it selectable (and selected)
+    // so nothing is lost; the user decides.
+    if (extraValue) {
+        choices.unshift({ value: extraValue, label: `${extraValue} (de la escritura, no está en el catálogo de este C.P.)`, selected: true });
+    }
+
     const instance = new Choices(select, {
         searchEnabled: true,
         itemSelectText: '',
         shouldSort: false,
         allowHTML: false,
     });
-    instance.setChoices(
-        colonias.map(c => ({
-            value: c.value,
-            label: c.label,
-            selected: keepValue && String(keepValue) === String(c.value),
-        })),
-        'value', 'label', true
-    );
+    instance.setChoices(choices, 'value', 'label', true);
 
     select._choices = instance;
     select.classList.add('choices-done');
@@ -834,6 +943,91 @@ function applyServerIssues(issues) {
             if (e) e.textContent = it.message;
         }
     }
+}
+
+/* ---------- Dates encoded in IDs (mirror of app/Services/Schema/IdDates.php) ----------
+ * birthdate_from_id:   CURP valid → always wins; else RFC física → only if empty.
+ * date_from_rfc_moral: RFC moral → only if empty.
+ */
+const ID_DATE_GENERIC_RFC = ['XAXX010101000', 'XEXX010101000', 'EXTF900101000', 'EXT990101000'];
+
+function ymdOrNull(y, m, d) {
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return null;
+    return `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+function dateFromCurp(curp) {
+    const m = String(curp ?? '').trim().toUpperCase().match(/^[A-Z]{4}(\d{2})(\d{2})(\d{2})[HMX][A-Z]{5}([A-Z0-9])\d$/);
+    if (!m) return null;
+    const century = /\d/.test(m[4]) ? 1900 : 2000;
+    return ymdOrNull(century + +m[1], +m[2], +m[3]);
+}
+
+function dateFromRfcFisica(rfc, currentYear = new Date().getFullYear()) {
+    const r = String(rfc ?? '').trim().toUpperCase();
+    if (ID_DATE_GENERIC_RFC.includes(r)) return null;
+    const m = r.match(/^[A-ZÑ&]{4}(\d{2})(\d{2})(\d{2})[A-Z0-9]{3}$/);
+    if (!m) return null;
+    let year = 2000 + +m[1];
+    if (year > currentYear - 18) year -= 100;
+    return ymdOrNull(year, +m[2], +m[3]);
+}
+
+function dateFromRfcMoral(rfc, currentYear = new Date().getFullYear()) {
+    const r = String(rfc ?? '').trim().toUpperCase();
+    if (ID_DATE_GENERIC_RFC.includes(r)) return null;
+    const m = r.match(/^[A-ZÑ&]{3}(\d{2})(\d{2})(\d{2})[A-Z0-9]{3}$/);
+    if (!m) return null;
+    let year = 2000 + +m[1];
+    if (year > currentYear) year -= 100;
+    return ymdOrNull(year, +m[2], +m[3]);
+}
+
+function deriveFromId(rule, row, current) {
+    const empty = current == null || String(current).trim() === '';
+    if (rule.rule === 'birthdate_from_id') {
+        const fromCurp = dateFromCurp(row[rule.curp || 'curp']);
+        if (fromCurp) return fromCurp;
+        return empty ? (dateFromRfcFisica(row[rule.rfc || 'rfc']) ?? current) : current;
+    }
+    if (rule.rule === 'date_from_rfc_moral') {
+        return empty ? (dateFromRfcMoral(row[rule.rfc || 'rfc']) ?? current) : current;
+    }
+    return current;
+}
+
+/** A CURP/RFC changed → recompute derived dates in the same scope (row / object). */
+function onDeriveSource(e) {
+    const src = e.target;
+    if (!src?.classList?.contains('rv-input') || !src.dataset.path || !src.dataset.field) return;
+
+    const parts = src.dataset.path.split('.');
+    parts.pop();
+    const scope = parts.join('.');
+    const fields = scope ? defForPath(scope)?.itemSchema : SCHEMA.fields;
+    if (!fields) return;
+
+    const inputAt = (name) => document.querySelector(`.rv-input[data-path="${cssEsc(scope ? `${scope}.${name}` : name)}"]`);
+    let changed = false;
+
+    for (const [name, def] of Object.entries(fields)) {
+        if (!def?.derive?.rule) continue;
+        const { rule, ...sources } = def.derive;
+        if (!Object.values(sources).includes(src.dataset.field)) continue;
+
+        const target = inputAt(name);
+        if (!target) continue;
+        const row = {};
+        for (const f of Object.values(sources)) row[f] = inputAt(f)?.value ?? null;
+
+        const next = deriveFromId(def.derive, row, target.value);
+        if (next && next !== target.value) {
+            target.value = next;
+            changed = true;
+        }
+    }
+    if (changed) onChange();
 }
 
 /* ---------- Resolver notes (info, not errors) ----------
