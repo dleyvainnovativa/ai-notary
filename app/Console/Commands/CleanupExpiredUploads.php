@@ -31,11 +31,11 @@ class CleanupExpiredUploads extends Command
             ->where('created_at', '<', now()->subMinutes($ttl))
             ->update(['temp_path' => null]);
 
-        // 3. NEW: purge AI output from completed documents older than 24h
+        // 3. Purge AI output AND the review draft from completed documents older than 24h
         $purged = Document::where('status', 'completed')
-            ->whereNotNull('ai_output_encrypted')
+            ->where(fn($q) => $q->whereNotNull('ai_output_encrypted')->orWhereNotNull('review_data_encrypted'))
             ->where('reviewed_at', '<', now()->subHours(24))
-            ->update(['ai_output_encrypted' => null]);
+            ->update(['ai_output_encrypted' => null, 'review_data_encrypted' => null]);
 
         $this->info("Cleaned up {$deleted} orphaned upload(s), purged {$purged} document(s).");
         return self::SUCCESS;

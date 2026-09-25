@@ -12,19 +12,12 @@ Route::post('/auth/session', [SessionController::class, 'store'])->middleware('g
 Route::post('/auth/logout', [SessionController::class, 'destroy'])->name('logout');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        $user = auth()->user();
-        return view('dashboard', [
-            'balance' => app(\App\Services\TokenService::class)->balance($user),
-            'processedCount' => \App\Models\Document::where('user_id', $user->id)
-                ->whereIn('status', ['requires_review', 'completed'])->count(),
-            'moduleCount' => count(app(\App\Modules\ModuleRegistry::class)->active()),
-        ]);
-    })->name('dashboard');
+    Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
 
     Route::get('/documents/{document}/review-data', [DocumentController::class, 'reviewData'])->name('document.review-data');
     Route::post('/documents/{document}/review-validate', [DocumentController::class, 'reviewValidate'])->name('document.review-validate');
+    Route::post('/documents/{document}/draft', [DocumentController::class, 'saveDraft'])->name('document.draft');
     Route::post('/documents/{document}/export', [DocumentController::class, 'export'])
         ->middleware('auth')->name('document.export');
 

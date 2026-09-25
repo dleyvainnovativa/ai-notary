@@ -22,6 +22,15 @@ export function initUpload() {
     // --- dropzones ---
     document.querySelectorAll('[data-dropzone]').forEach(initDropzone);
 
+    // --- resume: /upload?document=ID (reload, dashboard "Continuar revisión") ---
+    const resumeId = new URLSearchParams(window.location.search).get('document');
+    if (resumeId && /^\d+$/.test(resumeId)) {
+        submitBtn.disabled = true;
+        goToStep(2);
+        setProcessingState('working');
+        pollStatus(resumeId, 0, 0, true);
+    }
+
     // --- submit ---
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -53,6 +62,7 @@ export function initUpload() {
 
         try {
             const res = await http.post('/upload', fd);
+            rememberDocument(res.document_id);   // a reload now resumes this document
             pollStatus(res.document_id);
         } catch (err) {
             setProcessingState('failed', err?.data?.message ?? 'Upload failed.');
@@ -65,6 +75,7 @@ export function initUpload() {
     });
 
     function resetWizard() {
+        rememberDocument(null);
         form.reset();
         submitBtn.disabled = false;
         showModuleInputs();
@@ -123,6 +134,12 @@ function initDropzone(dz) {
 }
 function clearDropzone(dz) { dz._clear?.(); }
 
+/* ---------- URL keeps the current document ---------- */
+function rememberDocument(documentId) {
+    const url = documentId ? `/upload?document=${documentId}` : '/upload';
+    window.history.replaceState(null, '', url);
+}
+
 /* ---------- Step navigation ---------- */
 function goToStep(n) {
     document.querySelectorAll('.wizard-pane').forEach(p => {
@@ -145,7 +162,7 @@ function setProcessingState(state, message) {
 }
 
 /* ---------- Status polling ---------- */
-async function pollStatus(documentId, attempt = 0, errorStreak = 0) {
+async function pollStatus(documentId, attempt = 0, errorStreak = 0, autoOpen = false) {
     if (attempt > 90) { setProcessingState('failed', 'Sigue procesando — check back shortly.'); return; }
     if (errorStreak >= 3) { setProcessingState('failed', 'Conexión Perdida. Favor de recargar.'); return; }
 
@@ -153,6 +170,11 @@ async function pollStatus(documentId, attempt = 0, errorStreak = 0) {
         const { status, error } = await http.get(`/documents/${documentId}/status`);
 
         if (status === 'requires_review' || status === 'completed') {
+            if (autoOpen) {            // resuming: skip the "done" screen, go straight to the form
+                goToStep(3);
+                initReview(documentId);
+                return;
+            }
             setProcessingState('done');
             const reviewBtn = document.getElementById('goto-review');
             reviewBtn?.addEventListener('click', () => {
@@ -171,8 +193,13 @@ async function pollStatus(documentId, attempt = 0, errorStreak = 0) {
         const t = document.getElementById('processing-text');
         if (t && labels[status]) t.textContent = labels[status];
 
-        setTimeout(() => pollStatus(documentId, attempt + 1, 0), 2000);
-    } catch {
-        setTimeout(() => pollStatus(documentId, attempt + 1, errorStreak + 1), 2000);
+        setTimeout(() => pollStatus(documentId, attempt + 1, 0, autoOpen), 2000);
+    } catch (err) {
+        if (err?.status === 403 || err?.status === 404) {
+            setProcessingState('failed', 'Documento no encontrado.');
+            rememberDocument(null);
+            return;
+        }
+        setTimeout(() => pollStatus(documentId, attempt + 1, errorStreak + 1, autoOpen), 2000);
     }
 }

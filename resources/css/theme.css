@@ -669,6 +669,11 @@ a { color: var(--text); }
 .rv-field__error { font-size: 0.75rem; color: #dc2626; margin-top: 0.2rem; min-height: 0.9rem; }
 .rv-field.has-error .rv-input, .rv-field.has-error .ts-control { border-color: #dc2626 !important; }
 
+/* Draft autosave status (left of the export button) */
+.rv-draft-status { margin-right: auto; align-self: center; font-size: 0.8rem; color: var(--text-muted); }
+.rv-draft-status[data-state="error"] { color: #b45309; }
+.rv-draft-status[data-state="conflict"] { color: #dc2626; font-weight: 500; }
+
 /* Resolver notes: value filled by reference — verify, not an error */
 .rv-note {
     display: flex; align-items: flex-start; gap: 0.4rem;
@@ -1031,3 +1036,23 @@ a { color: var(--text); }
 .rv-array__title { font-size: 0.9rem; font-weight: 600; color: var(--text); display: block; }
 .rv-array__subtitle { font-size: 0.78rem; color: var(--text-muted); display: block; margin-top: 0.15rem; }
 .rv-array__count { font-size: 0.75rem; color: var(--text-subtle); }
+/* ---------- Dashboard: recent documents ---------- */
+.doc-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+.doc-list__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.25rem 1rem; margin-bottom: 0.75rem; }
+.doc-list__title { font-size: 1rem; font-weight: 600; margin: 0; }
+.doc-list__hint { font-size: 0.78rem; color: var(--text-muted); }
+.doc-list__empty { margin: 0; color: var(--text-muted); font-size: 0.875rem; }
+.doc-list__table { font-size: 0.875rem; --bs-table-bg: transparent; }
+.doc-list__table th { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+.doc-list__table td { vertical-align: middle; }
+.doc-list__file { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-list__date { white-space: nowrap; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.doc-list__draft { display: block; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+.doc-status { display: inline-block; font-size: 0.75rem; font-weight: 500; padding: 0.15rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+.doc-status--neutral { background: var(--bg-muted); color: var(--text-muted); }
+.doc-status--warn { background: rgba(217, 119, 6, 0.12); color: #b45309; }
+.doc-status--ok { background: rgba(22, 163, 74, 0.12); color: #15803d; }
+.doc-status--fail { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+[data-theme="dark"] .doc-status--warn { color: #fbbf24; }
+[data-theme="dark"] .doc-status--ok { color: #4ade80; }
+[data-theme="dark"] .doc-status--fail { color: #f87171; }

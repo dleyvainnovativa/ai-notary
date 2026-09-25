@@ -4,6 +4,7 @@ import { notify } from '../helpers/toast.js';
 
 
 let SCHEMA, DOCUMENT_ID;
+let INITIAL_LOOKUPS = [];   // CP lookups fired while rendering (settle before autosave arms)
 
 /* ---------- Help modal ---------- */
 let helpModalEl = null;
@@ -104,6 +105,8 @@ function personaTipoSelect(tipo) {
 /* ---------- Shared render logic ---------- */
 function renderReview(container, payload) {
     SCHEMA = payload.schema;
+    INITIAL_LOOKUPS = [];
+    resetAutosave(payload.draft);
     container.innerHTML = '';
 
     // Two-column shell: nav rail + form column
@@ -214,7 +217,15 @@ function renderReview(container, payload) {
     container.addEventListener('input', onChange);
     container.addEventListener('change', onChange);
     container.addEventListener('change', onDeriveSource);   // CURP/RFC → fecha_nacimiento / fecha_constitucion
-    document.getElementById('review-save')?.addEventListener('click', save);
+    container.addEventListener('input', scheduleAutosave);
+    container.addEventListener('change', scheduleAutosave);
+    armAutosaveWhenSettled();
+
+    const saveBtn = document.getElementById('review-save');
+    if (saveBtn && !saveBtn.dataset.bound) {
+        saveBtn.dataset.bound = '1';
+        saveBtn.addEventListener('click', save);
+    }
 }
 
 /* ---------- Real entry (from the wizard) ---------- */
@@ -228,8 +239,11 @@ export async function initReview(documentId) {
     let payload;
     try {
         payload = await http.get(`/documents/${documentId}/review-data`);
-    } catch {
-        container.innerHTML = '<p class="text-danger">No se pudieron cargar los datos extraídos.</p>';
+    } catch (err) {
+        const p = document.createElement('p');
+        p.className = 'text-danger';
+        p.textContent = err?.data?.message || 'No se pudieron cargar los datos extraídos.';
+        container.replaceChildren(p);
         return;
     }
     renderReview(container, payload);
@@ -397,7 +411,8 @@ function renderField(name, def, value, path, readOnly) {
     if (def.cp_lookup) {
         input.addEventListener('blur', () => cpLookup(input, def.cp_lookup));
         if ((input.value ?? '').length === 5) {
-            setTimeout(() => cpLookup(input, def.cp_lookup, true), 0);
+            INITIAL_LOOKUPS.push(new Promise(resolve =>
+                setTimeout(() => cpLookup(input, def.cp_lookup, true).finally(resolve), 0)));
         }
     }
     // CP → entidad federativa (derive state from first two digits of the CP)
@@ -613,6 +628,7 @@ async function cpLookup(cpInput, targetField, preserveValue = false) {
     const matched = matchColonia(currentValue, colonias);
     const extra = isText && currentValue && !matched ? currentValue : null;
     swapColonia(target, 'select', { colonias, selected: matched, extra });
+    if (!preserveValue) scheduleAutosave();   // user typed a CP → persist the new colonia state
 }
 
 /** Normalize colonia names: no accents/case/punctuation, no type prefix (FRACC., COL., U.H.…). */
@@ -1061,6 +1077,128 @@ function applyNotes(notes) {
     }
 }
 
+/* ---------- Draft autosave ----------
+ * Saves the raw form state a few seconds after the user stops editing.
+ *  - arms only after the initial render settles (CP lookups, entidad fill), and
+ *    compares against the last saved JSON, so loading never creates a save;
+ *  - optimistic lock: sends the version it loaded; a 409 means another tab or
+ *    session saved first → stop autosaving and ask the user to reload;
+ *  - network errors retry; a pending change is flushed on page unload (beacon).
+ */
+const AUTOSAVE_DELAY_MS = 2500;
+const AUTOSAVE_RETRY_MS = 10000;
+const AUTOSAVE = { ready: false, timer: null, inFlight: false, pending: false, blocked: false, lastJson: null, draft: { version: 0, saved_at: null } };
+
+function resetAutosave(draft) {
+    clearTimeout(AUTOSAVE.timer);
+    Object.assign(AUTOSAVE, {
+        ready: false, timer: null, inFlight: false, pending: false, blocked: false, lastJson: null,
+        draft: { version: draft?.version ?? 0, saved_at: draft?.saved_at ?? null },
+    });
+    setDraftStatus(AUTOSAVE.draft.saved_at ? 'saved' : 'clean');
+}
+
+async function armAutosaveWhenSettled() {
+    await Promise.allSettled(INITIAL_LOOKUPS);
+    await new Promise(r => setTimeout(r, 0));          // let deferred cpEntidad fills run
+    AUTOSAVE.lastJson = JSON.stringify(collect(SCHEMA.fields, ''));
+    AUTOSAVE.ready = true;
+}
+
+function autosaveEnabled() {
+    return AUTOSAVE.ready && !AUTOSAVE.blocked && DOCUMENT_ID && DOCUMENT_ID !== 'debug';
+}
+
+function scheduleAutosave() {
+    if (!autosaveEnabled()) return;
+    setDraftStatus('dirty');
+    clearTimeout(AUTOSAVE.timer);
+    AUTOSAVE.timer = setTimeout(flushAutosave, AUTOSAVE_DELAY_MS);
+}
+
+async function flushAutosave() {
+    if (!autosaveEnabled()) return;
+    clearTimeout(AUTOSAVE.timer);
+    AUTOSAVE.timer = null;
+    if (AUTOSAVE.inFlight) { AUTOSAVE.pending = true; return; }
+
+    const data = collect(SCHEMA.fields, '');
+    const json = JSON.stringify(data);
+    if (json === AUTOSAVE.lastJson) {
+        setDraftStatus(AUTOSAVE.draft.saved_at ? 'saved' : 'clean');
+        return;
+    }
+
+    AUTOSAVE.inFlight = true;
+    setDraftStatus('saving');
+    try {
+        const res = await http.post(`/documents/${DOCUMENT_ID}/draft`, { data, version: AUTOSAVE.draft.version });
+        AUTOSAVE.draft = res.draft;
+        AUTOSAVE.lastJson = json;
+        setDraftStatus('saved');
+    } catch (err) {
+        if (err?.status === 409) {
+            AUTOSAVE.blocked = true;
+            setDraftStatus('conflict');
+        } else {
+            setDraftStatus('error');
+            AUTOSAVE.timer = setTimeout(flushAutosave, AUTOSAVE_RETRY_MS);
+        }
+    } finally {
+        AUTOSAVE.inFlight = false;
+        if (AUTOSAVE.pending) { AUTOSAVE.pending = false; flushAutosave(); }
+    }
+}
+
+/** Validate / export saved server-side (no version check): adopt the new version. */
+function syncDraftAfterExplicitSave(draft, data) {
+    if (!draft) return;
+    clearTimeout(AUTOSAVE.timer);
+    AUTOSAVE.timer = null;
+    AUTOSAVE.draft = draft;
+    AUTOSAVE.lastJson = JSON.stringify(data);
+    AUTOSAVE.blocked = false;
+    setDraftStatus('saved');
+}
+
+/** Tab closing with unsaved edits: last-chance save (fire-and-forget). */
+window.addEventListener('pagehide', () => {
+    if (!autosaveEnabled() || !navigator.sendBeacon) return;
+    const data = collect(SCHEMA.fields, '');
+    const json = JSON.stringify(data);
+    if (json === AUTOSAVE.lastJson) return;
+    const token = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    const body = new Blob([JSON.stringify({ data, version: AUTOSAVE.draft.version, _token: token })], { type: 'application/json' });
+    navigator.sendBeacon(`/documents/${DOCUMENT_ID}/draft`, body);
+});
+
+function setDraftStatus(state) {
+    const btn = document.getElementById('review-save');
+    if (!btn) return;
+    let el = document.getElementById('rv-draft-status');
+    if (!el) {
+        el = document.createElement('span');
+        el.id = 'rv-draft-status';
+        el.className = 'rv-draft-status';
+        el.setAttribute('aria-live', 'polite');
+        btn.parentElement.insertBefore(el, btn);
+    }
+    const time = AUTOSAVE.draft.saved_at
+        ? new Date(AUTOSAVE.draft.saved_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+        : '';
+    const text = {
+        clean: '',
+        dirty: 'Cambios sin guardar…',
+        saving: 'Guardando…',
+        saved: time ? `Borrador guardado · ${time}` : 'Borrador guardado',
+        error: 'No se pudo guardar. Reintentando…',
+        conflict: 'Este documento se guardó en otra pestaña o sesión. Recarga la página para continuar.',
+    }[state] ?? '';
+    el.dataset.state = state;
+    el.textContent = text;
+    el.hidden = !text;
+}
+
 /* ---------- Save ---------- */
 async function save() {
     const localErr = validateLive();
@@ -1081,6 +1219,8 @@ async function save() {
         notify.error('No se pudo validar. Intenta de nuevo.');
         return;
     }
+
+    syncDraftAfterExplicitSave(result.draft, data);
 
     if (!result.valid) {
         applyServerIssues(result.issues);
@@ -1109,6 +1249,9 @@ async function exportTxt(data) {
             notify.error('No se pudo generar el archivo.');
             return;
         }
+
+        const v = parseInt(res.headers.get('X-Draft-Version') ?? '', 10);
+        if (!Number.isNaN(v)) syncDraftAfterExplicitSave({ version: v, saved_at: new Date().toISOString() }, data);
 
         // Stream the file blob → download
         const blob = await res.blob();

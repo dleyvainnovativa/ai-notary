@@ -7,9 +7,12 @@ use App\Modules\ModuleRegistry;
 use App\Services\CatalogService;
 use App\Services\Schema\SchemaEngine;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DocumentController extends Controller
 {
+    private const MAX_DRAFT_BYTES = 1_000_000; // ~1 MB of JSON; a UIF aviso is ~10 KB
+
     public function __construct(
         private ModuleRegistry $registry,
         private CatalogService $catalogs,
@@ -20,17 +23,20 @@ class DocumentController extends Controller
     public function reviewData(Document $document)
     {
         abort_unless($document->user_id === auth()->id(), 403);
-        abort_unless($document->status === 'requires_review', 409, 'Document is not ready for review.');
+        abort_unless(in_array($document->status, Document::REVIEWABLE, true), 409, 'El documento aún no está listo para revisión.');
+        abort_unless($document->isReviewable(), 410, 'Los datos de este documento ya fueron eliminados por privacidad.');
 
         $module = $this->registry->controller($document->module_slug);
         $dir = $this->registry->moduleDir($document->module_slug);
 
         $formSchema = $module->formSchema();   // ← use formSchema for BOTH rendering and engine
 
-        $raw = json_decode($document->ai_output_encrypted, true) ?: [];
+        $raw = json_decode($document->ai_output_encrypted ?? '', true) ?: [];
         $notes = $raw['_meta']['notes'] ?? [];
         unset($raw['_meta']);
-        $flat = $this->flatten($raw);
+
+        // The user's saved draft wins over the AI output (AI output stays the diff baseline).
+        $flat = $document->review_data_encrypted ?? $this->flatten($raw);
 
         $result = $this->engine->process($formSchema, $flat, $dir);   // ← formSchema, not schema()
 
@@ -45,7 +51,48 @@ class DocumentController extends Controller
             ])->values(),
             'notes' => $this->notePaths($notes),
             'formats' => $this->registry->manifest($document->module_slug)['exports'] ?? ['txt'],
+            'status' => $document->status,
+            'draft' => $this->draftInfo($document),
         ]);
+    }
+
+    /**
+     * Autosave of the review form (raw form state, no engine run). Optimistic
+     * lock: the client sends the version it loaded; a mismatch means another tab
+     * (or an export) saved in between → 409, the client stops autosaving.
+     */
+    public function saveDraft(Request $request, Document $document)
+    {
+        abort_unless($document->user_id === auth()->id(), 403);
+        abort_unless(in_array($document->status, Document::REVIEWABLE, true), 409, 'El documento no se puede editar.');
+
+        $data = $request->input('data');
+        abort_unless(is_array($data), 422, 'Datos inválidos.');
+        abort_if(strlen(json_encode($data)) > self::MAX_DRAFT_BYTES, 413, 'El borrador es demasiado grande.');
+
+        $clientVersion = (int) $request->input('version', -1);
+
+        return DB::transaction(function () use ($document, $data, $clientVersion) {
+            $locked = Document::whereKey($document->id)->lockForUpdate()->first();
+
+            if ($clientVersion !== (int) $locked->review_version) {
+                return response()->json([
+                    'message' => 'Este documento se guardó desde otra pestaña o sesión.',
+                    'draft' => $this->draftInfo($locked),
+                ], 409);
+            }
+
+            $locked->saveDraft($data);
+            return response()->json(['draft' => $this->draftInfo($locked)]);
+        });
+    }
+
+    private function draftInfo(Document $document): array
+    {
+        return [
+            'version' => (int) $document->review_version,
+            'saved_at' => $document->review_saved_at?->toIso8601String(),
+        ];
     }
 
     /**
@@ -68,6 +115,7 @@ class DocumentController extends Controller
     public function reviewValidate(Request $request, Document $document)
     {
         abort_unless($document->user_id === auth()->id(), 403);
+        abort_unless(in_array($document->status, Document::REVIEWABLE, true), 409, 'El documento no se puede editar.');
 
         $module = $this->registry->controller($document->module_slug);
         $dir = $this->registry->moduleDir($document->module_slug);
@@ -75,7 +123,11 @@ class DocumentController extends Controller
         $schema = $module->formSchema();
 
         $submitted = $request->input('data', []);
+        abort_unless(is_array($submitted), 422, 'Datos inválidos.');
         $result = $this->engine->process($schema, $submitted, $dir);
+
+        // Explicit user action: always persist (no version check) and hand back the new version.
+        $document->saveDraft($submitted);
 
         // Capture AI-vs-corrected diffs (against original extraction)
         $original = $this->flatten(json_decode($document->ai_output_encrypted ?? '', true) ?: []);
@@ -92,7 +144,7 @@ class DocumentController extends Controller
                 'message' => $i->message,
             ])->values(),
             'diffs' => $diffs,
-            // Phase 6 will persist + enable export here when valid.
+            'draft' => $this->draftInfo($document),
         ]);
     }
 
@@ -105,7 +157,10 @@ class DocumentController extends Controller
         // $schema = $module->schema();
         $schema = $module->formSchema();
 
+        abort_unless(in_array($document->status, Document::REVIEWABLE, true), 409, 'El documento no se puede exportar.');
+
         $submitted = $request->input('data', []);
+        abort_unless(is_array($submitted), 422, 'Datos inválidos.');
         $format = $request->input('format', 'txt');
 
         // Server re-runs the engine — authoritative validation + computed/derived
@@ -142,6 +197,7 @@ class DocumentController extends Controller
         // Mark the document completed + clear stored AI output (privacy: purge after export)
         // $document->update(['status' => 'completed', 'reviewed_at' => now(), 'ai_output_encrypted' => null]);
         $document->update(['status' => 'completed', 'reviewed_at' => now()]);
+        $document->saveDraft($submitted);   // what was exported is what the draft now holds
 
         $ref = $result->data['numero_escritura']
             ?? $result->data['referencia_aviso']
@@ -152,6 +208,7 @@ class DocumentController extends Controller
         return response($content, 200, [
             'Content-Type' => $mime . '; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'X-Draft-Version' => (string) $document->review_version,  // keeps the tab's autosave in sync
         ]);
     }
 
