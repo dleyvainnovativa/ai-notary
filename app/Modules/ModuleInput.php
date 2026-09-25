@@ -14,9 +14,17 @@ class ModuleInput
         public string $description = '',   // ← new
     ) {}
 
+    /**
+     * Full system prompt = shared core rules (resources/prompts/common_rules.txt)
+     * + this module's own prompt. Every module, current and future, inherits
+     * the shared rules (references like "en esta fecha" / "mismo domicilio").
+     */
     public function prompt(string $moduleDir): string
     {
-        return file_get_contents("{$moduleDir}/{$this->promptPath}");
+        $common = @file_get_contents(resource_path('prompts/common_rules.txt')) ?: '';
+        $own = file_get_contents("{$moduleDir}/{$this->promptPath}");
+
+        return $common === '' ? $own : rtrim($common) . "\n\n" . $own;
     }
     public function schema(string $moduleDir): array
     {

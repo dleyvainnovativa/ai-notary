@@ -6,6 +6,7 @@ use App\Models\Document;
 use App\Models\ProcessingCost;
 use App\Modules\ModuleRegistry;
 use App\Services\Ai\AiExtractor;
+use App\Services\References\ReferenceResolver;
 use App\Services\TokenService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,7 +25,7 @@ class ProcessDocumentJob implements ShouldQueue
     // The extracted text arrives here in the payload — not from any store.
     public function __construct(public int $documentId, public array $extractedTextByInput) {}
 
-    public function handle(ModuleRegistry $registry, AiExtractor $extractor, TokenService $tokens): void
+    public function handle(ModuleRegistry $registry, AiExtractor $extractor, TokenService $tokens, ReferenceResolver $resolver): void
     {
         $document = Document::find($this->documentId);
         if (!$document) return;
@@ -36,12 +37,15 @@ class ProcessDocumentJob implements ShouldQueue
             $dir = $registry->moduleDir($document->module_slug); // expose this in registry
 
             $merged = [];
+            $schemasByInput = [];
             foreach ($module->inputs() as $input) {
                 if (!isset($this->extractedTextByInput[$input->key])) continue; // optional & absent
 
+                $schemasByInput[$input->key] = $input->schema($dir);
+
                 $result = $extractor->extract(
                     $input->prompt($dir),
-                    $input->schema($dir),
+                    $schemasByInput[$input->key],
                     $input->outputExample($dir),
                     $this->extractedTextByInput[$input->key],
                     $dir   // ← add this
@@ -63,7 +67,11 @@ class ProcessDocumentJob implements ShouldQueue
                 $merged[$input->key] = $result->data;
             }
 
-            $cleaned = $module->postProcess($merged);
+            // Core step (all modules): resolve "en esta fecha" / "mismo domicilio que el anterior".
+            $resolved = $resolver->resolve($merged, $schemasByInput, $manifest['references'] ?? []);
+
+            $cleaned = $module->postProcess($resolved->data);
+            $cleaned['_meta'] = ['notes' => $resolved->notes];
 
             $document->update([
                 'module_version' => $manifest['version'],

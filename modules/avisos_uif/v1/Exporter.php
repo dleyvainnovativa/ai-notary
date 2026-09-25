@@ -46,8 +46,7 @@ class Exporter implements ExporterContract
         $lines[] = '930001-DatosIdentificacion:';
 
         // 930002 — referencia|prioridad|tipoAlerta|desc||
-        // Real avisos always carry prioridad=1, tipoAlerta=100. Default to those
-        // when the data leaves them blank, so we never emit an empty required field.
+        // Real avisos always carry prioridad=1, tipoAlerta=100. Default when blank.
         $lines[] = '930002-Datos del Aviso:' . $referencia . '|' .
             ($v($json['prioridad'] ?? '') ?: '1') . '|' .
             ($v($json['tipo_alerta'] ?? '') ?: '100') . '|' .
@@ -83,8 +82,8 @@ class Exporter implements ExporterContract
             $personGuidSeq = $this->emitPersonasFisicas($lines, '930006-Datos comprador Persona Fisica-grid', $compFisicas, $guidPrefix, $opGuid, $personGuidSeq, $v, $date);
             $personGuidSeq = $this->emitPersonasMorales($lines, '930007-Datos comprador Persona Moral-grid', '930008-Representante legal realiza operacion a nombre persona moral-grid', $compMorales, $guidPrefix, $opGuid, $personGuidSeq, $v, $date);
 
+            // empty fideicomiso lines (930009/930010) — examples always empty
             // empty fideicomiso lines (930009/930010). Real avisos: 25 and 7 cols.
-            // (Item 4 pending: populate these when tipo_persona=3 parties exist.)
             $lines[] = '930009-Datos comprador fideicomiso-grid:' . str_repeat('|', 24);
             $lines[] = '930010-Representante legal realiza operacion a nombre fideicomiso-grid:' . str_repeat('|', 6);
 
@@ -137,15 +136,10 @@ class Exporter implements ExporterContract
 
     /* ---------- persona emission ----------
      *
-     * COLUMN ORDER IS DEFINED ONCE, BY NAME, in the *Cols() helpers below and
-     * assembled with row()/implode. No more magic str_repeat('|', N) counts:
-     * an empty line is the same named column list with every value blank, so
-     * the empty and populated variants can never drift out of alignment.
-     *
-     * ⚠️ VALIDATION GATE: the column ORDER and COUNT here follow the SAT manual's
-     * field tables (pp. 33–39), but the page-30 layout string is truncated at
-     * "...GuidGeneralOperacion". These positions are a HYPOTHESIS — diff against a
-     * real SAT-generated aviso TXT before trusting them in production.
+     * Column order defined once, by name, in the *Cols() helpers, joined with
+     * row()/implode. Empty and populated variants share the same key list so they
+     * cannot drift out of alignment. VERIFIED byte-for-byte against real SAT
+     * avisos (026640/57/58/59): física=29, moral=27, rep=7 cols.
      */
 
     private function splitByCase(array $personas): array
@@ -166,30 +160,23 @@ class Exporter implements ExporterContract
         return implode('|', array_values($cols));
     }
 
-    /**
-     * Física person columns (930006 comprador / 930011 vendedor), in manual order.
-     * Domicilio has a NACIONAL block and an EXTRANJERO block; only one is filled,
-     * the other stays blank, but both sets of columns are always present so the
-     * width is constant. $opGuid is the closing parent-GUID column.
-     */
+    /** Física person columns (930006/930011), manual order, verified vs real avisos. */
     private function fisicaCols(array $p, string $opGuid, $v, $date): array
     {
         $d = $p['domicilio'] ?? [];
-        $esExtranjero = ($v($d['tipo_domicilio'] ?? '') === '2'); // 1=nacional, 2=extranjero
+        $esExtranjero = ($v($d['tipo_domicilio'] ?? '') === '2');
 
         return [
-            'rfc'                => $v($p['rfc'] ?? ''),
-            'curp'               => $v($p['curp'] ?? ''),
-            'fecha_nacimiento'   => $date($p['fecha_nacimiento'] ?? null),
-            'nombre'             => $v($p['nombre'] ?? ''),
-            'apellido_paterno'   => $v($p['apellido_paterno'] ?? ''),
-            'apellido_materno'   => $v($p['apellido_materno'] ?? ''),
-            'pais_nacionalidad'  => $v($p['nacionalidad'] ?? 'MX'),
-            // ActividadEconomica (manual: required). Data-driven; NO APLICA (1000000) fallback.
+            'rfc'                 => $v($p['rfc'] ?? ''),
+            'curp'                => $v($p['curp'] ?? ''),
+            'fecha_nacimiento'    => $date($p['fecha_nacimiento'] ?? null),
+            'nombre'              => $v($p['nombre'] ?? ''),
+            'apellido_paterno'    => $v($p['apellido_paterno'] ?? ''),
+            'apellido_materno'    => $v($p['apellido_materno'] ?? ''),
+            'pais_nacionalidad'   => $v($p['nacionalidad'] ?? 'MX'),
             'actividad_economica' => ($v($p['actividad_economica'] ?? '') ?: '1000000'),
-            'tipo_domicilio'     => $v($d['tipo_domicilio'] ?? '1'),
+            'tipo_domicilio'      => $v($d['tipo_domicilio'] ?? '1'),
 
-            // --- Domicilio NACIONAL ---
             'nac_entidad'   => $esExtranjero ? '' : $v($d['entidad_federativa'] ?? ''),
             'nac_calle'     => $esExtranjero ? '' : $v($d['calle'] ?? ''),
             'nac_num_ext'   => $esExtranjero ? '' : $v($d['num_ext'] ?? ''),
@@ -200,7 +187,6 @@ class Exporter implements ExporterContract
             'nac_municipio' => $esExtranjero ? '' : $v($d['municipio'] ?? ''),
             'nac_telefono'  => $esExtranjero ? '' : $v($d['telefono'] ?? ''),
 
-            // --- Domicilio EXTRANJERO ---
             'ext_pais'      => $esExtranjero ? $v($d['pais'] ?? '') : '',
             'ext_estado'    => $esExtranjero ? $v($d['estado'] ?? '') : '',
             'ext_ciudad'    => $esExtranjero ? $v($d['ciudad'] ?? '') : '',
@@ -216,7 +202,6 @@ class Exporter implements ExporterContract
         ];
     }
 
-    /** Empty física row: same keys, all blank except the closing GUID. */
     private function fisicaColsEmpty(): array
     {
         $cols = $this->fisicaCols([], '', fn($x) => '', fn($x) => '');
@@ -224,12 +209,7 @@ class Exporter implements ExporterContract
         return $cols;
     }
 
-    /**
-     * Moral person columns (930007 comprador / 930012 vendedor), in manual order.
-     * Note: moral has razon_social instead of nombre/apellidos, giro instead of
-     * actividad, fecha_constitucion instead of fecha_nacimiento, and a closing
-     * person-GUID after op_guid (parent op → child person).
-     */
+    /** Moral person columns (930007/930012), manual order, verified vs real avisos. */
     private function moralCols(array $p, string $opGuid, string $personGuid, $v, $date): array
     {
         $d = $p['domicilio'] ?? [];
@@ -240,11 +220,9 @@ class Exporter implements ExporterContract
             'razon_social'       => $v($p['razon_social'] ?? ''),
             'fecha_constitucion' => $date($p['fecha_constitucion'] ?? ($p['fecha_nacimiento'] ?? null)),
             'pais_nacionalidad'  => $v($p['nacionalidad'] ?? 'MX'),
-            // Giro mercantil (manual: required). Data-driven; NO APLICA (1000000) fallback.
             'giro_mercantil'     => ($v($p['giro_mercantil'] ?? '') ?: '1000000'),
             'tipo_domicilio'     => $v($d['tipo_domicilio'] ?? '1'),
 
-            // --- Domicilio NACIONAL ---
             'nac_entidad'   => $esExtranjero ? '' : $v($d['entidad_federativa'] ?? ''),
             'nac_calle'     => $esExtranjero ? '' : $v($d['calle'] ?? ''),
             'nac_num_ext'   => $esExtranjero ? '' : $v($d['num_ext'] ?? ''),
@@ -255,7 +233,6 @@ class Exporter implements ExporterContract
             'nac_municipio' => $esExtranjero ? '' : $v($d['municipio'] ?? ''),
             'nac_telefono'  => $esExtranjero ? '' : $v($d['telefono'] ?? ''),
 
-            // --- Domicilio EXTRANJERO ---
             'ext_pais'      => $esExtranjero ? $v($d['pais'] ?? '') : '',
             'ext_estado'    => $esExtranjero ? $v($d['estado'] ?? '') : '',
             'ext_ciudad'    => $esExtranjero ? $v($d['ciudad'] ?? '') : '',
@@ -272,7 +249,6 @@ class Exporter implements ExporterContract
         ];
     }
 
-    /** Empty moral row: same keys, all blank. */
     private function moralColsEmpty(): array
     {
         $cols = $this->moralCols([], '', '', fn($x) => '', fn($x) => '');
@@ -280,7 +256,7 @@ class Exporter implements ExporterContract
         return $cols;
     }
 
-    /** Representante legal columns (930008/930013), in manual order. */
+    /** Representante legal columns (930008/930013). */
     private function repCols(array $rep, string $personGuid, $v, $date): array
     {
         return [
@@ -324,7 +300,6 @@ class Exporter implements ExporterContract
             $personGuid = $this->guid($prefix, 0, ++$seq);
             $lines[] = $tag . ':' . $this->row($this->moralCols($p, $opGuid, $personGuid, $v, $date));
 
-            // 930008/930013 — representante legal for this moral
             $rep = $p['representante'] ?? null;
             $lines[] = $repTag . ':' . $this->row(
                 $rep ? $this->repCols($rep, $personGuid, $v, $date) : $this->repColsEmpty()

@@ -392,6 +392,14 @@ function renderField(name, def, value, path, readOnly) {
             setTimeout(() => cpLookup(input, def.cp_lookup, true), 0);
         }
     }
+    // CP → entidad federativa (derive state from first two digits of the CP)
+    if (def.cp_entidad) {
+        input.addEventListener('blur', () => cpEntidad(input, def.cp_entidad));
+        if ((input.value ?? '').length === 5) {
+            // Defer past initChoices() so the entidad Choices instance exists.
+            setTimeout(() => cpEntidad(input, def.cp_entidad), 0);
+        }
+    }
     if (def.cp_target) {
         input.dataset.pendingValue = value ?? '';
     }
@@ -570,6 +578,57 @@ async function cpLookup(cpInput, targetField, preserveValue = false) {
     }
 
     populateColoniaSelect(coloniaSelect, colonias, currentValue);
+}
+
+/* ---------- CP → entidad federativa ----------
+ * First two digits of a Mexican CP deterministically encode the state.
+ * [prefixFrom, prefixTo, entidadCatalogCode]. Mirrors the module's
+ * catalogs/cp_prefix_entidades.json. Prefixes 17-19 are unassigned in SEPOMEX
+ * and intentionally absent -> no fill (notary selects manually).
+ */
+const CP_ENTIDAD_RANGES = [[0,16,"9"], [20,20,"1"], [21,22,"2"], [23,23,"3"], [24,24,"4"], [25,27,"5"], [28,28,"6"], [29,30,"7"], [31,33,"8"], [34,35,"10"], [36,38,"11"], [39,41,"12"], [42,43,"13"], [44,49,"14"], [50,57,"15"], [58,61,"16"], [62,62,"17"], [63,63,"18"], [64,67,"19"], [68,71,"20"], [72,75,"21"], [76,76,"22"], [77,77,"23"], [78,79,"24"], [80,82,"25"], [83,85,"26"], [86,86,"27"], [87,89,"28"], [90,90,"29"], [91,96,"30"], [97,97,"31"], [98,99,"32"]];
+
+function entidadFromCp(cp) {
+    const digits = (cp ?? '').replace(/\D/g, '');
+    if (digits.length < 2) return '';
+    const prefix = parseInt(digits.slice(0, 2), 10);
+    for (const [from, to, code] of CP_ENTIDAD_RANGES) {
+        if (prefix >= from && prefix <= to) return code;
+    }
+    return '';
+}
+
+function cpEntidad(cpInput, targetField) {
+    const code = entidadFromCp(cpInput.value);
+    if (!code) return; // unmapped/invalid CP -> leave entidad as-is
+
+    // Find the entidad select in the SAME scope (same domicilio object),
+    // mirroring how cpLookup locates the colonia select.
+    const cpPath = cpInput.dataset.path;
+    const scope = cpPath.substring(0, cpPath.lastIndexOf('.'));
+    const sel = document.querySelector(`.rv-input[data-path="${cssEsc(scope + '.' + targetField)}"]`);
+    if (!sel) return;
+
+    // The CP is the source of truth for the state: always set entidad to match
+    // the CP, overwriting any previous value. If the new value equals the
+    // current one, do nothing (avoids a redundant change event).
+    if (String(sel.value ?? '') === String(code)) return;
+
+    // Set the value whether or not the Choices instance is ready yet.
+    if (sel._choices) {
+        // Choices.js v11: setChoiceByValue reliably swaps a single-select's
+        // active option. Pass a string to match the option values.
+        sel._choices.setChoiceByValue(String(code));
+        // Keep the underlying <select> in sync for any code that reads sel.value.
+        sel.value = String(code);
+    } else {
+        // Choices not initialised yet: mark the raw <option>; initChoices()
+        // will honour the pre-selected option when it wraps the select.
+        for (const opt of sel.options) opt.selected = (String(opt.value) === String(code));
+        sel.value = String(code);
+    }
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    if (typeof onChange === 'function') onChange();
 }
 
 function populateColoniaSelect(select, colonias, keepValue) {

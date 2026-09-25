@@ -44,6 +44,7 @@ class Controller implements ModuleControllerContract
         $catNacionalidad   = $cat('catalogo_nacionalidad');        // país (MX, US, ...)
         $catEntidades      = $cat('catalogo_entidades_federativas');
         $catTiposDomicilio = $cat('catalogo_tipos_domicilio');
+        $catTipoBienInmueble = $cat('catalogo_tipos_domicilio'); // "Tipo de bien inmueble" per SAT manual
         $catFormasPago     = $cat('catalogo_formas_de_pago');
         $catInstrumentos   = $cat('catalogo_instrumentos_monetarios');
         $catMonedas        = $cat('catalogo_tipos_moneda');
@@ -64,6 +65,7 @@ class Controller implements ModuleControllerContract
                     'type' => 'select',
                     'required' => true,
                     'options' => $catEntidades,
+                    'cp_entidad_target' => true,   // filled from the CP's first two digits
                 ],
                 'calle' => ['label' => 'Calle', 'type' => 'text', 'col' => 'full', 'required' => true],
                 'num_ext' => ['label' => 'Núm. Ext.', 'type' => 'text', 'required' => true],
@@ -73,6 +75,7 @@ class Controller implements ModuleControllerContract
                     'type' => 'text',
                     'required' => true,
                     'cp_lookup' => 'colonia',   // marks this CP as driving the 'colonia' select in the same scope
+                    'cp_entidad' => 'entidad_federativa', // also drives the entidad select in the same scope
                     'subtitle' => 'Escribe el CP para cargar las colonias.',
                 ],
                 'colonia' => [
@@ -183,22 +186,22 @@ class Controller implements ModuleControllerContract
                         'label' => 'Inmueble',
                         'type' => 'object',
                         'itemSchema' => [
-                            'tipo_bien' => ['label' => 'Tipo Bien', 'type' => 'select', 'required' => true, 'options' => $catTiposDomicilio],
-                            'valor_pactado' => ['label' => 'Valor Pactado', 'type' => 'number', 'format' => 'round', 'integer' => true, 'min' => 0, 'required' => true],
-                            'm2_terreno' => ['label' => 'M2 Terreno', 'type' => 'number', 'format' => 'round', 'integer' => true, 'min' => 0, 'required' => true],
-                            'm2_construidos' => ['label' => 'M2 Construidos', 'type' => 'number', 'format' => 'round', 'integer' => true, 'min' => 0, 'required' => true],
+                            'tipo_bien' => ['label' => 'Tipo Bien', 'type' => 'select', 'required' => true, 'options' => $catTipoBienInmueble],
+                            'valor_pactado' => ['label' => 'Valor Pactado', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
+                            'm2_terreno' => ['label' => 'M2 Terreno', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
+                            'm2_construidos' => ['label' => 'M2 Construidos', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
                             'folio_real' => ['label' => 'Folio Real', 'type' => 'text', 'required' => true],
                             'num_instrumento' => ['label' => 'Núm. Instrumento', 'type' => 'text', 'required' => true],
-                            'valor_avaluo' => ['label' => 'Valor Avalúo', 'type' => 'number', 'format' => 'round', 'integer' => true, 'min' => 0, 'required' => true],
+                            'valor_avaluo' => ['label' => 'Valor Avalúo', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
                             'domicilio' => [
                                 'label' => 'Domicilio del Inmueble',
                                 'type' => 'object',
                                 'itemSchema' => [
-                                    'entidad_federativa' => ['label' => 'Entidad', 'type' => 'select', 'required' => true, 'options' => $catEntidades],
+                                    'entidad_federativa' => ['label' => 'Entidad', 'type' => 'select', 'required' => true, 'options' => $catEntidades, 'cp_entidad_target' => true],
                                     'calle' => ['label' => 'Calle', 'type' => 'text', 'col' => 'full', 'required' => true],
                                     'num_ext' => ['label' => 'Núm. Ext.', 'type' => 'text', 'required' => true],
                                     'num_int' => ['label' => 'Núm. Int.', 'type' => 'text'],
-                                    'codigo_postal' => ['label' => 'C.P.', 'type' => 'text', 'required' => true, 'cp_lookup' => 'colonia', 'subtitle' => 'Escribe el CP para cargar las colonias.'],
+                                    'codigo_postal' => ['label' => 'C.P.', 'type' => 'text', 'required' => true, 'cp_lookup' => 'colonia', 'cp_entidad' => 'entidad_federativa', 'subtitle' => 'Escribe el CP para cargar las colonias.'],
                                     'colonia' => ['label' => 'Colonia', 'type' => 'select', 'required' => true, 'options' => [], 'cp_target' => true, 'subtitle' => 'Selecciona la Colonia cargada del CP.'],
                                     'municipio' => ['label' => 'Municipio', 'type' => 'text', 'required' => true],
                                 ],
@@ -215,7 +218,7 @@ class Controller implements ModuleControllerContract
                             'forma_pago' => ['label' => 'Forma Pago', 'type' => 'select', 'required' => true, 'options' => $catFormasPago],
                             'instrumento' => ['label' => 'Instrumento', 'type' => 'select', 'required' => true, 'options' => $catInstrumentos],
                             'moneda' => ['label' => 'Moneda', 'type' => 'select', 'required' => true, 'options' => $catMonedas],
-                            'monto' => ['label' => 'Monto', 'type' => 'number', 'format' => 'round', 'integer' => true, 'min' => 0, 'required' => true],
+                            'monto' => ['label' => 'Monto', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
                         ],
                     ],
                 ],

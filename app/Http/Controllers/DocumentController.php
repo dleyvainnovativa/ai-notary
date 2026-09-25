@@ -27,7 +27,9 @@ class DocumentController extends Controller
 
         $formSchema = $module->formSchema();   // ← use formSchema for BOTH rendering and engine
 
-        $raw = json_decode($document->ai_output_encrypted, true);
+        $raw = json_decode($document->ai_output_encrypted, true) ?: [];
+        $notes = $raw['_meta']['notes'] ?? [];
+        unset($raw['_meta']);
         $flat = $this->flatten($raw);
 
         $result = $this->engine->process($formSchema, $flat, $dir);   // ← formSchema, not schema()
@@ -41,8 +43,25 @@ class DocumentController extends Controller
                 'rule' => $i->rule,
                 'message' => $i->message,
             ])->values(),
+            'notes' => $this->notePaths($notes),
             'formats' => $this->registry->manifest($document->module_slug)['exports'] ?? ['txt'],
         ]);
+    }
+
+    /**
+     * ReferenceResolver notes carry the input key separately; map them to the
+     * same paths flatten() produces so the form can find the field.
+     */
+    private function notePaths(array $notes): array
+    {
+        return array_values(array_map(function ($n) {
+            $flattened = in_array($n['input'] ?? '', ['escritura', 'calculo'], true);
+            return [
+                'path' => $flattened ? $n['path'] : trim(($n['input'] ?? '') . '.' . $n['path'], '.'),
+                'kind' => $n['kind'] ?? 'info',
+                'message' => $n['message'] ?? '',
+            ];
+        }, $notes));
     }
 
     /** Re-run the engine on submitted (corrected) data; authoritative validation + diffs. */
@@ -139,6 +158,7 @@ class DocumentController extends Controller
     private function flatten(?array $raw): array
     {
         if ($raw === null) return [];
+        unset($raw['_meta']); // resolver notes, never form data
         if (isset($raw['escritura']) || isset($raw['calculo'])) {
             return array_merge($raw['escritura'] ?? [], $raw['calculo'] ?? []);
         }
