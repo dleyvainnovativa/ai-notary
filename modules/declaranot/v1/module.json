@@ -3,11 +3,25 @@
   "version": "1",
   "name": "Declaranot (Escritura + Cálculo)",
   "active": true,
-  "exports": ["xml", "txt"],
+  "exports": [
+    "xml",
+    "txt"
+  ],
   "catalogs_used": [
-    "catalogo_inmuebles", "catalogo_tipos_pago", "catalogo_bancos",
-    "catalogo_tipos_domicilio", "catalogo_datos_informativos"
+    "catalogo_inmuebles",
+    "catalogo_tipos_pago",
+    "catalogo_bancos",
+    "catalogo_tipos_domicilio",
+    "catalogo_datos_informativos"
   ],
   "controller_class": "Modules\\Declaranot\\V1\\Controller",
-  "exporter_class": "Modules\\Declaranot\\V1\\Exporter"
+  "exporter_class": "Modules\\Declaranot\\V1\\Exporter",
+  "references": {
+    "deed_date": [
+      "escritura.fecha_firma_escritura"
+    ],
+    "address_keys": [
+      "domicilio"
+    ]
+  }
 }

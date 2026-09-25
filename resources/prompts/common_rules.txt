@@ -1,0 +1,76 @@
+=== REGLAS GENERALES (aplican a todos los módulos) ===
+
+Rules:
+- Use the provided schema definitions.
+- Respect conditional fields.
+- Normalize enum values exactly as defined.
+- Dates must be YYYY-MM-DD.
+- Monetary values must be numeric only (no currency symbols).
+- Never invent information.
+- Return arrays even if they contain only one item.
+- Return ONLY the output JSON.
+
+Null handling:
+- Return null if a value is missing UNLESS another rule applies.
+
+Select / enum fields:
+- For fields with allowed_values, ALWAYS return one of the allowed_values.value
+  entries, NEVER the label.
+
+Números y fechas escritos con letra:
+- Las escrituras escriben cantidades, códigos postales y fechas con letra
+  (ej. "NOVENTA Y UN MIL NOVECIENTOS CUARENTA Y OCHO" → "91948";
+  "A LOS TREINTA DÍAS DEL MES DE JULIO DEL AÑO DOS MIL VEINTISÉIS" → 2026-07-30).
+  Conviértelos siempre a dígitos.
+- Ignora marcadores de plantilla del procesador de textos que aparezcan dentro
+  del texto (ej. "*&Fecha de Protocolo"); no forman parte del dato.
+
+=== REFERENCIAS DENTRO DE LA ESCRITURA (CRÍTICO) ===
+
+Las escrituras evitan repetir datos y en su lugar hacen referencia a datos ya
+escritos. Debes resolver esas referencias; nunca devuelvas la frase literal
+como valor de un campo.
+
+Fechas por referencia a la fecha de la escritura:
+- La "fecha de la escritura" es la fecha de firma/otorgamiento que aparece en
+  el encabezado del instrumento (ej. "EN LA CIUDAD DE ..., A LOS TREINTA DÍAS
+  DEL MES DE JULIO DEL AÑO DOS MIL VEINTISÉIS"). Extráela siempre en el campo
+  de fecha de la escritura/operación del esquema.
+- Cuando CUALQUIER OTRA fecha (pagos, liquidaciones, entregas, etc.) se
+  expresa por referencia al propio acto en vez de con una fecha concreta,
+  devuelve EXACTAMENTE el texto "@FECHA_ESCRITURA" en ese campo. Frases
+  típicas: "en esta fecha", "en este acto", "a la firma de la presente",
+  "a la firma de este instrumento", "el día de hoy", "en la fecha de firma".
+- También usa "@FECHA_ESCRITURA" para un pago que se realiza como parte del
+  propio acto y que no tiene ninguna fecha propia (ej. "paga por transferencia
+  ... como finiquito en el pago del precio", o el importe de un crédito que se
+  otorga y dispone en la misma escritura).
+- Nunca uses "@FECHA_ESCRITURA" para la fecha de la escritura misma ni para la
+  fecha de la operación: esas se extraen del encabezado.
+- Si la fecha se refiere a un momento anterior sin fecha concreta (ej. "con
+  anterioridad a este acto", "previamente"), devuelve null.
+- "En este acto" solo es una referencia de fecha cuando describe CUÁNDO ocurre
+  un pago o una entrega. En frases como "representado en este acto por" no es
+  una fecha; ignórala.
+
+Domicilios por referencia a otra persona:
+- Frases como "con mismo domicilio que el anterior", "con igual domicilio",
+  "con mismo domicilio, vecindad y estado civil que el anterior", "con
+  domicilio ya señalado" indican que la persona comparte el domicilio de
+  otra persona.
+- "El anterior" es la persona descrita INMEDIATAMENTE ANTES en el texto, en el
+  mismo apartado donde aparece la frase (normalmente las GENERALES de los
+  comparecientes), sin importar si es vendedor, comprador u otro compareciente.
+  Si la frase nombra a alguien ("el mismo domicilio que el señor X"), usa el
+  domicilio de esa persona.
+- Copia el domicilio COMPLETO de esa persona (calle, número exterior e
+  interior, colonia, código postal, municipio, entidad federativa y tipo de
+  domicilio) en el domicilio de la persona que hace la referencia.
+- Si el objeto domicilio del esquema incluye el campo "copiado_de", escribe
+  ahí el nombre completo de la persona de quien copiaste el domicilio. Si el
+  domicilio está escrito completo en el texto (sin referencia), "copiado_de"
+  debe ser null.
+- Si no puedes identificar a quién se refiere, deja el domicilio en null y
+  escribe en "copiado_de" la frase literal encontrada.
+
+=== INSTRUCCIONES ESPECÍFICAS DEL MÓDULO ===

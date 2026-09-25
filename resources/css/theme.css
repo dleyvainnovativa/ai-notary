@@ -669,6 +669,18 @@ a { color: var(--text); }
 .rv-field__error { font-size: 0.75rem; color: #dc2626; margin-top: 0.2rem; min-height: 0.9rem; }
 .rv-field.has-error .rv-input, .rv-field.has-error .ts-control { border-color: #dc2626 !important; }
 
+/* Resolver notes: value filled by reference — verify, not an error */
+.rv-note {
+    display: flex; align-items: flex-start; gap: 0.4rem;
+    font-size: 0.75rem; line-height: 1.35; color: #1d4ed8;
+    background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.25);
+    border-radius: 6px; padding: 0.35rem 0.5rem; margin-top: 0.3rem;
+}
+.rv-subsection > .rv-note { margin: 0 0 0.75rem; }
+.rv-note i { margin-top: 0.12rem; }
+.rv-field.has-note .rv-input { border-color: rgba(37, 99, 235, 0.55); }
+[data-theme="dark"] .rv-note { color: #93c5fd; background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.35); }
+
 .rv-array__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
 .rv-array__count { font-size: 0.8rem; color: var(--text-muted); }
 .rv-row {

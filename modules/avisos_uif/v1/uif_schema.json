@@ -74,7 +74,8 @@
       "items": {
         "fecha_operacion": {
           "type": "date",
-          "required": true
+          "required": true,
+          "ai_description": "Fecha de firma de la escritura (encabezado del instrumento)."
         },
         "tipo_transmision": {
           "type": "select",
@@ -160,6 +161,10 @@
                 },
                 "municipio": {
                   "type": "text"
+                },
+                "copiado_de": {
+                  "type": "text",
+                  "ai_description": "Solo si la escritura NO escribe el domicilio y lo refiere a otra persona ('con mismo domicilio que el anterior'): nombre completo de la persona de quien se copió el domicilio. Si el domicilio está escrito completo, null."
                 }
               }
             },
@@ -257,6 +262,10 @@
                 },
                 "municipio": {
                   "type": "text"
+                },
+                "copiado_de": {
+                  "type": "text",
+                  "ai_description": "Solo si la escritura NO escribe el domicilio y lo refiere a otra persona ('con mismo domicilio que el anterior'): nombre completo de la persona de quien se copió el domicilio. Si el domicilio está escrito completo, null."
                 }
               }
             },
@@ -334,7 +343,8 @@
           "items": {
             "fecha_pago": {
               "type": "date",
-              "required": true
+              "required": true,
+              "ai_description": "Fecha del pago en YYYY-MM-DD. Si el pago se hace 'en esta fecha', 'en este acto', 'a la firma' o como parte del propio acto sin fecha propia, devuelve \"@FECHA_ESCRITURA\"."
             },
             "forma_pago": {
               "type": "select",

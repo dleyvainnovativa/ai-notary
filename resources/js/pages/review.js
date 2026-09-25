@@ -207,6 +207,7 @@ function renderReview(container, payload) {
     initChoices(container);
     applyConditional();
     applyServerIssues(payload.issues);
+    applyNotes(payload.notes || []);   // "tomado de…" notes from the ReferenceResolver
     refreshErrorBadges();      // initial badge state from server issues
     initScrollSpy();
 
@@ -831,6 +832,37 @@ function applyServerIssues(issues) {
             col.classList.add('has-error');
             const e = col.querySelector('.rv-field__error');
             if (e) e.textContent = it.message;
+        }
+    }
+}
+
+/* ---------- Resolver notes (info, not errors) ----------
+ * Server notes mark values filled by reference ("en esta fecha",
+ * "mismo domicilio que el anterior") so the user verifies them.
+ * Path targets a field (.rv-field) or an object block (.rv-subsection).
+ */
+function applyNotes(notes) {
+    for (const n of notes) {
+        if (!n?.path || !n.message) continue;
+        const target = document.querySelector(`[data-path="${cssEsc(n.path)}"]`);
+        if (!target) continue;
+
+        const note = document.createElement('div');
+        note.className = 'rv-note';
+        note.dataset.kind = n.kind || 'info';
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid fa-circle-info';
+        const text = document.createElement('span');
+        text.textContent = n.message;
+        note.append(icon, text);
+
+        if (target.classList.contains('rv-subsection')) {
+            const title = target.querySelector(':scope > .rv-subsection__title');
+            title ? title.after(note) : target.prepend(note);
+        } else {
+            target.classList.add('has-note');
+            const err = target.querySelector(':scope > .rv-field__error');
+            err ? target.insertBefore(note, err) : target.appendChild(note);
         }
     }
 }

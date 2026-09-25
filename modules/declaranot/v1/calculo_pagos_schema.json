@@ -38,8 +38,8 @@
                     "type": "number",
                     "rules": [
                         {
-                        "condition": "value >= 20",
-                        "set": 20
+                            "condition": "value >= 20",
+                            "set": 20
                         }
                     ]
                 },
@@ -56,7 +56,8 @@
                     "type": "text"
                 },
                 "fecha_pago_federacion": {
-                    "type": "date"
+                    "type": "date",
+                    "ai_description": "Fecha en YYYY-MM-DD. Si el documento la expresa por referencia a la firma de la escritura ('en esta fecha', 'a la firma'), devuelve \"@FECHA_ESCRITURA\"."
                 },
                 "isr_entidad": {
                     "type": "number"
@@ -65,7 +66,8 @@
                     "type": "text"
                 },
                 "fecha_pago_entidad": {
-                    "type": "date"
+                    "type": "date",
+                    "ai_description": "Fecha en YYYY-MM-DD. Si el documento la expresa por referencia a la firma de la escritura ('en esta fecha', 'a la firma'), devuelve \"@FECHA_ESCRITURA\"."
                 },
                 "total_isr_pagado": {
                     "type": "computed",
