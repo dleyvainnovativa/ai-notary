@@ -6,6 +6,7 @@ use App\Models\Document;
 use App\Models\ProcessingCost;
 use App\Modules\ModuleRegistry;
 use App\Services\Ai\AiExtractor;
+use App\Services\Append\AppendService;
 use App\Services\References\ReferenceResolver;
 use App\Services\TokenService;
 use Illuminate\Bus\Queueable;
@@ -25,7 +26,7 @@ class ProcessDocumentJob implements ShouldQueue
     // The extracted text arrives here in the payload — not from any store.
     public function __construct(public int $documentId, public array $extractedTextByInput) {}
 
-    public function handle(ModuleRegistry $registry, AiExtractor $extractor, TokenService $tokens, ReferenceResolver $resolver): void
+    public function handle(ModuleRegistry $registry, AiExtractor $extractor, TokenService $tokens, ReferenceResolver $resolver, AppendService $appender): void
     {
         $document = Document::find($this->documentId);
         if (!$document) return;
@@ -73,15 +74,30 @@ class ProcessDocumentJob implements ShouldQueue
             $cleaned = $module->postProcess($resolved->data);
             $cleaned['_meta'] = ['notes' => $resolved->notes];
 
-            $document->update([
-                'module_version' => $manifest['version'],
-                'ai_output_encrypted' => json_encode($cleaned),
-                'status' => 'requires_review',
-            ]);
+            if ($document->parent_document_id) {
+                // Appended deed (operaciones acumuladas): merge into the parent's review,
+                // keep nothing on the child. Throws AppendException → token released.
+                $appender->mergeIntoParent($document, $cleaned);
+                $document->update([
+                    'module_version' => $manifest['version'],
+                    'ai_output_encrypted' => null,
+                    'status' => 'completed',
+                    'reviewed_at' => now(),
+                ]);
+            } else {
+                $document->update([
+                    'module_version' => $manifest['version'],
+                    'ai_output_encrypted' => json_encode($cleaned),
+                    'status' => 'requires_review',
+                ]);
+            }
 
             if ($document->reservation && $document->reservation->status === 'active') {
                 $tokens->consume($document->reservation);
             }
+        } catch (\App\Services\Append\AppendException $e) {
+            $this->failGracefully($document, $tokens, $e->getMessage());
+            return;
         } catch (\App\Services\Ai\AiProviderException $e) {
             if ($this->attempts() >= $this->tries) {
                 $this->failGracefully($document, $tokens, 'AI processing failed. Your token was not used.');

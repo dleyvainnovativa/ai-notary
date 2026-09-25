@@ -27,6 +27,7 @@ class Document extends Model
         'review_data_encrypted',
         'review_saved_at',
         'review_version',
+        'parent_document_id',
     ];
 
     protected $casts = [
@@ -67,6 +68,17 @@ class Document extends Model
     public function reservation()
     {
         return $this->belongsTo(TokenReservation::class, 'reservation_id');
+    }
+
+    /** The document an appended deed was merged into (operaciones acumuladas). */
+    public function parent()
+    {
+        return $this->belongsTo(Document::class, 'parent_document_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Document::class, 'parent_document_id');
     }
 
     public function markFailed(string $reason): void

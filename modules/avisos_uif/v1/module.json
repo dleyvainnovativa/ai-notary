@@ -26,5 +26,13 @@
     "address_keys": [
       "domicilio"
     ]
+  },
+  "append": {
+    "array": "operaciones",
+    "input": "escritura",
+    "enabled_when": {
+      "operaciones_acumuladas": "1"
+    },
+    "label": "Agregar escritura (operación acumulada)"
   }
 }

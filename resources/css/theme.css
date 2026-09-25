@@ -1060,3 +1060,12 @@ a { color: var(--text); }
 /* ---------- Review PDF preview modal ---------- */
 .rv-pdf__frame { display: block; width: 100%; height: 78vh; border: 0; background: #525659; border-radius: 0 0 var(--radius) var(--radius); }
 @media (max-width: 640px) { .rv-pdf__frame { height: 70vh; } }
+
+/* ---------- Append deed (operaciones acumuladas) ---------- */
+.rv-append { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin-top: 0.25rem;
+    padding: 0.75rem; border: 1px dashed color-mix(in srgb, var(--primary) 45%, var(--border)); border-radius: var(--radius); }
+.rv-append[hidden] { display: none; }
+.rv-append__hint { font-size: 0.78rem; color: var(--text-muted); }
+.rv-row > .rv-note { margin: 0 0 0.75rem; }
+.rv-note[data-kind="warning"] { color: #b45309; background: rgba(217, 119, 6, 0.08); border-color: rgba(217, 119, 6, 0.3); }
+[data-theme="dark"] .rv-note[data-kind="warning"] { color: #fbbf24; }

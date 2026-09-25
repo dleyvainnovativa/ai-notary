@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\AvisosUif\V1;
+namespace Modules\AvisosUif\V1;  // reference copy of the SAT-verified single-operation exporter (tests only)
 
 use App\Modules\ExporterContract;
 use Carbon\Carbon;
@@ -62,26 +62,19 @@ class Exporter implements ExporterContract
         $ops = $json['operaciones'] ?? [];
         $lines[] = '930004-DetalleOperaciones:' . count($ops);
 
-        // Per operation. GUIDs must be unique across the WHOLE aviso:
-        //  - group 0 (operations + personas morales) uses ONE running sequence, so
-        //    operation 2's GUID never collides with operation 1's personas;
-        //  - each operation's inmueble gets its own GUID (group 1, seq = operation #),
-        //    so its 930017 liquidaciones link to the right inmueble.
-        // With a single operation this yields exactly the GUIDs verified against the
-        // real SAT avisos (op …0001, morales …0002+, inmueble 0001-…0001).
-        // Multi-operation output is NOT yet verified against a SAT-accepted file.
+        // Per operation — but the TXT examples only ever show one operation's blocks.
+        // We emit for each operation; SAT files in examples have one op.
         $opCounter = 0;
-        $guidSeq = 0;
         foreach ($ops as $op) {
             $opCounter++;
-            $opGuid = $this->guid($guidPrefix, 0, ++$guidSeq);   // ...-0000-...-00000000000N
+            $opGuid = $this->guid($guidPrefix, 0, $opCounter);   // ...-0000-...-00000000000N
 
             // 930005 — operacion: fecha|tipoTransmision|opGuid
             $lines[] = '930005-Datos de la operacion-grid:' .
                 $date($op['fecha_operacion'] ?? null) . '|' .
                 $v($op['tipo_transmision'] ?? '') . '|' . $opGuid;
 
-            $personGuidSeq = $guidSeq; // continues the aviso-wide sequence
+            $personGuidSeq = 1; // increments across all persons in this op
 
             // Split adquirentes (compradores) by persona_case
             [$compFisicas, $compMorales] = $this->splitByCase($op['adquirentes'] ?? []);
@@ -99,15 +92,13 @@ class Exporter implements ExporterContract
             $personGuidSeq = $this->emitPersonasFisicas($lines, '930011-Datos vendedor Persona Fisica-grid', $vendFisicas, $guidPrefix, $opGuid, $personGuidSeq, $v, $date);
             $personGuidSeq = $this->emitPersonasMorales($lines, '930012-Datos vendedor Persona Moral-grid', '930013-Representante legal realiza operacion a nombre persona moral-grid', $vendMorales, $guidPrefix, $opGuid, $personGuidSeq, $v, $date);
 
-            $guidSeq = $personGuidSeq;   // next operation continues after this one's personas
-
             $lines[] = '930014-Datos vendedor fideicomiso-grid:' . str_repeat('|', 24);
             $lines[] = '930015-Representante legal realiza operacion a nombre fideicomiso-grid:' . str_repeat('|', 6);
 
             // 930016 — inmueble
             $inm = $op['inmueble'] ?? [];
             $dom = $inm['domicilio'] ?? [];
-            $inmGuid = $this->guid($guidPrefix, 1, $opCounter); // third group = 0001, one per operation
+            $inmGuid = $this->guid($guidPrefix, 1, 1); // third group = 0001
             $lines[] = '930016-Datos inmuebles-grid:' .
                 $v($inm['tipo_bien'] ?? '') . '|' .
                 $this->money($inm['valor_pactado'] ?? 0) . '|' .

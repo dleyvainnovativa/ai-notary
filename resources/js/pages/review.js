@@ -6,6 +6,7 @@ import { modal } from '../helpers/modal.js';
 
 let SCHEMA, DOCUMENT_ID;
 let INITIAL_LOOKUPS = [];   // CP lookups fired while rendering (settle before autosave arms)
+let APPEND = null;          // module "append" config (operaciones acumuladas) or null
 
 /* ---------- Help modal ---------- */
 let helpModalEl = null;
@@ -107,6 +108,7 @@ function personaTipoSelect(tipo) {
 function renderReview(container, payload) {
     SCHEMA = payload.schema;
     INITIAL_LOOKUPS = [];
+    APPEND = payload.append ?? null;
     resetAutosave(payload.draft);
     container.innerHTML = '';
 
@@ -215,12 +217,18 @@ function renderReview(container, payload) {
     refreshErrorBadges();      // initial badge state from server issues
     initScrollSpy();
 
-    container.addEventListener('input', onChange);
-    container.addEventListener('change', onChange);
-    container.addEventListener('change', onDeriveSource);   // CURP/RFC → fecha_nacimiento / fecha_constitucion
-    container.addEventListener('input', scheduleAutosave);
-    container.addEventListener('change', scheduleAutosave);
+    // The form re-renders in place (e.g. after an appended deed): bind once.
+    if (!container.dataset.rvBound) {
+        container.dataset.rvBound = '1';
+        container.addEventListener('input', onChange);
+        container.addEventListener('change', onChange);
+        container.addEventListener('change', onDeriveSource);   // CURP/RFC → fecha_nacimiento / fecha_constitucion
+        container.addEventListener('input', scheduleAutosave);
+        container.addEventListener('change', scheduleAutosave);
+        container.addEventListener('change', updateAppendVisibility);
+    }
     armAutosaveWhenSettled();
+    ensureAppendControls();
 
     const saveBtn = document.getElementById('review-save');
     if (saveBtn && !saveBtn.dataset.bound) {
@@ -1071,6 +1079,9 @@ function applyNotes(notes) {
         if (target.classList.contains('rv-subsection')) {
             const title = target.querySelector(':scope > .rv-subsection__title');
             title ? title.after(note) : target.prepend(note);
+        } else if (target.classList.contains('rv-row')) {
+            const head = target.querySelector(':scope > .rv-row__head');
+            head ? head.after(note) : target.prepend(note);
         } else {
             target.classList.add('has-note');
             const err = target.querySelector(':scope > .rv-field__error');
@@ -1199,6 +1210,179 @@ function setDraftStatus(state) {
     el.dataset.state = state;
     el.textContent = text;
     el.hidden = !text;
+}
+
+/* ---------- Append a deed (operaciones acumuladas) ----------
+ * Shown under the module's target array when its enabled_when values match
+ * (UIF: ¿Operaciones acumuladas? = Sí). The server saves the current form,
+ * processes the deed as a child document (1 token) and merges its operation(s)
+ * into this document's draft; we then re-render from the server.
+ */
+const APPEND_POLL_MS = 2000;
+const APPEND_MAX_POLLS = 90;
+
+function ensureAppendControls() {
+    if (!APPEND || DOCUMENT_ID === 'debug') return;
+    const wrap = document.querySelector(`.rv-array[data-path="${cssEsc(APPEND.array)}"]`);
+    if (!wrap || wrap.querySelector(':scope > .rv-append')) return;
+
+    const box = document.createElement('div');
+    box.className = 'rv-append';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-sm btn-outline-primary';
+    btn.id = 'rv-append-btn';
+    btn.innerHTML = '<i class="fa-solid fa-file-circle-plus me-1"></i> ';
+    btn.append(document.createTextNode(APPEND.label));
+    btn.addEventListener('click', openAppendModal);
+    const hint = document.createElement('span');
+    hint.className = 'rv-append__hint';
+    hint.textContent = 'Sube la escritura de la siguiente operación: se extrae su operación y se agrega a esta lista. Usa 1 token.';
+    box.append(btn, hint);
+    wrap.appendChild(box);
+    updateAppendVisibility();
+}
+
+function appendEnabled() {
+    if (!APPEND) return false;
+    return Object.entries(APPEND.enabled_when || {}).every(([field, expected]) => {
+        const el = document.querySelector(`.rv-input[data-path="${cssEsc(field)}"]`);
+        return el && String(el.value) === String(expected);
+    });
+}
+
+function updateAppendVisibility() {
+    const box = document.querySelector('.rv-append');
+    if (box) box.hidden = !appendEnabled();
+}
+
+function appendModalEl() {
+    let el = document.getElementById('rv-append-modal');
+    if (el) return el;
+    el = document.createElement('div');
+    el.className = 'modal fade';
+    el.id = 'rv-append-modal';
+    el.tabIndex = -1;
+    el.dataset.bsBackdrop = 'static';
+    el.setAttribute('aria-labelledby', 'rv-append-title');
+    el.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rv-append-title">Agregar escritura</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar" data-append-closable></button>
+                </div>
+                <div class="modal-body">
+                    <div data-append-state="pick">
+                        <p class="mb-2" id="rv-append-target"></p>
+                        <input type="file" class="form-control" id="rv-append-file"
+                               accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                        <div class="form-text">PDF o Word (.docx). Usa 1 token; si el procesamiento falla, el token se devuelve.</div>
+                    </div>
+                    <div data-append-state="working" hidden class="text-center py-3">
+                        <div class="spinner-border text-primary mb-2" role="status"></div>
+                        <div id="rv-append-progress">Subiendo…</div>
+                        <div class="form-text">No cierres esta ventana; suele tardar menos de un minuto.</div>
+                    </div>
+                    <div data-append-state="failed" hidden>
+                        <div class="alert alert-danger mb-0" id="rv-append-error"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-append-closable>Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="rv-append-submit" disabled>
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Procesar escritura
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    document.body.appendChild(el);
+    el.querySelector('#rv-append-file').addEventListener('change', (e) => {
+        el.querySelector('#rv-append-submit').disabled = !e.target.files?.[0];
+    });
+    el.querySelector('#rv-append-submit').addEventListener('click', submitAppend);
+    return el;
+}
+
+function setAppendState(state, message = '') {
+    const el = appendModalEl();
+    el.querySelectorAll('[data-append-state]').forEach(p => { p.hidden = p.dataset.appendState !== state; });
+    const working = state === 'working';
+    el.querySelectorAll('[data-append-closable]').forEach(b => { b.disabled = working; });
+    const submit = el.querySelector('#rv-append-submit');
+    submit.hidden = state !== 'pick';
+    if (state === 'working') el.querySelector('#rv-append-progress').textContent = message || 'Subiendo…';
+    if (state === 'failed') el.querySelector('#rv-append-error').textContent = message || 'No se pudo procesar la escritura.';
+}
+
+function openAppendModal() {
+    const el = appendModalEl();
+    const count = collect(SCHEMA.fields, '')[APPEND.array]?.length ?? 0;
+    el.querySelector('#rv-append-title').textContent = APPEND.label;
+    el.querySelector('#rv-append-target').textContent = `Se agregará como operación #${count + 1}.`;
+    const file = el.querySelector('#rv-append-file');
+    file.value = '';
+    el.querySelector('#rv-append-submit').disabled = true;
+    setAppendState('pick');
+    modal.show('rv-append-modal');
+}
+
+async function submitAppend() {
+    const el = appendModalEl();
+    const file = el.querySelector('#rv-append-file').files?.[0];
+    if (!file) return;
+
+    // Pause autosave: the server saves this exact state, then merges into it.
+    clearTimeout(AUTOSAVE.timer);
+    AUTOSAVE.ready = false;
+    const data = collect(SCHEMA.fields, '');
+    const newIndex = data[APPEND.array]?.length ?? 0;
+
+    setAppendState('working', 'Subiendo…');
+    const fd = new FormData();
+    fd.append(APPEND.input, file);
+    fd.append('data', JSON.stringify(data));
+
+    let childId;
+    try {
+        const res = await http.post(`/documents/${DOCUMENT_ID}/append`, fd);
+        childId = res.document_id;
+        if (res.draft) AUTOSAVE.draft.version = res.draft.version;   // server saved `data`
+        AUTOSAVE.lastJson = JSON.stringify(data);
+    } catch (err) {
+        const msg = err?.status === 402 ? 'No tienes tokens disponibles. Compra más en Facturación.'
+            : (Object.values(err?.data?.errors ?? {})[0]?.[0] ?? err?.data?.message ?? 'No se pudo subir la escritura.');
+        setAppendState('failed', msg);
+        AUTOSAVE.ready = true;
+        return;
+    }
+
+    const labels = { uploaded: 'En fila…', extracting: 'Extrayendo texto…', processing: 'Analizando con IA…' };
+    for (let i = 0; i < APPEND_MAX_POLLS; i++) {
+        await new Promise(r => setTimeout(r, APPEND_POLL_MS));
+        let st;
+        try {
+            st = await http.get(`/documents/${childId}/status`);
+        } catch {
+            continue;   // transient network error: keep polling
+        }
+        if (st.status === 'completed') {
+            modal.hide('rv-append-modal');
+            notify.success('Operación agregada. Revisa sus datos.');
+            await initReview(DOCUMENT_ID);   // re-render from the merged draft
+            document.querySelector(`.rv-row[data-path="${cssEsc(APPEND?.array ?? '')}.${newIndex}"]`)
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+        if (st.status === 'failed') {
+            setAppendState('failed', st.error || 'No se pudo procesar la escritura.');
+            AUTOSAVE.ready = true;
+            return;
+        }
+        setAppendState('working', labels[st.status] ?? 'Procesando…');
+    }
+    setAppendState('failed', 'Sigue procesando. Recarga la página en unos minutos para ver la operación agregada.');
+    AUTOSAVE.ready = true;
 }
 
 /* ---------- PDF preview ----------

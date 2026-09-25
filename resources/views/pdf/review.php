@@ -115,6 +115,7 @@ $renderBlocks = function (array $blocks, int $depth = 0) use (&$renderBlocks, $r
                     echo '<table class="card__head"><tr><td class="card__title">' . $e($card['title']) . '</td>';
                     echo '<td class="card__badge-cell">' . ($card['badge'] ? '<span class="badge">' . $e($card['badge']) . '</span>' : '') . '</td></tr></table>';
                     echo '<div class="card__body">';
+                    $renderNotes($card['notes'] ?? []);
                     $renderBlocks($card['blocks'], $depth + 1);
                     echo '</div></div>';
                 }

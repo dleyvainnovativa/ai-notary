@@ -18,6 +18,7 @@ class DashboardController extends Controller
         // Only NULL-ness of the encrypted columns is needed (can the review still open?),
         // so never load/decrypt their contents here.
         $recent = Document::where('user_id', $user->id)
+            ->whereNull('parent_document_id')   // appended deeds live inside their parent
             ->select(['id', 'module_slug', 'original_filename', 'status', 'last_error', 'updated_at', 'review_saved_at'])
             ->selectRaw('(review_data_encrypted IS NOT NULL OR ai_output_encrypted IS NOT NULL) as has_data')
             ->latest('updated_at')
@@ -38,6 +39,7 @@ class DashboardController extends Controller
         return view('dashboard', [
             'balance' => $tokens->balance($user),
             'processedCount' => Document::where('user_id', $user->id)
+                ->whereNull('parent_document_id')
                 ->whereIn('status', ['requires_review', 'completed'])->count(),
             'moduleCount' => count($modules),
             'recent' => $recent,

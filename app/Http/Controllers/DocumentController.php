@@ -55,7 +55,22 @@ class DocumentController extends Controller
             'formats' => $this->registry->manifest($document->module_slug)['exports'] ?? ['txt'],
             'status' => $document->status,
             'draft' => $this->draftInfo($document),
+            'append' => $this->appendConfig($document),
         ]);
+    }
+
+    /** Module's "append" block (operaciones acumuladas) for the form, or null. */
+    private function appendConfig(Document $document): ?array
+    {
+        if ($document->status !== 'requires_review') return null;
+        $cfg = $this->registry->manifest($document->module_slug)['append'] ?? null;
+        if (!$cfg || empty($cfg['array'])) return null;
+        return [
+            'array' => $cfg['array'],
+            'input' => $cfg['input'] ?? 'escritura',
+            'enabled_when' => $cfg['enabled_when'] ?? [],
+            'label' => $cfg['label'] ?? 'Agregar escritura',
+        ];
     }
 
     /**
@@ -168,14 +183,7 @@ class DocumentController extends Controller
      */
     private function notePaths(array $notes): array
     {
-        return array_values(array_map(function ($n) {
-            $flattened = in_array($n['input'] ?? '', ['escritura', 'calculo'], true);
-            return [
-                'path' => $flattened ? $n['path'] : trim(($n['input'] ?? '') . '.' . $n['path'], '.'),
-                'kind' => $n['kind'] ?? 'info',
-                'message' => $n['message'] ?? '',
-            ];
-        }, $notes));
+        return \App\Support\ReviewData::notePaths($notes);
     }
 
     /** Re-run the engine on submitted (corrected) data; authoritative validation + diffs. */
@@ -281,12 +289,7 @@ class DocumentController extends Controller
 
     private function flatten(?array $raw): array
     {
-        if ($raw === null) return [];
-        unset($raw['_meta']); // resolver notes, never form data
-        if (isset($raw['escritura']) || isset($raw['calculo'])) {
-            return array_merge($raw['escritura'] ?? [], $raw['calculo'] ?? []);
-        }
-        return $raw;
+        return \App\Support\ReviewData::flatten($raw);
     }
 
     private function resolveCatalogs(array $schema, string $dir): array

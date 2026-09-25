@@ -165,6 +165,7 @@ class ReviewPdfPresenter
             $cards[] = [
                 'title' => $itemLabel . ' ' . ($i + 1) . ($name ? ' · ' . $name : ''),
                 'badge' => $this->rowBadge($itemSchema, $row),
+                'notes' => $this->notes["{$path}.{$i}"] ?? [],
                 'blocks' => $this->blocks($itemSchema, $row, "{$path}.{$i}", $kase),
             ];
         }

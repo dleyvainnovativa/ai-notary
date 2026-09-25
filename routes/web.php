@@ -47,6 +47,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
     Route::get('/documents/{document}/status', [UploadController::class, 'status'])->name('document.status');
+    Route::post('/documents/{document}/append', [UploadController::class, 'append'])->name('document.append');
     Route::get('/debug/review-data', [DocumentController::class, 'reviewDebug'])
         ->middleware('auth')->name('debug.review-data');
     Route::get('/debug-review', fn() => view('debug-review'))
