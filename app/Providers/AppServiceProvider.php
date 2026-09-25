@@ -16,6 +16,12 @@ class AppServiceProvider extends ServiceProvider
             \App\Services\Ai\AiExtractor::class,
             \App\Services\Ai\OpenAiExtractor::class,
         );
+
+        // Review PDF: dompdf temp/font cache inside storage/ (writable on shared hosting)
+        $this->app->bind(\App\Services\Pdf\ReviewPdfRenderer::class, fn() => new \App\Services\Pdf\ReviewPdfRenderer(
+            null,
+            storage_path('app/dompdf'),
+        ));
     }
 
     /**

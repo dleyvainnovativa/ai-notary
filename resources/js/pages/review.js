@@ -1,6 +1,7 @@
 import Choices from 'choices.js';
 import { http } from '../helpers/http.js';
 import { notify } from '../helpers/toast.js';
+import { modal } from '../helpers/modal.js';
 
 
 let SCHEMA, DOCUMENT_ID;
@@ -226,6 +227,7 @@ function renderReview(container, payload) {
         saveBtn.dataset.bound = '1';
         saveBtn.addEventListener('click', save);
     }
+    ensurePdfButton();
 }
 
 /* ---------- Real entry (from the wizard) ---------- */
@@ -1197,6 +1199,106 @@ function setDraftStatus(state) {
     el.dataset.state = state;
     el.textContent = text;
     el.hidden = !text;
+}
+
+/* ---------- PDF preview ----------
+ * Renders the CURRENT form state (unsaved edits included) server-side; the
+ * server also stores it as the draft, so we adopt the returned version.
+ */
+let PDF_URL = null;
+
+function ensurePdfButton() {
+    const saveBtn = document.getElementById('review-save');
+    if (!saveBtn || DOCUMENT_ID === 'debug' || document.getElementById('review-pdf')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'review-pdf';
+    btn.className = 'btn btn-outline-secondary me-2';
+    btn.innerHTML = '<i class="fa-solid fa-file-pdf me-1"></i> Vista previa PDF';
+    btn.addEventListener('click', previewPdf);
+    saveBtn.parentElement.insertBefore(btn, saveBtn);
+}
+
+async function previewPdf() {
+    const btn = document.getElementById('review-pdf');
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Generando…';
+
+    const data = collect(SCHEMA.fields, '');
+    try {
+        const res = await fetch(`/documents/${DOCUMENT_ID}/pdf`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/pdf',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ data }),
+        });
+        if (!res.ok) {
+            notify.error('No se pudo generar el PDF.');
+            return;
+        }
+        const v = parseInt(res.headers.get('X-Draft-Version') ?? '', 10);
+        if (!Number.isNaN(v)) syncDraftAfterExplicitSave({ version: v, saved_at: new Date().toISOString() }, data);
+
+        const blob = await res.blob();
+        const match = (res.headers.get('Content-Disposition') || '').match(/filename="?([^"]+)"?/);
+        showPdfModal(blob, match ? match[1] : 'revision.pdf');
+    } catch {
+        notify.error('Error al generar el PDF.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = original;
+    }
+}
+
+function showPdfModal(blob, filename) {
+    let el = document.getElementById('rv-pdf-modal');
+    if (!el) {
+        el = document.createElement('div');
+        el.className = 'modal fade';
+        el.id = 'rv-pdf-modal';
+        el.tabIndex = -1;
+        el.setAttribute('aria-labelledby', 'rv-pdf-title');
+        el.innerHTML = `
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content rv-pdf">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rv-pdf-title">Vista previa PDF</h5>
+                        <div class="ms-auto d-flex align-items-center gap-2">
+                            <a class="btn btn-sm btn-outline-secondary" id="rv-pdf-open" target="_blank" rel="noopener">
+                                <i class="fa-solid fa-up-right-from-square me-1"></i> Abrir en pestaña
+                            </a>
+                            <a class="btn btn-sm btn-primary" id="rv-pdf-download">
+                                <i class="fa-solid fa-download me-1"></i> Descargar
+                            </a>
+                            <button type="button" class="btn-close ms-1" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                    </div>
+                    <div class="modal-body p-0">
+                        <iframe id="rv-pdf-frame" class="rv-pdf__frame" title="Vista previa PDF"></iframe>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(el);
+        // Free the blob when the modal closes (it holds personal data in memory).
+        el.addEventListener('hidden.bs.modal', () => {
+            document.getElementById('rv-pdf-frame').src = 'about:blank';
+            if (PDF_URL) { URL.revokeObjectURL(PDF_URL); PDF_URL = null; }
+        });
+    }
+
+    if (PDF_URL) URL.revokeObjectURL(PDF_URL);
+    PDF_URL = URL.createObjectURL(blob);
+    document.getElementById('rv-pdf-frame').src = PDF_URL;
+    document.getElementById('rv-pdf-open').href = PDF_URL;
+    const dl = document.getElementById('rv-pdf-download');
+    dl.href = PDF_URL;
+    dl.download = filename;
+    modal.show('rv-pdf-modal');
 }
 
 /* ---------- Save ---------- */

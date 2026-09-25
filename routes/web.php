@@ -18,6 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents/{document}/review-data', [DocumentController::class, 'reviewData'])->name('document.review-data');
     Route::post('/documents/{document}/review-validate', [DocumentController::class, 'reviewValidate'])->name('document.review-validate');
     Route::post('/documents/{document}/draft', [DocumentController::class, 'saveDraft'])->name('document.draft');
+    Route::match(['get', 'post'], '/documents/{document}/pdf', [DocumentController::class, 'pdf'])->name('document.pdf');
     Route::post('/documents/{document}/export', [DocumentController::class, 'export'])
         ->middleware('auth')->name('document.export');
 

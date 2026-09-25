@@ -27,6 +27,42 @@ class SchemaEngine
         return new EngineResult($data, $this->issues);
     }
 
+    /* ---------- Public helpers (PDF presenter, future consumers) ---------- */
+
+    /** Persona case of an array row ('fisica', 'nacional_moral', …) or null when the array has no classifier. */
+    public function caseForRow(?array $classifier, array $row): ?string
+    {
+        return $classifier ? $this->classifyRow($classifier, $row) : null;
+    }
+
+    /**
+     * Would the review form show this field? Mirrors review.js applyConditional():
+     * case rules (required_in_cases / show_in_cases) inside classified rows, else
+     * enabled_if / required_if against the sibling values.
+     */
+    public function isVisible(array $def, array $scope, ?string $kase): bool
+    {
+        if (!empty($def['required_in_cases']) || !empty($def['show_in_cases'])) {
+            return $kase !== null && (
+                in_array($kase, $def['required_in_cases'] ?? [], true)
+                || in_array($kase, $def['show_in_cases'] ?? [], true)
+            );
+        }
+        $cond = $def['enabled_if'] ?? $def['required_if'] ?? null;
+        return $cond ? $this->conditionMet($cond, $scope) : true;
+    }
+
+    /** Is this (visible) field required here? */
+    public function isRequired(array $def, array $scope, ?string $kase): bool
+    {
+        if (!empty($def['required_in_cases'])) {
+            return $kase !== null && in_array($kase, $def['required_in_cases'], true);
+        }
+        if (!empty($def['required_if'])) return $this->conditionMet($def['required_if'], $scope);
+        if (!empty($def['required_when'])) return $this->evalRequiredWhen($def, $scope);
+        return !empty($def['required']);
+    }
+
     /**
      * Dispatches classification to a named rule declared on the array's
      * 'classifier' => ['rule' => '...']. Additive seam: declaranot uses

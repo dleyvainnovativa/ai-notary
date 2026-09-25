@@ -85,6 +85,9 @@
                             <td class="doc-list__date">{{ $doc['updated_at']?->format('d/m/Y H:i') }}</td>
                             <td class="text-end">
                                 @if ($doc['can_open'])
+                                    <a href="{{ route('document.pdf', $doc['id']) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary me-1" title="Ver PDF de revisión" aria-label="Ver PDF de revisión">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </a>
                                     <a href="{{ route('upload', ['document' => $doc['id']]) }}" class="btn btn-sm {{ $doc['status'] === 'requires_review' ? 'btn-primary' : 'btn-outline-secondary' }}">
                                         {{ $doc['status'] === 'requires_review' ? 'Continuar revisión' : 'Abrir' }}
                                     </a>

@@ -158,6 +158,7 @@ class Controller implements ModuleControllerContract
             ],
 
             'operaciones' => [
+                'item_label' => 'Operación',
                 'label' => 'Operaciones',
                 'type' => 'array',
                 'itemSchema' => [
@@ -165,6 +166,7 @@ class Controller implements ModuleControllerContract
                     'tipo_transmision' => ['label' => 'Tipo Transmisión', 'type' => 'select', 'required' => true, 'options' => $catTipoTransmision],
 
                     'adquirentes' => [
+                        'item_label' => 'Adquirente',
                         'col' => 'full',
                         'label' => 'Adquirentes',
                         'type' => 'array',
@@ -174,6 +176,7 @@ class Controller implements ModuleControllerContract
                     ],
 
                     'vendedores' => [
+                        'item_label' => 'Vendedor',
                         'col' => 'full',
                         'label' => 'Vendedores',
                         'type' => 'array',
@@ -187,12 +190,12 @@ class Controller implements ModuleControllerContract
                         'type' => 'object',
                         'itemSchema' => [
                             'tipo_bien' => ['label' => 'Tipo Bien', 'type' => 'select', 'required' => true, 'options' => $catTipoBienInmueble],
-                            'valor_pactado' => ['label' => 'Valor Pactado', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
+                            'valor_pactado' => ['label' => 'Valor Pactado', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true, 'money' => true],
                             'm2_terreno' => ['label' => 'M2 Terreno', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
                             'm2_construidos' => ['label' => 'M2 Construidos', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
                             'folio_real' => ['label' => 'Folio Real', 'type' => 'text', 'required' => true],
                             'num_instrumento' => ['label' => 'Núm. Instrumento', 'type' => 'text', 'required' => true],
-                            'valor_avaluo' => ['label' => 'Valor Avalúo', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
+                            'valor_avaluo' => ['label' => 'Valor Avalúo', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true, 'money' => true],
                             'domicilio' => [
                                 'label' => 'Domicilio del Inmueble',
                                 'type' => 'object',
@@ -210,6 +213,7 @@ class Controller implements ModuleControllerContract
                     ],
 
                     'pagos' => [
+                        'item_label' => 'Pago',
                         'label' => 'Liquidaciones / Pagos',
                         'type' => 'array',
                         'col' => 'full',
@@ -218,7 +222,7 @@ class Controller implements ModuleControllerContract
                             'forma_pago' => ['label' => 'Forma Pago', 'type' => 'select', 'required' => true, 'options' => $catFormasPago],
                             'instrumento' => ['label' => 'Instrumento', 'type' => 'select', 'required' => true, 'options' => $catInstrumentos],
                             'moneda' => ['label' => 'Moneda', 'type' => 'select', 'required' => true, 'options' => $catMonedas],
-                            'monto' => ['label' => 'Monto', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true],
+                            'monto' => ['label' => 'Monto', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true, 'money' => true],
                         ],
                     ],
                 ],

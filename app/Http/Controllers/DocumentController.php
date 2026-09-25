@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Modules\ModuleRegistry;
 use App\Services\CatalogService;
+use App\Services\Pdf\ReviewPdfPresenter;
+use App\Services\Pdf\ReviewPdfRenderer;
 use App\Services\Schema\SchemaEngine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -85,6 +87,71 @@ class DocumentController extends Controller
             $locked->saveDraft($data);
             return response()->json(['draft' => $this->draftInfo($locked)]);
         });
+    }
+
+    /**
+     * Review PDF (every module, one generic template).
+     *  POST  data = current form state → rendered AND saved as the draft (like validate)
+     *  GET   stored draft (or AI output) → e.g. from the dashboard; ?download=1 forces a download
+     */
+    public function pdf(Request $request, Document $document, ReviewPdfPresenter $presenter, ReviewPdfRenderer $renderer)
+    {
+        abort_unless($document->user_id === auth()->id(), 403);
+        abort_unless(in_array($document->status, Document::REVIEWABLE, true), 409, 'El documento aún no está listo.');
+
+        $module = $this->registry->controller($document->module_slug);
+        $dir = $this->registry->moduleDir($document->module_slug);
+        $manifest = $this->registry->manifest($document->module_slug);
+        $formSchema = $module->formSchema();
+
+        $raw = json_decode($document->ai_output_encrypted ?? '', true) ?: [];
+        $notes = $this->notePaths($raw['_meta']['notes'] ?? []);
+
+        if ($request->isMethod('post')) {
+            $data = $request->input('data');
+            abort_unless(is_array($data), 422, 'Datos inválidos.');
+            $document->saveDraft($data);
+        } else {
+            abort_unless($document->isReviewable(), 410, 'Los datos de este documento ya fueron eliminados por privacidad.');
+            unset($raw['_meta']);
+            $data = $document->review_data_encrypted ?? $this->flatten($raw);
+        }
+
+        $data = $this->engine->process($formSchema, $data, $dir)->data;   // derived values (dates from CURP…)
+        $sections = $presenter->present($formSchema, $data, $notes);
+
+        $reference = (string) ($data['numero_escritura'] ?? $data['referencia_aviso'] ?? $document->id);
+        $tz = config('app.display_timezone', 'America/Mexico_City');
+        $doc = [
+            'module' => $manifest['name'] ?? $document->module_slug,
+            'reference' => $reference,
+            'generated_at' => now()->timezone($tz)->format('d/m/Y H:i'),
+            'status' => ['requires_review' => 'Por revisar', 'completed' => 'Exportado'][$document->status] ?? null,
+            'notaria' => $this->notariaLine($document),
+            'draft_saved_at' => $document->review_saved_at?->timezone($tz)->format('d/m/Y H:i'),
+        ];
+
+        $filename = $document->module_slug . '_' . preg_replace('/[^A-Za-z0-9_-]/', '', $reference) . '_revision.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return response($renderer->pdf($doc, $sections), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => $disposition . '; filename="' . $filename . '"',
+            'Cache-Control' => 'no-store, private',          // personal data: never cache
+            'X-Draft-Version' => (string) $document->review_version,
+        ]);
+    }
+
+    private function notariaLine(Document $document): ?string
+    {
+        $p = $document->user->notarioProfile;
+        if (!$p) return null;
+        $parts = array_filter([
+            $p->num_notaria ? 'Notaría Pública No. ' . $p->num_notaria : null,
+            $p->nombre_notario,
+            $p->entidad_federativa,
+        ], fn($v) => is_string($v) && trim($v) !== '');
+        return $parts ? implode(' · ', $parts) : null;
     }
 
     private function draftInfo(Document $document): array
