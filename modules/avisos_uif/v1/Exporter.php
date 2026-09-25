@@ -151,14 +151,26 @@ class Exporter implements ExporterContract
      * avisos (026640/57/58/59): física=29, moral=27, rep=7 cols.
      */
 
+    /**
+     * UIF tipo_persona (catalogo_persona): 1 = física, 2 = moral, 3 = fideicomiso.
+     * (Previously this reused declaranot's rule, where '2' means *extranjera*, so a
+     * persona moral selected in the UIF form was emitted as a física line.)
+     * Without a usable tipo, fall back to the RFC shape: 12 chars = moral, else física.
+     * Fideicomisos are not emitted yet (930009/930014 stay empty) — see TODO.
+     */
     private function splitByCase(array $personas): array
     {
         $fisicas = [];
         $morales = [];
         foreach ($personas as $p) {
-            $case = $this->personaCase($p['tipo_persona'] ?? null, $p['rfc'] ?? null);
-            if (str_contains($case, 'moral')) $morales[] = $p;
-            else $fisicas[] = $p; // fisica + unknown default to física
+            $tipo = (string) ($p['tipo_persona'] ?? '');
+            if ($tipo === '3') continue; // TODO: fideicomiso columns (930009/930014) not verified yet
+            if ($tipo === '2') { $morales[] = $p; continue; }
+            if ($tipo === '1') { $fisicas[] = $p; continue; }
+
+            $rfc = strtoupper(trim((string) ($p['rfc'] ?? '')));
+            if (preg_match('/^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/u', $rfc)) $morales[] = $p;
+            else $fisicas[] = $p;
         }
         return [$fisicas, $morales];
     }

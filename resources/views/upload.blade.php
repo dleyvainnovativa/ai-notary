@@ -100,6 +100,28 @@
                 </button>
             </div>
         </form>
+
+        {{-- Import an existing TXT (modules with an importer) — no AI, no token --}}
+        @php
+            $importable = array_keys(array_filter($modules, fn($m) => !empty($m['importer_class'])));
+        @endphp
+        @if ($importable)
+        <div class="import-txt" id="import-txt" data-importable='@json($importable)' hidden>
+            <div class="import-txt__text">
+                <i class="fa-solid fa-file-import import-txt__icon"></i>
+                <div>
+                    <div class="import-txt__title">¿Ya tienes el archivo TXT?</div>
+                    <div class="import-txt__desc">Impórtalo para revisarlo, generar el PDF o volver a exportarlo. No usa tokens.</div>
+                </div>
+            </div>
+            <div class="import-txt__actions">
+                <input type="file" id="import-file" class="form-control form-control-sm" accept=".txt,text/plain" aria-label="Archivo TXT">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="import-submit" disabled>
+                    <i class="fa-solid fa-file-import me-1"></i> Importar TXT
+                </button>
+            </div>
+        </div>
+        @endif
     </div>
 
     {{-- ============ STEP 2: PROCESSING ============ --}}

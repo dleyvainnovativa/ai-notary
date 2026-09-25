@@ -16,6 +16,7 @@
   ],
   "controller_class": "Modules\\Declaranot\\V1\\Controller",
   "exporter_class": "Modules\\Declaranot\\V1\\Exporter",
+  "importer_class": "Modules\\Declaranot\\V1\\Importer",
   "references": {
     "deed_date": [
       "escritura.fecha_firma_escritura"

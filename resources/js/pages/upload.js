@@ -69,6 +69,8 @@ export function initUpload() {
         }
     });
 
+    initImport(moduleSelect);
+
     // --- try again ---
     document.getElementById('try-again')?.addEventListener('click', () => {
         resetWizard();
@@ -133,6 +135,47 @@ function initDropzone(dz) {
     dz._clear = clear; // expose for resetWizard
 }
 function clearDropzone(dz) { dz._clear?.(); }
+
+/* ---------- Import an existing TXT ----------
+ * Uses the module selected above; shown only for modules with an importer.
+ * The server parses the file, checks it re-exports identically, and creates a
+ * document ready for review — we go straight to it.
+ */
+function initImport(moduleSelect) {
+    const box = document.getElementById('import-txt');
+    if (!box) return;
+    let importable = [];
+    try { importable = JSON.parse(box.dataset.importable || '[]'); } catch { importable = []; }
+
+    const fileInput = document.getElementById('import-file');
+    const btn = document.getElementById('import-submit');
+    const sync = () => { box.hidden = !importable.includes(moduleSelect.value); };
+    moduleSelect.addEventListener('change', sync);
+    sync();
+
+    fileInput.addEventListener('change', () => { btn.disabled = !fileInput.files?.[0]; });
+
+    btn.addEventListener('click', async () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Importando…';
+
+        const fd = new FormData();
+        fd.append('module', moduleSelect.value);
+        fd.append('file', file);
+        try {
+            const res = await http.post('/import', fd);
+            window.location.href = res.redirect;
+        } catch (err) {
+            const msg = Object.values(err?.data?.errors ?? {})[0]?.[0] ?? err?.data?.message ?? 'No se pudo importar el archivo.';
+            notify.error(msg);
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    });
+}
 
 /* ---------- URL keeps the current document ---------- */
 function rememberDocument(documentId) {

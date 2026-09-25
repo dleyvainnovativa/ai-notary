@@ -35,6 +35,7 @@ class DocumentController extends Controller
 
         $raw = json_decode($document->ai_output_encrypted ?? '', true) ?: [];
         $notes = $raw['_meta']['notes'] ?? [];
+        $banners = $raw['_meta']['banners'] ?? [];
         unset($raw['_meta']);
 
         // The user's saved draft wins over the AI output (AI output stays the diff baseline).
@@ -52,6 +53,7 @@ class DocumentController extends Controller
                 'message' => $i->message,
             ])->values(),
             'notes' => $this->notePaths($notes),
+            'banners' => array_values(array_filter($banners, 'is_string')),
             'formats' => $this->registry->manifest($document->module_slug)['exports'] ?? ['txt'],
             'status' => $document->status,
             'draft' => $this->draftInfo($document),

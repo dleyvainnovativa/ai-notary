@@ -19,6 +19,7 @@
   ],
   "controller_class": "Modules\\AvisosUif\\V1\\Controller",
   "exporter_class": "Modules\\AvisosUif\\V1\\Exporter",
+  "importer_class": "Modules\\AvisosUif\\V1\\Importer",
   "references": {
     "deed_date": [
       "escritura.operaciones.*.fecha_operacion"

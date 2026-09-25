@@ -130,6 +130,18 @@ function renderReview(container, payload) {
     summary.hidden = true;
     formCol.appendChild(summary);
 
+    // File-level messages (e.g. from a TXT import)
+    for (const text of payload.banners || []) {
+        const b = document.createElement('div');
+        b.className = 'rv-banner';
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid fa-circle-info';
+        const span = document.createElement('span');
+        span.textContent = text;
+        b.append(icon, span);
+        formCol.appendChild(b);
+    }
+
     // Render sections
     SCHEMA.sections.forEach((section, i) => {
         const sectionId = `rv-sec-${i}`;

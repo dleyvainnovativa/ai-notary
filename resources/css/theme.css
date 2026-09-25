@@ -1069,3 +1069,21 @@ a { color: var(--text); }
 .rv-row > .rv-note { margin: 0 0 0.75rem; }
 .rv-note[data-kind="warning"] { color: #b45309; background: rgba(217, 119, 6, 0.08); border-color: rgba(217, 119, 6, 0.3); }
 [data-theme="dark"] .rv-note[data-kind="warning"] { color: #fbbf24; }
+
+/* ---------- Import TXT (upload step 1) ---------- */
+.import-txt { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1.25rem;
+    margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+.import-txt[hidden] { display: none; }
+.import-txt__text { display: flex; align-items: flex-start; gap: 0.75rem; }
+.import-txt__icon { font-size: 1.25rem; color: var(--primary); margin-top: 0.15rem; }
+.import-txt__title { font-weight: 600; font-size: 0.9rem; }
+.import-txt__desc { font-size: 0.8rem; color: var(--text-muted); }
+.import-txt__actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.import-txt__actions .form-control { max-width: 260px; }
+
+/* Review banners (file-level messages) */
+.rv-banner { display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.82rem; color: #1d4ed8;
+    background: rgba(37, 99, 235, 0.07); border: 1px solid rgba(37, 99, 235, 0.22); border-radius: var(--radius);
+    padding: 0.6rem 0.8rem; margin-bottom: 0.75rem; }
+.rv-banner i { margin-top: 0.15rem; }
+[data-theme="dark"] .rv-banner { color: #93c5fd; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); }

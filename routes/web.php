@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     })->name('upload');
 
     Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
+    Route::post('/import', [\App\Http\Controllers\ImportController::class, 'store'])->name('import.store');
     Route::get('/documents/{document}/status', [UploadController::class, 'status'])->name('document.status');
     Route::post('/documents/{document}/append', [UploadController::class, 'append'])->name('document.append');
     Route::get('/debug/review-data', [DocumentController::class, 'reviewDebug'])
