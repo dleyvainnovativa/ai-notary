@@ -2,6 +2,7 @@
 @section('title', 'Dashboard')
 @section('page_title', 'Dashboard')
 @php($navActive = 'dashboard')
+@php($statusLabels = ['uploaded' => ['En fila', 'neutral'],'extracting' => ['Extrayendo texto', 'neutral'],'processing' => ['Analizando con IA', 'neutral'],'requires_review' => ['Por revisar', 'warn'],'completed' => ['Exportado', 'ok'],'failed' => ['Fallido', 'fail']])
 
 @section('content')
 <div class="page-header">
@@ -39,16 +40,7 @@
     </a>
 </div>
 
-@php
-    $statusLabels = [
-        'uploaded' => ['En fila', 'neutral'],
-        'extracting' => ['Extrayendo texto', 'neutral'],
-        'processing' => ['Analizando con IA', 'neutral'],
-        'requires_review' => ['Por revisar', 'warn'],
-        'completed' => ['Exportado', 'ok'],
-        'failed' => ['Fallido', 'fail'],
-    ];
-@endphp
+
 
 <div class="doc-list mt-4">
     <div class="doc-list__head">
@@ -57,49 +49,49 @@
     </div>
 
     @if ($recent->isEmpty())
-        <p class="doc-list__empty">Aún no has procesado documentos.</p>
+    <p class="doc-list__empty">Aún no has procesado documentos.</p>
     @else
-        <div class="table-responsive">
-            <table class="table doc-list__table mb-0">
-                <thead>
-                    <tr>
-                        <th>Documento</th>
-                        <th>Módulo</th>
-                        <th>Estado</th>
-                        <th>Actualizado</th>
-                        <th class="text-end"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($recent as $doc)
-                        @php([$label, $tone] = $statusLabels[$doc['status']] ?? [$doc['status'], 'neutral'])
-                        <tr>
-                            <td class="doc-list__file" title="{{ $doc['filename'] }}">{{ $doc['filename'] }}</td>
-                            <td>{{ $doc['module'] }}</td>
-                            <td>
-                                <span class="doc-status doc-status--{{ $tone }}" @if ($doc['status'] === 'failed' && $doc['error']) title="{{ $doc['error'] }}" @endif>{{ $label }}</span>
-                                @if ($doc['has_draft'] && $doc['status'] === 'requires_review')
-                                    <span class="doc-list__draft">borrador guardado</span>
-                                @endif
-                            </td>
-                            <td class="doc-list__date">{{ $doc['updated_at']?->format('d/m/Y H:i') }}</td>
-                            <td class="text-end">
-                                @if ($doc['can_open'])
-                                    <a href="{{ route('document.pdf', $doc['id']) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary me-1" title="Ver PDF de revisión" aria-label="Ver PDF de revisión">
-                                        <i class="fa-solid fa-file-pdf"></i>
-                                    </a>
-                                    <a href="{{ route('upload', ['document' => $doc['id']]) }}" class="btn btn-sm {{ $doc['status'] === 'requires_review' ? 'btn-primary' : 'btn-outline-secondary' }}">
-                                        {{ $doc['status'] === 'requires_review' ? 'Continuar revisión' : 'Abrir' }}
-                                    </a>
-                                @elseif ($doc['in_progress'])
-                                    <a href="{{ route('upload', ['document' => $doc['id']]) }}" class="btn btn-sm btn-outline-secondary">Ver progreso</a>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+        <table class="table doc-list__table mb-0">
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Módulo</th>
+                    <th>Estado</th>
+                    <th>Actualizado</th>
+                    <th class="text-end"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($recent as $doc)
+                @php([$label, $tone] = $statusLabels[$doc['status']] ?? [$doc['status'], 'neutral'])
+                <tr>
+                    <td class="doc-list__file" title="{{ $doc['filename'] }}">{{ $doc['filename'] }}</td>
+                    <td>{{ $doc['module'] }}</td>
+                    <td>
+                        <span class="doc-status doc-status--{{ $tone }}" @if ($doc['status']==='failed' && $doc['error']) title="{{ $doc['error'] }}" @endif>{{ $label }}</span>
+                        @if ($doc['has_draft'] && $doc['status'] === 'requires_review')
+                        <span class="doc-list__draft">borrador guardado</span>
+                        @endif
+                    </td>
+                    <td class="doc-list__date">{{ $doc['updated_at']?->format('d/m/Y H:i') }}</td>
+                    <td class="text-end">
+                        @if ($doc['can_open'])
+                        <a href="{{ route('document.pdf', $doc['id']) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary me-1" title="Ver PDF de revisión" aria-label="Ver PDF de revisión">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </a>
+                        <a href="{{ route('upload', ['document' => $doc['id']]) }}" class="btn btn-sm {{ $doc['status'] === 'requires_review' ? 'btn-primary' : 'btn-outline-secondary' }}">
+                            {{ $doc['status'] === 'requires_review' ? 'Continuar revisión' : 'Abrir' }}
+                        </a>
+                        @elseif ($doc['in_progress'])
+                        <a href="{{ route('upload', ['document' => $doc['id']]) }}" class="btn btn-sm btn-outline-secondary">Ver progreso</a>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
     @endif
 </div>
 @endsection

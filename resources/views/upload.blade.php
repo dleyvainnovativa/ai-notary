@@ -102,9 +102,7 @@
         </form>
 
         {{-- Import an existing TXT (modules with an importer) — no AI, no token --}}
-        @php
-            $importable = array_keys(array_filter($modules, fn($m) => !empty($m['importer_class'])));
-        @endphp
+        @php($importable = array_keys(array_filter($modules, fn($m) => !empty($m['importer_class']))))
         @if ($importable)
         <div class="import-txt" id="import-txt" data-importable='@json($importable)' hidden>
             <div class="import-txt__text">
