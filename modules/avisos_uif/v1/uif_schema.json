@@ -80,7 +80,8 @@
         "tipo_transmision": {
           "type": "select",
           "required": true,
-          "source": "catalogo_tipo_transmision"
+          "source": "catalogo_tipo_transmision",
+          "ai_description": "Acto jurídico por el que se transmite el inmueble (ver reglas de tipo de transmisión). Donación = '3', herencia = '2'."
         },
         "adquirentes": {
           "type": "array",
@@ -292,7 +293,8 @@
               "source": "catalogo_tipos_domicilio"
             },
             "valor_pactado": {
-              "type": "number"
+              "type": "number",
+              "ai_description": "Precio pactado. En transmisiones gratuitas (herencia, donación, cesión gratuita, servidumbre sin indemnización) es 0."
             },
             "m2_terreno": {
               "type": "number"
@@ -307,7 +309,8 @@
               "type": "text"
             },
             "valor_avaluo": {
-              "type": "number"
+              "type": "number",
+              "ai_description": "Valor fiscal (avalúo / catastral) de lo que REALMENTE se transmite. Si es nuda propiedad, usufructo o un porcentaje, llena también valor_calculo; el sistema calcula este campo."
             },
             "domicilio": {
               "type": "object",
@@ -333,6 +336,38 @@
                 },
                 "municipio": {
                   "type": "text"
+                }
+              }
+            },
+            "valor_calculo": {
+              "type": "object",
+              "ai_description": "Desglose para que el SISTEMA calcule el valor fiscal de lo que realmente se transmite (nuda propiedad, usufructo, porcentajes). No multipliques: solo extrae las partes.",
+              "items": {
+                "derecho_transmitido": {
+                  "type": "text",
+                  "ai_description": "'pleno_dominio' (propiedad completa), 'nuda_propiedad', 'usufructo' o 'parcial' (un porcentaje de la propiedad o de derechos de copropiedad)."
+                },
+                "valor_total": {
+                  "type": "number",
+                  "ai_description": "Valor del 100% del inmueble para efectos fiscales (avalúo, valor catastral o valor fiscal), solo dígitos. Ej. '$5,131,600.000' → 5131600."
+                },
+                "valor_explicito": {
+                  "type": "number",
+                  "ai_description": "Monto que la escritura asigna EXPRESAMENTE al derecho transmitido (ej. 'correspondiendo a la nuda propiedad la cantidad de $2,565,800.00' → 2565800). null si no lo dice."
+                },
+                "porcentajes": {
+                  "type": "array",
+                  "ai_description": "Cada porcentaje que la escritura aplica al valor, en el orden en que se aplican. [] si no hay.",
+                  "items": {
+                    "porcentaje": {
+                      "type": "number",
+                      "ai_description": "Ej. 50 para 50%."
+                    },
+                    "concepto": {
+                      "type": "text",
+                      "ai_description": "A qué se refiere: 'nuda propiedad', 'copropiedad', 'usufructo'…"
+                    }
+                  }
                 }
               }
             }
@@ -362,7 +397,8 @@
               "type": "number",
               "required": true
             }
-          }
+          },
+          "ai_description": "Pagos del precio. En transmisiones gratuitas (tipo 2, 3, 7, 9) devuelve []."
         }
       }
     }

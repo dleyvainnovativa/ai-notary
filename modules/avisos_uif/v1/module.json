@@ -26,6 +26,12 @@
     ],
     "address_keys": [
       "domicilio"
+    ],
+    "partial_values": [
+      {
+        "object": "escritura.operaciones.*.inmueble",
+        "target": "valor_avaluo"
+      }
     ]
   },
   "append": {

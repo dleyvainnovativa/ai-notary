@@ -88,6 +88,12 @@
           "codigo_postal": "94296",
           "colonia": "Fraccionamiento Hípico",
           "municipio": "VIRGINIA CORDERO DE MURILLO VIDAL"
+        },
+        "valor_calculo": {
+          "derecho_transmitido": "pleno_dominio",
+          "valor_total": null,
+          "valor_explicito": null,
+          "porcentajes": []
         }
       },
       "pagos": [

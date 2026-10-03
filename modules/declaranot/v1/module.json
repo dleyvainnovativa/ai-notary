@@ -23,6 +23,12 @@
     ],
     "address_keys": [
       "domicilio"
+    ],
+    "partial_values": [
+      {
+        "object": "escritura",
+        "target": "avaluo_inmueble"
+      }
     ]
   }
 }

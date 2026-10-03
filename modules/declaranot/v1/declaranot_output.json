@@ -61,5 +61,11 @@
             "documento_oficial": "PASAPORTE",
             "folio": "XEXX010101000"
         }
-    ]
+    ],
+    "valor_calculo": {
+        "derecho_transmitido": "pleno_dominio",
+        "valor_total": null,
+        "valor_explicito": null,
+        "porcentajes": []
+    }
 }

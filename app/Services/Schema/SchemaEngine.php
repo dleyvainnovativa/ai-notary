@@ -7,6 +7,8 @@ use App\Services\CatalogService;
 class SchemaEngine
 {
     private array $issues = [];
+    /** Enclosing scopes while validating (outermost first) — lets conditions read '^field' from a parent row. */
+    private array $ancestors = [];
     private const GENERIC_RFC = [
         'fisica' => ['EXTF900101000'],
         'moral'  => ['EXT990101000'],
@@ -17,6 +19,7 @@ class SchemaEngine
     public function process(array $schema, array $data, string $moduleDir): EngineResult
     {
         $this->issues = [];
+        $this->ancestors = [];
         $fields = $schema['fields'] ?? [];
 
         $data = $this->applyValueRules($fields, $data);
@@ -53,7 +56,19 @@ class SchemaEngine
     }
 
     /** Is this (visible) field required here? */
-    public function isRequired(array $def, array $scope, ?string $kase): bool
+    public function isRequired(array $def, array $scope, ?string $kase, array $ancestors = []): bool
+    {
+        $saved = $this->ancestors;
+        $this->ancestors = $ancestors;
+        try {
+            if ($this->isOptionalHere($def, $scope)) return false;
+            return $this->requiredRule($def, $scope, $kase);
+        } finally {
+            $this->ancestors = $saved;
+        }
+    }
+
+    private function requiredRule(array $def, array $scope, ?string $kase): bool
     {
         if (!empty($def['required_in_cases'])) {
             return $kase !== null && in_array($kase, $def['required_in_cases'], true);
@@ -61,6 +76,26 @@ class SchemaEngine
         if (!empty($def['required_if'])) return $this->conditionMet($def['required_if'], $scope);
         if (!empty($def['required_when'])) return $this->evalRequiredWhen($def, $scope);
         return !empty($def['required']);
+    }
+
+    /**
+     * 'optional_when' => ['^tipo_transmision' => ['2','3','7','9']] — the field stops being
+     * required when the condition holds. '^name' reads the nearest enclosing scope
+     * (e.g. a pago row reading its operación's tipo_transmision).
+     */
+    private function isOptionalHere(array $def, array $scope): bool
+    {
+        return !empty($def['optional_when']) && $this->conditionMet($def['optional_when'], $scope);
+    }
+
+    private function ancestorValue(string $field)
+    {
+        for ($i = count($this->ancestors) - 1; $i >= 0; $i--) {
+            if (is_array($this->ancestors[$i]) && array_key_exists($field, $this->ancestors[$i])) {
+                return $this->ancestors[$i][$field];
+            }
+        }
+        return null;
     }
 
     /**
@@ -277,13 +312,17 @@ class SchemaEngine
                             );
                         }
                     }
+                    $this->ancestors[] = $data;
                     $this->validateRow($def['itemSchema'], $row, $moduleDir, "{$fieldPath}.{$i}", $kase);  // ← itemSchema
+                    array_pop($this->ancestors);
                 }
                 continue;
             }
 
             if ($type === 'object') {
+                $this->ancestors[] = $data;
                 $this->validate($def['itemSchema'], $value ?? [], $moduleDir, $fieldPath);  // ← itemSchema
+                array_pop($this->ancestors);
                 continue;
             }
 
@@ -342,20 +381,25 @@ class SchemaEngine
                             );
                         }
                     }
+                    $this->ancestors[] = $data;
                     $this->validateRow($def['itemSchema'], $subRow, $moduleDir, "{$fieldPath}.{$i}", $subKase);
+                    array_pop($this->ancestors);
                 }
                 continue;
             }
 
             // NEW: recurse into nested objects inside a row
             if ($type === 'object') {
+                $this->ancestors[] = $data;
                 $this->validateRow($def['itemSchema'], $value ?? [], $moduleDir, $fieldPath, null);
+                array_pop($this->ancestors);
                 continue;
             }
 
             // case-based requirement (existing)
             if (!empty($def['required_in_cases']) || !empty($def['show_in_cases'])) {
-                $requiredHere = $kase && in_array($kase, $def['required_in_cases'] ?? [], true);
+                $requiredHere = $kase && in_array($kase, $def['required_in_cases'] ?? [], true)
+                    && !$this->isOptionalHere($def, $data);
                 $shownHere = $requiredHere || ($kase && in_array($kase, $def['show_in_cases'] ?? [], true));
                 if (!$shownHere) continue;
                 if ($requiredHere && $this->isEmpty($value)) {
@@ -372,6 +416,11 @@ class SchemaEngine
     private function validateLeaf(string $name, array $def, $value, array $scope, string $moduleDir, string $fieldPath): void
     {
         $type = $def['type'] ?? 'text';
+
+        if ($this->isOptionalHere($def, $scope)) {
+            if ($this->isEmpty($value)) return;               // optional here and empty → nothing to check
+            unset($def['required'], $def['required_if'], $def['required_when']);   // filled → format checks only
+        }
 
         // required_if
         if (!empty($def['required_if'])) {
@@ -469,7 +518,9 @@ class SchemaEngine
     private function conditionMet(array $condition, array $data): bool
     {
         foreach ($condition as $field => $expected) {
-            $actual = $data[$field] ?? null;
+            $actual = str_starts_with((string) $field, '^')
+                ? $this->ancestorValue(substr($field, 1))
+                : ($data[$field] ?? null);
 
             if (is_array($expected) && isset($expected['op'])) {
                 if (!$this->compare($actual, $expected['op'], $expected['value'])) return false;

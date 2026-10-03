@@ -866,6 +866,14 @@ function applyConditional() {
     document.querySelectorAll('.rv-field, .rv-array').forEach(node => {
         const def = defForPath(node.dataset.path);
         if (!def) return;
+
+        // optional_when: stops being required (e.g. pagos of a donación). '^field' = enclosing row's value.
+        if (def.optional_when) {
+            const optional = condMet(def.optional_when, condValues(def.optional_when, node.dataset.path));
+            node.dataset.dynOptional = optional ? '1' : '0';
+            const star = node.querySelector(':scope > .rv-field__label .rv-req');
+            if (star) star.hidden = optional;
+        }
         const scopeVals = siblings(node.dataset.path);
 
         // --- case-based rules (only inside classified rows) ---
@@ -936,7 +944,7 @@ function validateField(def, value, col) {
     // }
     
     if (!def) return null;
-    const required = def.required || col.dataset.dynRequired === '1';
+    const required = (def.required || col.dataset.dynRequired === '1') && col.dataset.dynOptional !== '1';
 
     // For selects, the placeholder value counts as "not selected"
     const placeholder = def.placeholderValue ?? '0';   // default to "0" (Seleccionar opción)
@@ -1647,6 +1655,26 @@ function siblings(path) {
     });
     return out;
 }
+/** Sibling values plus '^field' values read from the nearest enclosing scope that has the field. */
+function condValues(cond, path) {
+    const vals = siblings(path);
+    for (const key of Object.keys(cond)) {
+        if (!key.startsWith('^')) continue;
+        const field = key.slice(1);
+        const parts = path.split('.');
+        parts.pop();                       // the field itself
+        let found;
+        while (parts.length && found === undefined) {
+            parts.pop();                   // step out one level (row → array → owner …)
+            const p = parts.length ? `${parts.join('.')}.${field}` : field;
+            const el = document.querySelector(`.rv-input[data-path="${cssEsc(p)}"]`);
+            if (el) found = el.value;
+        }
+        vals[key] = found;
+    }
+    return vals;
+}
+
 function condMet(cond, vals) {
     for (const [field, expected] of Object.entries(cond)) {
         const actual = vals[field];

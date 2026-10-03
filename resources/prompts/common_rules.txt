@@ -73,4 +73,26 @@ Domicilios por referencia a otra persona:
 - Si no puedes identificar a quién se refiere, deja el domicilio en null y
   escribe en "copiado_de" la frase literal encontrada.
 
+=== VALORES PARCIALES: NUDA PROPIEDAD, USUFRUCTO, PORCENTAJES (CRÍTICO) ===
+
+Cuando el esquema incluye el objeto "valor_calculo", úsalo para describir QUÉ
+parte del inmueble se transmite y con qué valores. NUNCA hagas multiplicaciones
+ni cálculos: el sistema calcula el valor final y lo muestra al usuario.
+- derecho_transmitido: "pleno_dominio" si se transmite la propiedad completa;
+  "nuda_propiedad" si se transmite la nuda propiedad (normalmente el transmitente
+  se reserva el usufructo); "usufructo" si solo se transmite el usufructo;
+  "parcial" si se transmite un porcentaje de la propiedad o de derechos de
+  copropiedad.
+- valor_total: el valor del 100% del inmueble para efectos fiscales (avalúo,
+  valor catastral, valor fiscal), en dígitos. "$5,131,600.000" → 5131600.
+- valor_explicito: el monto que la escritura asigna EXPRESAMENTE a lo que se
+  transmite (ej. "correspondiendo a la nuda propiedad la cantidad de
+  $2,565,800.00" → 2565800). Si la escritura no da ese monto, null.
+- porcentajes: cada porcentaje que la escritura aplica, con su concepto, en el
+  orden en que se aplican (ej. "dona su 50% de copropiedad" y "la nuda propiedad
+  se valúa en el 80%" → [{50, "copropiedad"}, {80, "nuda propiedad"}]). [] si no
+  hay porcentajes.
+- En el campo de valor/avalúo correspondiente pon valor_explicito si existe; si
+  no, valor_total. El sistema lo recalculará a partir de valor_calculo.
+
 === INSTRUCCIONES ESPECÍFICAS DEL MÓDULO ===

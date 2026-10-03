@@ -60,7 +60,8 @@ class Exporter implements ExporterContract
 
         // 930004 — number of operations (examples show "2"; using op count — confirm)
         $ops = $json['operaciones'] ?? [];
-        $lines[] = '930004-DetalleOperaciones:' . count($ops);
+        $detalleOps = count($ops) > 1 ? 1 : 2; // TODO: confirm SAT limit, examples show 2
+        $lines[] = '930004-DetalleOperaciones:' . $detalleOps;
 
         // Per operation. GUIDs must be unique across the WHOLE aviso:
         //  - group 0 (operations + personas morales) uses ONE running sequence, so
@@ -165,8 +166,14 @@ class Exporter implements ExporterContract
         foreach ($personas as $p) {
             $tipo = (string) ($p['tipo_persona'] ?? '');
             if ($tipo === '3') continue; // TODO: fideicomiso columns (930009/930014) not verified yet
-            if ($tipo === '2') { $morales[] = $p; continue; }
-            if ($tipo === '1') { $fisicas[] = $p; continue; }
+            if ($tipo === '2') {
+                $morales[] = $p;
+                continue;
+            }
+            if ($tipo === '1') {
+                $fisicas[] = $p;
+                continue;
+            }
 
             $rfc = strtoupper(trim((string) ($p['rfc'] ?? '')));
             if (preg_match('/^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/u', $rfc)) $morales[] = $p;

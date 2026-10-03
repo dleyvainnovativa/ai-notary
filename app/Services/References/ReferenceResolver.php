@@ -20,9 +20,16 @@ namespace App\Services\References;
  * Every value it fills produces a note so the review form can ask the user to
  * verify it. Pure PHP (no framework calls) so it can be tested standalone.
  *
+ *  3. Partial values (nuda propiedad, usufructo, percentages):
+ *     the AI only extracts the parts into a "valor_calculo" helper object (total,
+ *     explicit amount, percentages) — it never multiplies. This step sets the
+ *     target field (explicit amount wins, else total × percentages), cross-checks
+ *     both when present, and explains the result in a note.
+ *
  * Module config (module.json → "references"):
- *   "deed_date":    ["escritura.fecha_firma_escritura"]          path(s) with * for array indexes
- *   "address_keys": ["domicilio"]                                  optional, default ["domicilio"]
+ *   "deed_date":      ["escritura.fecha_firma_escritura"]          path(s) with * for array indexes
+ *   "address_keys":   ["domicilio"]                                  optional, default ["domicilio"]
+ *   "partial_values": [{"object": "escritura.operaciones.*.inmueble", "target": "valor_avaluo"}]
  */
 class ReferenceResolver
 {
@@ -36,6 +43,7 @@ class ReferenceResolver
     private array $datePatterns;
     private array $deedDatePaths;
     private array $addressKeys;
+    private array $partialValues;
 
     /**
      * @param array $merged          AI output keyed by input key: ['escritura' => [...], 'calculo' => [...]]
@@ -48,6 +56,7 @@ class ReferenceResolver
         $this->notes = [];
         $this->deedDatePaths = (array) ($config['deed_date'] ?? []);
         $this->addressKeys = (array) ($config['address_keys'] ?? ['domicilio']);
+        $this->partialValues = (array) ($config['partial_values'] ?? []);
 
         $this->datePatterns = [];
         foreach ($schemasByInput as $inputKey => $schema) {
@@ -57,6 +66,7 @@ class ReferenceResolver
         // Addresses first: copying an address never touches date fields.
         $this->walkAddresses($this->data, []);
         $this->walkDates($this->data, []);
+        $this->resolvePartialValues();
 
         return new ResolverResult($this->data, $this->notes);
     }
@@ -209,6 +219,123 @@ class ReferenceResolver
             if (isset($addr[$k]) && trim((string) $addr[$k]) !== '') return true;
         }
         return false;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Partial values (nuda propiedad, usufructo, porcentajes)            */
+    /* ------------------------------------------------------------------ */
+
+    private const HELPER_KEY = 'valor_calculo';
+    private const DERECHO_LABEL = [
+        'nuda_propiedad' => 'nuda propiedad', 'usufructo' => 'usufructo',
+        'parcial' => 'parte transmitida', 'pleno_dominio' => 'propiedad',
+    ];
+
+    private function resolvePartialValues(): void
+    {
+        foreach ($this->partialValues as $cfg) {
+            $target = $cfg['target'] ?? null;
+            if (!$target || empty($cfg['object'])) continue;
+            foreach ($this->expand(explode('.', $cfg['object'])) as $objPath) {
+                $obj = $this->get($this->data, $objPath);
+                if (!is_array($obj) || !array_key_exists(self::HELPER_KEY, $obj)) continue;
+
+                $helper = is_array($obj[self::HELPER_KEY]) ? $obj[self::HELPER_KEY] : [];
+                unset($obj[self::HELPER_KEY]);                 // never reaches the form / exporter
+                [$value, $note] = $this->partialValue($helper, $obj[$target] ?? null);
+                if ($value !== null) $obj[$target] = $value;
+                $this->set($objPath, $obj);
+                if ($note) $this->notes[] = $this->note([...$objPath, $target], $note[0], $note[1]);
+            }
+        }
+    }
+
+    /** @return array{0: int|float|null, 1: ?array{0: string, 1: string}} [value to set, [kind, message]] */
+    private function partialValue(array $h, $current): array
+    {
+        $total = $this->num($h['valor_total'] ?? null);
+        $explicit = $this->num($h['valor_explicito'] ?? null);
+        $derecho = strtolower(trim((string) ($h['derecho_transmitido'] ?? '')));
+        $label = self::DERECHO_LABEL[$derecho] ?? 'parte transmitida';
+        $pcts = array_values(array_filter(array_map(
+            fn($p) => is_array($p) ? $this->num($p['porcentaje'] ?? null) : $this->num($p),
+            (array) ($h['porcentajes'] ?? [])
+        ), fn($p) => $p !== null && $p > 0 && $p <= 100));
+
+        $factor = $pcts ? array_product(array_map(fn($p) => $p / 100, $pcts)) : null;
+        $computed = ($total && $factor !== null) ? round($total * $factor, 2) : null;
+        $pctText = $pcts ? implode(' × ', array_map(fn($p) => $this->pct($p), $pcts)) : null;
+
+        // 1. The deed states the amount → it wins; cross-check against total × %.
+        if ($explicit !== null && $explicit > 0) {
+            $msg = 'Valor de la ' . $label . ' según la escritura: ' . $this->money($explicit);
+            if ($total) $msg .= ' (valor total ' . $this->money($total) . ', equivale al ' . $this->pct($explicit / $total * 100) . ')';
+            if ($computed !== null && abs($computed - $explicit) > 1) {
+                return [$explicit, ['warning', $msg . '. No coincide con ' . $pctText . ' del total (' . $this->money($computed) . '): verifica cuál es el correcto.']];
+            }
+            $partial = $total && abs($explicit - $total) > 1;
+            return [$explicit, $partial || $derecho !== 'pleno_dominio' ? ['partial_value', $msg . '. Verifícalo.'] : null];
+        }
+
+        // 2. Total + percentages → computed here (never by the AI).
+        if ($computed !== null) {
+            return [$computed, ['partial_value', 'Valor calculado: ' . $pctText . ' de ' . $this->money($total) . ' = ' . $this->money($computed)
+                . ' (' . $label . '). Verifícalo.']];
+        }
+
+        // 3. A partial right with nothing to compute from → leave it to the user.
+        if (in_array($derecho, ['nuda_propiedad', 'usufructo', 'parcial'], true)) {
+            return [null, ['warning', 'La escritura transmite ' . $label . ' pero no indica su valor ni el porcentaje: captura el valor que corresponde.']];
+        }
+
+        // 4. Pleno dominio: only fill an empty target with the total.
+        if ($total && ($current === null || $current === '' || (float) $current == 0.0)) {
+            return [$total, null];
+        }
+        return [null, null];
+    }
+
+    /** All concrete paths matching a pattern with '*' for array indexes. */
+    private function expand(array $pattern, array $prefix = []): array
+    {
+        if (!$pattern) return [$prefix];
+        $seg = array_shift($pattern);
+        if ($seg !== '*') return $this->expand($pattern, [...$prefix, $seg]);
+        $node = $this->get($this->data, $prefix);
+        if (!is_array($node)) return [];
+        $out = [];
+        foreach (array_keys($node) as $k) {
+            $out = array_merge($out, $this->expand($pattern, [...$prefix, (string) $k]));
+        }
+        return $out;
+    }
+
+    private function set(array $path, $value): void
+    {
+        $ref = &$this->data;
+        foreach ($path as $seg) {
+            if (!is_array($ref)) return;
+            $ref = &$ref[$seg];
+        }
+        $ref = $value;
+    }
+
+    private function num($v): ?float
+    {
+        if (is_int($v) || is_float($v)) return (float) $v;
+        if (!is_string($v)) return null;
+        $clean = str_replace([',', '$', ' ', '%'], '', $v);
+        return is_numeric($clean) ? (float) $clean : null;
+    }
+
+    private function money(float $n): string
+    {
+        return '$' . number_format($n, 2, '.', ',');
+    }
+
+    private function pct(float $p): string
+    {
+        return rtrim(rtrim(number_format($p, 2, '.', ''), '0'), '.') . '%';
     }
 
     /* ------------------------------------------------------------------ */

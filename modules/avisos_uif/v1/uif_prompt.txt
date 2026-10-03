@@ -13,6 +13,32 @@ Operaciones:
 - En pagos[].fecha_pago aplica la regla de "@FECHA_ESCRITURA" de las reglas
   generales cuando el pago se hace "en esta fecha", "en este acto", etc.
 
+Tipo de transmisión (tipo_transmision) — CRÍTICO:
+- Identifica el ACTO JURÍDICO por el que se transmite el inmueble y devuelve el
+  valor del catálogo catalogo_tipo_transmision:
+  - "1" Compraventa de inmuebles: "compraventa", "vende", "enajena" a cambio de un precio.
+  - "2" Adjudicaciones por herencia: "adjudicación por herencia", "sucesión
+    testamentaria / intestamentaria", "legado", "adjudica a los herederos".
+  - "3" Donaciones: "donación", "dona en forma pura, simple y gratuita".
+  - "4" Compraventa de ejidatarios: venta de derechos ejidales / parcela ejidal.
+  - "5" Hipotecas: SOLO si el acto reportado es únicamente la hipoteca. Si la
+    escritura contiene una compraventa y además una hipoteca (crédito para pagar
+    el precio), el tipo es "1" (Compraventa).
+  - "6" Cesión onerosa: cesión de derechos a cambio de una contraprestación.
+  - "7" Cesión gratuita: cesión de derechos sin contraprestación.
+  - "8" Servidumbre con indemnización.  "9" Servidumbre sin indemnización.
+  - "10" Adjudicación judicial: remate, adjudicación decretada por un juez.
+- Si no puedes identificarlo con certeza, devuelve null.
+
+Transmisiones gratuitas (tipo_transmision "2", "3", "7" o "9"):
+- No hay precio ni pagos: devuelve "pagos": [] (lista vacía) y valor_pactado = 0.
+- Nunca inventes forma_pago ni instrumento para estos actos.
+- El valor fiscal del inmueble va en valor_avaluo (ver la regla de valores
+  parciales: nuda propiedad, usufructo, porcentajes).
+- En una donación, los DONANTES son los "vendedores" (transmiten) y los
+  DONATARIOS son los "adquirentes" (reciben). En una herencia, el autor de la
+  sucesión / la sucesión es quien transmite y los herederos o legatarios adquieren.
+
 Adquirentes y vendedores:
 - Adquirentes are the buyers/acquirers; vendedores are the sellers/transferors.
 - Each is an array — include every party on each side.

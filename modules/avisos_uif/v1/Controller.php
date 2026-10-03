@@ -7,6 +7,9 @@ use App\Modules\ModuleInput;
 
 class Controller implements ModuleControllerContract
 {
+    /** catalogo_tipo_transmision codes with no consideration (herencia, donación, cesión gratuita, servidumbre sin indemnización). */
+    public const TRANSMISIONES_GRATUITAS = ['2', '3', '7', '9'];
+
     public function __construct(private string $dir) {}
 
     public function inputs(): array
@@ -48,6 +51,11 @@ class Controller implements ModuleControllerContract
         $catFormasPago     = $cat('catalogo_formas_de_pago');
         $catInstrumentos   = $cat('catalogo_instrumentos_monetarios');
         $catMonedas        = $cat('catalogo_tipos_moneda');
+
+        /* Gratuitous transmissions (catalogo_tipo_transmision): 2 herencia, 3 donación,
+         * 7 cesión gratuita, 9 servidumbre sin indemnización → no consideration paid,
+         * so forma de pago / instrumento stop being required. '^' = the operación's value. */
+        $gratuita = ['^tipo_transmision' => self::TRANSMISIONES_GRATUITAS];
 
         /* ---------- Reusable domicilio block ---------- */
         $domicilio = fn() => [
@@ -219,8 +227,8 @@ class Controller implements ModuleControllerContract
                         'col' => 'full',
                         'itemSchema' => [
                             'fecha_pago' => ['label' => 'Fecha Pago', 'type' => 'date', 'required' => true],
-                            'forma_pago' => ['label' => 'Forma Pago', 'type' => 'select', 'required' => true, 'options' => $catFormasPago],
-                            'instrumento' => ['label' => 'Instrumento', 'type' => 'select', 'required' => true, 'options' => $catInstrumentos],
+                            'forma_pago' => ['label' => 'Forma Pago', 'type' => 'select', 'required' => true, 'options' => $catFormasPago, 'optional_when' => $gratuita],
+                            'instrumento' => ['label' => 'Instrumento', 'type' => 'select', 'required' => true, 'options' => $catInstrumentos, 'optional_when' => $gratuita],
                             'moneda' => ['label' => 'Moneda', 'type' => 'select', 'required' => true, 'options' => $catMonedas],
                             'monto' => ['label' => 'Monto', 'type' => 'number', 'format' => 'decimal', 'min' => 0, 'required' => true, 'money' => true],
                         ],
@@ -252,8 +260,26 @@ class Controller implements ModuleControllerContract
         return ['fields' => $fields, 'sections' => $sections];
     }
 
+    /**
+     * Safety net for gratuitous transmissions (the prompt already asks for this):
+     * valor_pactado = 0 when missing, and payment rows with no amount are dropped
+     * (a donación has no pagos; 930017 lines are simply not emitted).
+     */
     public function postProcess(array $merged): array
     {
+        foreach ($merged['escritura']['operaciones'] ?? [] as $i => $op) {
+            if (!is_array($op) || !in_array((string) ($op['tipo_transmision'] ?? ''), self::TRANSMISIONES_GRATUITAS, true)) continue;
+
+            $inm = &$merged['escritura']['operaciones'][$i]['inmueble'];
+            if (is_array($inm) && ($inm['valor_pactado'] ?? null) === null) $inm['valor_pactado'] = 0;
+            unset($inm);
+
+            $pagos = $op['pagos'] ?? [];
+            $merged['escritura']['operaciones'][$i]['pagos'] = array_values(array_filter(
+                is_array($pagos) ? $pagos : [],
+                fn($p) => is_array($p) && is_numeric($p['monto'] ?? null) && (float) $p['monto'] > 0
+            ));
+        }
         return $merged;
     }
 }

@@ -25,9 +25,9 @@ class AppendService
             if (!$parent || $parent->user_id !== $child->user_id) {
                 throw new AppendException('No se encontró la escritura principal. Tu token no fue usado.');
             }
-            if ($parent->status !== 'requires_review') {
-                throw new AppendException('La escritura principal ya no está en revisión (¿ya se exportó?). Tu token no fue usado.');
-            }
+            // if ($parent->status !== 'requires_review') {
+            //     throw new AppendException('La escritura principal ya no está en revisión (¿ya se exportó?). Tu token no fue usado.');
+            // }
 
             $config = $this->registry->manifest($parent->module_slug)['append'] ?? null;
             if (!$config) throw new AppendException('Este módulo no admite escrituras adicionales.');

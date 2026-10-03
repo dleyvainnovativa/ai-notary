@@ -61,7 +61,7 @@ class ReviewPdfPresenter
 
     /* ------------------------------------------------------------------ */
 
-    private function blocks(array $defs, array $scope, string $prefix, ?string $kase): array
+    private function blocks(array $defs, array $scope, string $prefix, ?string $kase, array $ancestors = []): array
     {
         $blocks = [];
         $grid = [];
@@ -84,24 +84,24 @@ class ReviewPdfPresenter
                     'type' => 'group',
                     'title' => $def['label'] ?? $this->humanize($name),
                     'notes' => $this->notes[$path] ?? [],
-                    'blocks' => $this->blocks($def['itemSchema'] ?? [], is_array($value) ? $value : [], $path, null),
+                    'blocks' => $this->blocks($def['itemSchema'] ?? [], is_array($value) ? $value : [], $path, null, [...$ancestors, $scope]),
                 ];
                 continue;
             }
 
             if ($type === 'array') {
                 $flush();
-                $blocks[] = $this->arrayBlock($name, $def, is_array($value) ? array_values($value) : [], $path);
+                $blocks[] = $this->arrayBlock($name, $def, is_array($value) ? array_values($value) : [], $path, [...$ancestors, $scope]);
                 continue;
             }
 
-            $grid[] = $this->cell($name, $def, $value, $scope, $kase, $path);
+            $grid[] = $this->cell($name, $def, $value, $scope, $kase, $path, $ancestors);
         }
         $flush();
         return $blocks;
     }
 
-    private function arrayBlock(string $name, array $def, array $rows, string $path): array
+    private function arrayBlock(string $name, array $def, array $rows, string $path, array $ancestors = []): array
     {
         $title = $def['label'] ?? $this->humanize($name);
         $itemLabel = $def['item_label'] ?? $title;
@@ -131,7 +131,7 @@ class ReviewPdfPresenter
                 $row = is_array($row) ? $row : [];
                 $cells = [];
                 foreach ($columns as $col => $cdef) {
-                    $cell = $this->cell($col, $cdef, $row[$col] ?? null, $row, null, "{$path}.{$i}.{$col}");
+                    $cell = $this->cell($col, $cdef, $row[$col] ?? null, $row, null, "{$path}.{$i}.{$col}", $ancestors);
                     $cell['hidden'] = !$this->engine->isVisible($cdef, $row, null);
                     $cells[] = $cell;
                     if (!empty($cdef['money']) && is_numeric($row[$col] ?? null)) {
@@ -166,19 +166,19 @@ class ReviewPdfPresenter
                 'title' => $itemLabel . ' ' . ($i + 1) . ($name ? ' · ' . $name : ''),
                 'badge' => $this->rowBadge($itemSchema, $row),
                 'notes' => $this->notes["{$path}.{$i}"] ?? [],
-                'blocks' => $this->blocks($itemSchema, $row, "{$path}.{$i}", $kase),
+                'blocks' => $this->blocks($itemSchema, $row, "{$path}.{$i}", $kase, $ancestors),
             ];
         }
         return ['type' => 'cards', 'title' => $title, 'count' => count($cards), 'items' => $cards];
     }
 
-    private function cell(string $name, array $def, $value, array $scope, ?string $kase, string $path): array
+    private function cell(string $name, array $def, $value, array $scope, ?string $kase, string $path, array $ancestors = []): array
     {
         $display = $this->display($def, $value);
         return [
             'label' => $def['label'] ?? $this->humanize($name),
             'value' => $display,
-            'missing' => $display === null && $this->engine->isRequired($def, $scope, $kase),
+            'missing' => $display === null && $this->engine->isRequired($def, $scope, $kase, $ancestors),
             'full' => ($def['col'] ?? null) === 'full' || ($display !== null && mb_strlen($display) > 70),
             'numeric' => in_array($def['type'] ?? '', ['number', 'computed'], true),
             'notes' => $this->notes[$path] ?? [],
