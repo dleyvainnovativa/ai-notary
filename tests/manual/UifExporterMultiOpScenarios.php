@@ -6,8 +6,7 @@ namespace App\Modules { interface ExporterContract { public function supportedFo
 namespace {
 function now(){ return Carbon\Carbon::parse('2026-09-25'); }
 $R = getenv('NOTARIA_ROOT') ?: dirname(__DIR__, 2);
-// Optional: ORIG_EXPORTER=/path/to/old/Exporter.php to prove single-op output is byte-identical
-$ORIG = getenv('ORIG_EXPORTER') ?: (file_exists(__DIR__ . '/Exporter.v1-verified.php') ? __DIR__ . '/Exporter.v1-verified.php' : null);
+$ORIG = getenv('ORIG_EXPORTER') ?: __DIR__ . '/Exporter.v1-verified.php';
 // Load the original under another namespace so both can run side by side
 eval('?>' . str_replace('namespace Modules\AvisosUif\V1;', 'namespace Orig;', file_get_contents($ORIG)));
 require "$R/modules/avisos_uif/v1/Exporter.php";
@@ -15,7 +14,7 @@ require "$R/modules/avisos_uif/v1/Exporter.php";
 $fail = 0;
 function check($l,$c){ global $fail; echo ($c?'  PASS ':'  FAIL ')."$l\n"; if(!$c) $fail++; }
 $fis = fn($rfc,$n) => ['tipo_persona'=>'1','rfc'=>$rfc,'curp'=>'XEXX010101HNEXXXA4','fecha_nacimiento'=>'1965-11-27','nombre'=>$n,'apellido_paterno'=>'P','apellido_materno'=>'M','nacionalidad'=>'MX','actividad_economica'=>'8111000','domicilio'=>['tipo_domicilio'=>'1','entidad_federativa'=>'30','calle'=>'AZALEAS','num_ext'=>'489','num_int'=>null,'codigo_postal'=>'91948','colonia'=>'Flores del Valle','municipio'=>'VERACRUZ']];
-$mor = fn($rfc,$rs) => ['tipo_persona'=>'1','rfc'=>$rfc,'razon_social'=>$rs,'fecha_constitucion'=>'1995-01-01','nacionalidad'=>'MX','giro_mercantil'=>'1000000','representante'=>['rfc'=>'OEET621022IH3','curp'=>'OEET621022MDFRSR01','fecha_nacimiento'=>'1962-10-22','nombre'=>'MARIA TERESA','apellido_paterno'=>'ORTEGA','apellido_materno'=>'ESCUDERO'],'domicilio'=>['tipo_domicilio'=>'1','entidad_federativa'=>'30','calle'=>'CENTRO','num_ext'=>'1','codigo_postal'=>'91700','colonia'=>'Centro','municipio'=>'VERACRUZ']];
+$mor = fn($rfc,$rs,$tipo='2') => ['tipo_persona'=>$tipo,'rfc'=>$rfc,'razon_social'=>$rs,'fecha_constitucion'=>'1995-01-01','nacionalidad'=>'MX','giro_mercantil'=>'1000000','representante'=>['rfc'=>'OEET621022IH3','curp'=>'OEET621022MDFRSR01','fecha_nacimiento'=>'1962-10-22','nombre'=>'MARIA TERESA','apellido_paterno'=>'ORTEGA','apellido_materno'=>'ESCUDERO'],'domicilio'=>['tipo_domicilio'=>'1','entidad_federativa'=>'30','calle'=>'CENTRO','num_ext'=>'1','codigo_postal'=>'91700','colonia'=>'Centro','municipio'=>'VERACRUZ']];
 $op = fn($fecha, $adq, $ven, $monto) => ['fecha_operacion'=>$fecha,'tipo_transmision'=>'1','adquirentes'=>$adq,'vendedores'=>$ven,
   'inmueble'=>['tipo_bien'=>'3','valor_pactado'=>$monto,'m2_terreno'=>112.19,'m2_construidos'=>112.19,'folio_real'=>'5184','num_instrumento'=>'26763','valor_avaluo'=>0,'domicilio'=>['entidad_federativa'=>'30','calle'=>'BETO AVILA','num_ext'=>'144','num_int'=>'204','codigo_postal'=>'94294','colonia'=>'Vista Alegre','municipio'=>'BOCA DEL RIO']],
   'pagos'=>[['fecha_pago'=>$fecha,'forma_pago'=>'1','instrumento'=>'8','moneda'=>'1','monto'=>$monto*0.1],['fecha_pago'=>$fecha,'forma_pago'=>'2','instrumento'=>'8','moneda'=>'1','monto'=>$monto*0.9]]];
@@ -32,8 +31,27 @@ $cases = [
 ];
 foreach ($cases as $label => $ops) {
   $d = $base + ['operaciones' => $ops];
-  check("$label", $orig->export($d, 'txt') === $new->export($d, 'txt'));
+  // The old exporter only recognised a moral as tipo '1' + 12-char RFC (declaranot rule);
+  // feed it that encoding and the new exporter the UIF one (tipo '2'): output must match.
+  $oldEnc = $d;
+  array_walk_recursive($oldEnc, function (&$v, $k) { if ($k === 'tipo_persona' && $v === '2') $v = '1'; });
+  // Intended changes for a single operation, nothing else:
+  //  - 930004 is ¿acumuladas? (No = 2), not the operation count (1);
+  //  - records grouped strictly by type (a moral's 930013 rep line no longer sits right after its 930012).
+  $oldLines = explode("\r\n", str_replace('930004-DetalleOperaciones:1', '930004-DetalleOperaciones:2', $orig->export($oldEnc, 'txt')));
+  $head = array_slice($oldLines, 0, 5); $body = array_slice($oldLines, 5);
+  $keyed = []; foreach ($body as $i => $l) $keyed[] = [substr($l, 0, 6), $i, $l];
+  usort($keyed, fn($a, $b) => [$a[0], $a[1]] <=> [$b[0], $b[1]]);   // stable sort by record type
+  $expected = implode("\r\n", array_merge($head, array_column($keyed, 2)));
+  check("$label (= old output with 930004 = 2, grouped by record type)", $expected === $new->export($d, 'txt'));
 }
+echo "UIF tipo_persona = 2 (moral) now goes to the moral line\n";
+$d = $base + ['operaciones' => [$op('2026-07-30', [$mor('ICJ950101AB1','INMOBILIARIA JUBRISA SA DE CV')], [], 1)]];
+$t = mb_convert_encoding($new->export($d, 'txt'), 'UTF-8', 'Windows-1252');
+check('930007 carries the razón social', (bool) preg_match('/^930007[^:]*:ICJ950101AB1\|INMOBILIARIA JUBRISA SA DE CV\|/m', $t));
+check('930006 is the empty placeholder', (bool) preg_match('/^930006[^:]*:\|+\r?$/m', $t));
+$tOld = mb_convert_encoding($orig->export($d, 'txt'), 'UTF-8', 'Windows-1252');
+check('(old exporter really put it on the física line)', (bool) preg_match('/^930006[^:]*:ICJ950101AB1\|/m', $tOld));
 
 echo "Multiple operations (operaciones acumuladas)\n";
 $d = $base + ['operaciones' => [
@@ -51,7 +69,7 @@ foreach ($lines as $ln) {
   if (str_starts_with($ln, '930016')) { $c = explode('|', $ln); $inmGuids[] = end($c); }
   if (str_starts_with($ln, '930017')) { $c = explode('|', $ln); $liqLinks[] = end($c); }
 }
-check('930004 counts 3 operations', in_array('930004-DetalleOperaciones:3', $lines, true));
+check('930004 = 1 (acumuladas Sí) with 3 operations', in_array('930004-DetalleOperaciones:1', $lines, true));
 check('3 operation GUIDs, all distinct', count($opGuids) === 3 && count(array_unique($opGuids)) === 3);
 check('persona moral GUIDs distinct and never equal an operation GUID', count(array_unique($morGuids)) === count($morGuids) && !array_intersect($morGuids, $opGuids));
 check('3 inmueble GUIDs, all distinct', count(array_unique($inmGuids)) === 3);

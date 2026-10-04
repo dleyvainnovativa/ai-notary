@@ -25,9 +25,9 @@ class AppendService
             if (!$parent || $parent->user_id !== $child->user_id) {
                 throw new AppendException('No se encontró la escritura principal. Tu token no fue usado.');
             }
-            // if ($parent->status !== 'requires_review') {
-            //     throw new AppendException('La escritura principal ya no está en revisión (¿ya se exportó?). Tu token no fue usado.');
-            // }
+            if (!$parent->isReviewable()) {
+                throw new AppendException('Los datos de la escritura principal ya fueron eliminados por privacidad. Tu token no fue usado.');
+            }
 
             $config = $this->registry->manifest($parent->module_slug)['append'] ?? null;
             if (!$config) throw new AppendException('Este módulo no admite escrituras adicionales.');
@@ -37,7 +37,9 @@ class AppendService
 
             $result = $this->merger->merge($parentDraft, $parentRaw, $childOutput, $config, $child->original_filename);
 
-            $parent->forceFill(['ai_output_encrypted' => json_encode($result['raw'])]);
+            // A new, unreviewed operation: an exported document goes back to "Por revisar"
+            // (its previous TXT is now out of date, and the 24 h post-export purge stops).
+            $parent->forceFill(['ai_output_encrypted' => json_encode($result['raw']), 'status' => 'requires_review']);
             $parent->saveDraft($result['draft']);   // saves both fields, bumps review_version
 
             return ['offset' => $result['offset'], 'count' => $result['count']];

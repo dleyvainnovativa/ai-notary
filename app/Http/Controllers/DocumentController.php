@@ -64,7 +64,7 @@ class DocumentController extends Controller
     /** Module's "append" block (operaciones acumuladas) for the form, or null. */
     private function appendConfig(Document $document): ?array
     {
-        if ($document->status !== 'requires_review') return null;
+        if (!$document->isReviewable()) return null;   // exported documents can receive more deeds too
         $cfg = $this->registry->manifest($document->module_slug)['append'] ?? null;
         if (!$cfg || empty($cfg['array'])) return null;
         return [

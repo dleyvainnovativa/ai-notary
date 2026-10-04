@@ -736,16 +736,8 @@ a { color: var(--text); }
     align-items: start;
 }
 @media (max-width: 860px) {
-    .rv-layout { grid-template-columns: 1fr;
-     }
-    .rv-nav { 
-        /* display: none;  */
-        display: -webkit-inline-box !important; 
-    z-index: 999;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    }   /* hide rail on mobile; form scrolls normally */
-    
+    .rv-layout { grid-template-columns: 1fr; }
+    /* the nav becomes a bottom sheet — see "Mobile: section nav as bottom sheet" below */
 }
 
 .rv-nav {
@@ -1028,10 +1020,7 @@ a { color: var(--text); }
 }
 .rv-nav__item--child.is-current .rv-nav__label { color: var(--primary); }
 
-/* On mobile chip bar, children still render as chips — just smaller */
-@media (max-width: 860px) {
-    .rv-nav__item--child { padding-left: 0.8rem; }
-}
+
 
 .rv-array__title { font-size: 0.9rem; font-weight: 600; color: var(--text); display: block; }
 .rv-array__subtitle { font-size: 0.78rem; color: var(--text-muted); display: block; margin-top: 0.15rem; }
@@ -1087,3 +1076,77 @@ a { color: var(--text); }
     padding: 0.6rem 0.8rem; margin-bottom: 0.75rem; }
 .rv-banner i { margin-top: 0.15rem; }
 [data-theme="dark"] .rv-banner { color: #93c5fd; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); }
+
+
+/* ---------- Mobile: section nav as bottom sheet + floating pill ---------- */
+.rv-nav__sheethead, .rv-navpill, .rv-sheet-backdrop { display: none; }
+
+@media (max-width: 860px) {
+    .rv-nav {
+        position: fixed; top: auto; left: 0; right: 0; bottom: 0; z-index: 1050;
+        max-height: min(72vh, 560px); overflow-y: auto; overscroll-behavior: contain;
+        background: var(--surface); border-top: 1px solid var(--border);
+        border-radius: 16px 16px 0 0; box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.25);
+        padding: 0 0.75rem calc(1rem + env(safe-area-inset-bottom));
+        gap: 0.1rem;
+        transform: translateY(105%); visibility: hidden;
+        transition: transform 0.22s ease, visibility 0s linear 0.22s;
+    }
+    .rv-nav.is-open { transform: none; visibility: visible; transition: transform 0.22s ease; }
+
+    .rv-nav__sheethead {
+        display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0;
+        background: var(--surface); padding: 0.9rem 0.25rem 0.6rem; margin-bottom: 0.25rem; z-index: 1;
+        border-bottom: 1px solid var(--border);
+    }
+    .rv-nav__sheethead strong { font-size: 0.95rem; }
+    .rv-nav__grabber { position: absolute; top: 0.4rem; left: 50%; transform: translateX(-50%);
+        width: 36px; height: 4px; border-radius: 999px; background: var(--border); }
+    .rv-nav__close { border: 0; background: transparent; color: var(--text-muted); width: 36px; height: 36px; border-radius: 999px; }
+    .rv-nav__close:hover { background: var(--bg-muted); }
+    .rv-nav__item { padding: 0.7rem 0.75rem; font-size: 0.9rem; }       /* comfortable tap targets */
+    .rv-nav__item--child { padding-left: 1.5rem; font-size: 0.85rem; }
+
+    .rv-sheet-backdrop { display: block; position: fixed; inset: 0; z-index: 1045; background: rgba(0, 0, 0, 0.45); }
+    .rv-sheet-backdrop[hidden] { display: none; }
+    body.rv-sheet-open { overflow: hidden; }
+
+    .rv-navpill {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        position: fixed; left: 50%; bottom: calc(1rem + env(safe-area-inset-bottom)); transform: translateX(-50%);
+        z-index: 1040; max-width: calc(100vw - 2rem);
+        padding: 0.6rem 1rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--surface); color: var(--text); font-size: 0.85rem; font-weight: 600;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+    .rv-navpill__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rv-navpill__chev { font-size: 0.7rem; color: var(--text-muted); }
+    .rv-navpill__badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #dc2626; color: #fff;
+        font-size: 0.7rem; display: inline-grid; place-items: center; }
+    .rv-navpill__badge[hidden] { display: none; }
+    .rv-navpill.has-errors { border-color: rgba(220, 38, 38, 0.55); }
+    body.rv-sheet-open .rv-navpill { visibility: hidden; }
+
+    /* keep the export button clear of the floating pill */
+    #review-form ~ .d-flex { margin-bottom: 4.5rem; }
+}
+
+/* ---------- Mobile: tighter cards (more width for the fields) ---------- */
+@media (max-width: 640px) {
+    .wizard-card { padding: 1rem 0.85rem; }
+    .rv-section { margin-bottom: 1.1rem; }
+    .rv-section__body, .rv-grid { grid-template-columns: 1fr; gap: 0.65rem; }
+    .rv-row { padding: 0.75rem; margin-bottom: 0.75rem; }
+    .rv-row__head { margin-bottom: 0.5rem; }
+    .rv-subsection { padding: 0.65rem 0.7rem; margin-top: 0.5rem; }
+
+    /* nested levels (persona inside operación, domicilio inside persona): no boxed card,
+       just a thin accent line — boxes inside boxes ate most of the screen width */
+    .rv-row .rv-row,
+    .rv-row .rv-subsection {
+        background: transparent; border: 0; border-left: 2px solid var(--border); border-radius: 0;
+        padding: 0.15rem 0 0.15rem 0.65rem; margin-left: 0;
+    }
+    .rv-row .rv-row .rv-row__head { margin-bottom: 0.35rem; }
+    .rv-array__head { margin-bottom: 0.5rem; }
+}

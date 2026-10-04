@@ -43,10 +43,12 @@ class Importer implements ImporterContract
             'referencia_aviso' => null, 'prioridad' => null, 'tipo_alerta' => null, 'descripcion_alerta' => null,
             'solicitante' => [], 'operaciones_acumuladas' => null, 'operaciones' => [],
         ];
-        $declaredOps = null;
-        $op = -1;                 // index of the current operation
+        $acumuladas = null;
+        $op = -1;                 // index of the last operation seen (fallback when a line has no GUID)
+        $opGuidToOp = [];         // records are grouped BY TYPE across operations → link lines by GUID
         $inmGuidToOp = [];
-        $lastMoral = [];          // side => index of last persona moral (for its representante line)
+        $personGuidTo = [];       // persona moral GUID => [op, side, index] (for its representante line)
+        $lastMoral = [];          // fallback: side => [op, index] of the last persona moral
         $seen930002 = false;
 
         foreach (TxtDecoder::lines($text) as $n => $line) {
@@ -82,12 +84,13 @@ class Importer implements ImporterContract
                     break;
 
                 case '930004':
-                    $declaredOps = (int) ($f[0] ?? 0);
+                    // ¿operaciones acumuladas? 1 = Sí, 2 = No (not the operation count)
+                    $acumuladas = $this->s($f[0] ?? null);
                     break;
 
                 case '930005':
                     $op++;
-                    $lastMoral = [];
+                    if (!empty($f[2])) $opGuidToOp[trim($f[2])] = $op;
                     $data['operaciones'][$op] = [
                         'fecha_operacion' => $this->date($f[0] ?? null, "operaciones.{$op}.fecha_operacion", $result),
                         'tipo_transmision' => $this->s($f[1] ?? null),
@@ -100,8 +103,9 @@ class Importer implements ImporterContract
                     $side = $tag === '930006' ? 'adquirentes' : 'vendedores';
                     $c = $this->cols($this->fisicaKeys, $f, $tag, $n, $result);
                     if ($this->allEmpty($c)) break;   // placeholder line
-                    $i = count($data['operaciones'][$op][$side]);
-                    $data['operaciones'][$op][$side][] = $this->fisica($c, "operaciones.{$op}.{$side}.{$i}", $result);
+                    $o = $opGuidToOp[trim($c['op_guid'])] ?? $op;
+                    $i = count($data['operaciones'][$o][$side]);
+                    $data['operaciones'][$o][$side][] = $this->fisica($c, "operaciones.{$o}.{$side}.{$i}", $result);
                     break;
 
                 case '930007': case '930012':
@@ -109,9 +113,11 @@ class Importer implements ImporterContract
                     $side = $tag === '930007' ? 'adquirentes' : 'vendedores';
                     $c = $this->cols($this->moralKeys, $f, $tag, $n, $result);
                     if ($this->allEmpty($c)) break;
-                    $i = count($data['operaciones'][$op][$side]);
-                    $data['operaciones'][$op][$side][] = $this->moral($c, "operaciones.{$op}.{$side}.{$i}", $result);
-                    $lastMoral[$side] = $i;
+                    $o = $opGuidToOp[trim($c['op_guid'])] ?? $op;
+                    $i = count($data['operaciones'][$o][$side]);
+                    $data['operaciones'][$o][$side][] = $this->moral($c, "operaciones.{$o}.{$side}.{$i}", $result);
+                    if (trim($c['person_guid']) !== '') $personGuidTo[trim($c['person_guid'])] = [$o, $side, $i];
+                    $lastMoral[$side] = [$o, $i];
                     break;
 
                 case '930008': case '930013':
@@ -119,18 +125,19 @@ class Importer implements ImporterContract
                     $side = $tag === '930008' ? 'adquirentes' : 'vendedores';
                     $c = $this->cols($this->repKeys, $f, $tag, $n, $result);
                     if ($this->allEmpty($c)) break;
-                    if (!isset($lastMoral[$side])) {
+                    $owner = $personGuidTo[trim($c['person_guid'])] ?? (isset($lastMoral[$side]) ? [$lastMoral[$side][0], $side, $lastMoral[$side][1]] : null);
+                    if (!$owner) {
                         $result->warn("Representante legal (línea " . ($n + 1) . ") sin persona moral a la que pertenezca; se ignoró.");
                         break;
                     }
-                    $i = $lastMoral[$side];
-                    $data['operaciones'][$op][$side][$i]['representante'] = [
+                    [$o, $side, $i] = $owner;
+                    $data['operaciones'][$o][$side][$i]['representante'] = [
                         'rfc' => $this->s($c['rfc']), 'curp' => $this->s($c['curp']),
                         'fecha_nacimiento' => TxtDecoder::ymd($c['fecha_nacimiento']),
                         'nombre' => $this->s($c['nombre']), 'apellido_paterno' => $this->s($c['apellido_paterno']),
                         'apellido_materno' => $this->s($c['apellido_materno']),
                     ];
-                    $result->warn('Trae representante legal de la persona moral; el formulario aún no lo muestra, pero se conserva al exportar mientras no se elimine la persona.', "operaciones.{$op}.{$side}.{$i}");
+                    $result->warn('Trae representante legal de la persona moral; el formulario aún no lo muestra, pero se conserva al exportar mientras no se elimine la persona.', "operaciones.{$o}.{$side}.{$i}");
                     break;
 
                 case '930009': case '930010': case '930014': case '930015':
@@ -141,8 +148,9 @@ class Importer implements ImporterContract
 
                 case '930016':
                     $this->requireOp($op, $tag);
+                    $o = $opGuidToOp[trim($f[15] ?? '')] ?? $op;
                     // tipo_bien|valor_pactado|m2_terreno|m2_construidos|folio_real|num_instrumento|valor_avaluo|(vacío)|entidad|calle|num_ext|num_int|cp|colonia|municipio|opGuid|inmGuid
-                    $data['operaciones'][$op]['inmueble'] = [
+                    $data['operaciones'][$o]['inmueble'] = [
                         'tipo_bien' => $this->s($f[0] ?? null),
                         'valor_pactado' => $this->num($f[1] ?? null),
                         'm2_terreno' => $this->num($f[2] ?? null),
@@ -157,12 +165,12 @@ class Importer implements ImporterContract
                             'municipio' => $this->s($f[14] ?? null),
                         ],
                     ];
-                    if (!empty($f[16])) $inmGuidToOp[$f[16]] = $op;
+                    if (!empty($f[16])) $inmGuidToOp[trim($f[16])] = $o;
                     break;
 
                 case '930017':
                     // fecha|forma|instrumento|moneda|monto|inmGuid — attach to the inmueble's operation
-                    $target = $inmGuidToOp[$f[5] ?? ''] ?? $op;
+                    $target = $inmGuidToOp[trim($f[5] ?? '')] ?? $op;
                     $this->requireOp($target, $tag);
                     $p = count($data['operaciones'][$target]['pagos']);
                     $data['operaciones'][$target]['pagos'][] = [
@@ -181,10 +189,23 @@ class Importer implements ImporterContract
             throw new ImportException('El archivo no parece ser un aviso UIF (faltan los registros 930002 / 930005).');
         }
         $count = count($data['operaciones']);
-        if ($declaredOps !== null && $declaredOps !== $count) {
-            $result->warn("El archivo declara {$declaredOps} operación(es) (930004) pero contiene {$count}.");
+        $data['operaciones_acumuladas'] = in_array($acumuladas, ['1', '2'], true) ? $acumuladas : ($count > 1 ? '1' : '2');
+        if ($count > 1 && $data['operaciones_acumuladas'] !== '1') {
+            $result->warn("El archivo trae {$count} operaciones pero 930004 indica que no son acumuladas.");
         }
-        $data['operaciones_acumuladas'] = $count > 1 ? '1' : '2';
+
+        // Gratuitous operations: the exporter writes one liquidación automatically
+        // (fecha|0|0|1|valor avalúo). Recognise it so the form shows "sin pagos", as captured.
+        foreach ($data['operaciones'] as $i => $o) {
+            $pagos = $o['pagos'] ?? [];
+            if (!in_array((string) ($o['tipo_transmision'] ?? ''), Exporter::TRANSMISIONES_GRATUITAS, true) || count($pagos) !== 1) continue;
+            $p = $pagos[0];
+            if (($p['forma_pago'] ?? null) === '0' && ($p['instrumento'] ?? null) === '0' && ($p['moneda'] ?? null) === '1'
+                && $p['fecha_pago'] === ($o['fecha_operacion'] ?? null)
+                && abs((float) ($p['monto'] ?? 0) - (float) ($o['inmueble']['valor_avaluo'] ?? 0)) < 0.005) {
+                $data['operaciones'][$i]['pagos'] = [];
+            }
+        }
 
         $result->data = $data;
         $result->meta['operations'] = $count;

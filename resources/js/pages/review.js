@@ -173,49 +173,6 @@ function renderReview(container, payload) {
         sec.appendChild(body);
         formCol.appendChild(sec);
 
-         // --- nav item for the section ---
-    const navItem = document.createElement('a');
-    navItem.className = 'rv-nav__item';
-    navItem.href = `#${sectionId}`;
-    navItem.dataset.target = sectionId;
-    navItem.innerHTML = `
-        <span class="rv-nav__label">${section.title}</span>
-        <span class="rv-nav__badge" hidden></span>
-    `;
-    navItem.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-    nav.appendChild(navItem);
-
-    // --- sub-nav children (e.g. per operation: Adquirentes, Vendedores...) ---
-    if (section.subnav) {
-        const opData = payload.data?.[section.subnav.array] ?? [];
-        const opCount = Math.max(opData.length, 1); // at least one shown
-        const multi = opCount > 1;
-
-        for (let opIndex = 0; opIndex < opCount; opIndex++) {
-            for (const child of section.subnav.children) {
-                // target path in the rendered DOM
-                const targetPath = `${section.subnav.array}.${opIndex}.${child.field}`;
-                const childItem = document.createElement('a');
-                childItem.className = 'rv-nav__item rv-nav__item--child';
-                childItem.dataset.targetPath = targetPath;
-                childItem.dataset.parentTarget = sectionId;
-                const label = multi ? `Op ${opIndex + 1} · ${child.label}` : child.label;
-                childItem.innerHTML = `
-                    <span class="rv-nav__label">${label}</span>
-                    <span class="rv-nav__badge" hidden></span>
-                `;
-                childItem.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const el = document.querySelector(`[data-path="${cssEsc(targetPath)}"]`);
-                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-                nav.appendChild(childItem);
-            }
-        }
-    }
     });
 
     layout.appendChild(nav);
@@ -223,6 +180,7 @@ function renderReview(container, payload) {
     container.appendChild(layout);
 
     initChoices(container);
+    rebuildNav();
     applyConditional();
     applyServerIssues(payload.issues);
     applyNotes(payload.notes || []);   // "tomado de…" notes from the ReferenceResolver
@@ -293,6 +251,148 @@ export async function initReviewDebug() {
     renderReview(container, payload);
 }
 
+/* ---------- Section nav (built from the live DOM; rebuilt when rows change) ---------- */
+function rebuildNav() {
+    const nav = document.getElementById('rv-nav');
+    if (!nav || !SCHEMA) return;
+    nav.replaceChildren();
+
+    // Bottom-sheet header (only visible on mobile, where the nav is a sheet)
+    const head = document.createElement('div');
+    head.className = 'rv-nav__sheethead';
+    head.innerHTML = '<span class="rv-nav__grabber" aria-hidden="true"></span><strong>Secciones</strong>';
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'rv-nav__close';
+    close.setAttribute('aria-label', 'Cerrar');
+    close.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    close.addEventListener('click', closeNavSheet);
+    head.appendChild(close);
+    nav.appendChild(head);
+
+    SCHEMA.sections.forEach((section, i) => {
+        const sectionId = `rv-sec-${i}`;
+        nav.appendChild(navLink(section.title, () => document.getElementById(sectionId), { target: sectionId }));
+
+        // sub-nav per array row (e.g. Op 1 · Adquirentes …), counted from the DOM, not the payload
+        if (section.subnav) {
+            const rows = document.querySelectorAll(
+                `.rv-array[data-path="${cssEsc(section.subnav.array)}"] > .rv-array__rows > .rv-row`);
+            const count = Math.max(rows.length, 1);
+            for (let r = 0; r < count; r++) {
+                for (const child of section.subnav.children) {
+                    const targetPath = `${section.subnav.array}.${r}.${child.field}`;
+                    const label = count > 1 ? `Op ${r + 1} · ${child.label}` : child.label;
+                    nav.appendChild(navLink(label,
+                        () => document.querySelector(`[data-path="${cssEsc(targetPath)}"]`),
+                        { targetPath, parentTarget: sectionId, child: true }));
+                }
+            }
+        }
+    });
+    ensureNavPill();
+    initScrollSpy();
+    refreshErrorBadges();
+    syncNavPill();
+}
+
+/* ---------- Mobile: nav as a bottom sheet, opened by a floating pill ----------
+ * ≤ 860px: the same #rv-nav element becomes the sheet (CSS), so badges, the
+ * current-section highlight and rebuilds keep working with no duplicate markup.
+ */
+const MOBILE_NAV = '(max-width: 860px)';
+
+function ensureNavPill() {
+    if (document.getElementById('rv-navpill')) return;
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.id = 'rv-navpill';
+    pill.className = 'rv-navpill';
+    pill.setAttribute('aria-controls', 'rv-nav');
+    pill.setAttribute('aria-expanded', 'false');
+    pill.innerHTML = '<i class="fa-solid fa-list-ul" aria-hidden="true"></i>'
+        + '<span class="rv-navpill__label">Secciones</span>'
+        + '<span class="rv-navpill__badge" hidden></span>'
+        + '<i class="fa-solid fa-chevron-up rv-navpill__chev" aria-hidden="true"></i>';
+    pill.addEventListener('click', () => (document.getElementById('rv-nav')?.classList.contains('is-open') ? closeNavSheet() : openNavSheet()));
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'rv-sheet-backdrop';
+    backdrop.className = 'rv-sheet-backdrop';
+    backdrop.hidden = true;
+    backdrop.addEventListener('click', closeNavSheet);
+
+    document.body.append(backdrop, pill);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeNavSheet(); });
+}
+
+function openNavSheet() {
+    const nav = document.getElementById('rv-nav');
+    if (!nav || !window.matchMedia(MOBILE_NAV).matches) return;
+    nav.classList.add('is-open');
+    nav.setAttribute('role', 'dialog');
+    nav.setAttribute('aria-modal', 'true');
+    nav.setAttribute('aria-label', 'Secciones del formulario');
+    document.getElementById('rv-sheet-backdrop').hidden = false;
+    document.getElementById('rv-navpill')?.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('rv-sheet-open');
+    (nav.querySelector('.rv-nav__item.is-current') || nav.querySelector('.rv-nav__item'))?.focus({ preventScroll: true });
+    nav.querySelector('.rv-nav__item.is-current')?.scrollIntoView({ block: 'nearest' });
+}
+
+function closeNavSheet() {
+    const nav = document.getElementById('rv-nav');
+    if (!nav?.classList.contains('is-open')) return;
+    nav.classList.remove('is-open');
+    nav.removeAttribute('role');
+    nav.removeAttribute('aria-modal');
+    const backdrop = document.getElementById('rv-sheet-backdrop');
+    if (backdrop) backdrop.hidden = true;
+    const pill = document.getElementById('rv-navpill');
+    pill?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('rv-sheet-open');
+    pill?.focus({ preventScroll: true });
+}
+
+/** Pill shows where you are + how many fields need attention in the whole form. */
+function syncNavPill() {
+    const pill = document.getElementById('rv-navpill');
+    if (!pill) return;
+    const current = document.querySelector('#rv-nav .rv-nav__item.is-current .rv-nav__label')
+        || document.querySelector('#rv-nav .rv-nav__item .rv-nav__label');
+    pill.querySelector('.rv-navpill__label').textContent = current?.textContent || 'Secciones';
+    const errors = [...document.querySelectorAll('.rv-section')]
+        .reduce((n, sec) => n + [...sec.querySelectorAll('.rv-field.has-error')].filter(f => f.offsetParent !== null).length, 0);
+    const badge = pill.querySelector('.rv-navpill__badge');
+    badge.hidden = errors === 0;
+    badge.textContent = errors;
+    pill.classList.toggle('has-errors', errors > 0);
+}
+
+function navLink(label, targetFn, { target, targetPath, parentTarget, child = false }) {
+    const a = document.createElement('a');
+    a.className = 'rv-nav__item' + (child ? ' rv-nav__item--child' : '');
+    a.href = target ? `#${target}` : '#';
+    if (target) a.dataset.target = target;
+    if (targetPath) a.dataset.targetPath = targetPath;
+    if (parentTarget) a.dataset.parentTarget = parentTarget;
+    const l = document.createElement('span');
+    l.className = 'rv-nav__label';
+    l.textContent = label;
+    const b = document.createElement('span');
+    b.className = 'rv-nav__badge';
+    b.hidden = true;
+    a.append(l, b);
+    a.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (typeof closeNavSheet === 'function') closeNavSheet();
+        targetFn()?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return a;
+}
+
+let SPY = null;   // current IntersectionObserver (re-created on every nav rebuild)
+
 function initScrollSpy() {
     const targets = [
         ...document.querySelectorAll('.rv-section'),
@@ -302,7 +402,8 @@ function initScrollSpy() {
     ];
     if (!targets.length) return;
 
-    const observer = new IntersectionObserver((entries) => {
+    SPY?.disconnect();
+    const observer = SPY = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (!entry.isIntersecting) return;
             document.querySelectorAll('.rv-nav__item').forEach(n => n.classList.remove('is-current'));
@@ -313,12 +414,8 @@ function initScrollSpy() {
             let navItem = null;
             if (id) navItem = document.querySelector(`.rv-nav__item[data-target="${id}"]`);
             if (!navItem && path) navItem = document.querySelector(`.rv-nav__item--child[data-target-path="${cssEsc(path)}"]`);
-            if (navItem) {
-                navItem.classList.add('is-current');
-                if (window.matchMedia('(max-width: 860px)').matches) {
-                    navItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                }
-            }
+            if (navItem) navItem.classList.add('is-current');
+            syncNavPill();
         });
     }, { rootMargin: '-15% 0px -75% 0px', threshold: 0 });
 
@@ -560,7 +657,7 @@ function renderArray(name, def, rows, path) {
     const buildRow = (rowData, idx) => {
         const row = document.createElement('div');
         row.className = 'rv-row';
-        const rowPath = `${path}.${idx}`;
+        const rowPath = `${wrap.dataset.path}.${idx}`;   // live: parent rows may have been renumbered
         row.dataset.path = rowPath;
 
         const rh = document.createElement('div');
@@ -570,7 +667,7 @@ function renderArray(name, def, rows, path) {
         rm.type = 'button';
         rm.className = 'rv-row__remove';
         rm.innerHTML = '<i class="fa-solid fa-xmark me-1"></i>Eliminar';
-        rm.onclick = () => { row.remove(); reindex(wrap); updateCount(wrap); onChange(); };
+        rm.onclick = () => { row.remove(); reindex(wrap); updateCount(wrap); afterRowsChanged(); };
         rh.appendChild(rm);
         row.appendChild(rh);
 
@@ -590,9 +687,16 @@ function renderArray(name, def, rows, path) {
     addBtn.onclick = () => {
         buildRow({}, rowsWrap.children.length);
         updateCount(wrap);
-        applyConditional();
+        afterRowsChanged();
     };
     return wrap;
+}
+
+/** Rows added/removed: re-run conditions, rebuild the section nav, persist. */
+function afterRowsChanged() {
+    onChange();
+    rebuildNav();
+    scheduleAutosave();
 }
 
 function updateCount(wrap) {
@@ -817,15 +921,29 @@ function populateColoniaSelect(select, colonias, selectedValue = null, extraValu
     onChange();
 }
 
+/**
+ * Renumber the rows of an array after a delete. Every element inside a row
+ * (fields, inputs, nested arrays and their rows, objects) carries a path that
+ * STARTS with the row's path, so the old row prefix is replaced by the new one:
+ * operaciones.1.adquirentes.0.curp → operaciones.0.adquirentes.0.curp.
+ * (Previously nested elements were rewritten to `${row}.${field}`, which turned
+ * operaciones.1.adquirentes.0.curp into operaciones.0.curp and made collect()
+ * drop the whole operation on save / PDF / export.)
+ */
 function reindex(wrap) {
     const base = wrap.dataset.path;
     [...wrap.querySelectorAll(':scope > .rv-array__rows > .rv-row')].forEach((row, i) => {
-        const rowPath = `${base}.${i}`;
-        row.dataset.path = rowPath;
-        row.querySelector('.rv-row__num').textContent = `#${i + 1}`;
-        row.querySelectorAll('[data-field]').forEach(el => {
-            el.dataset.path = `${rowPath}.${el.dataset.field}`;
-        });
+        const oldPath = row.dataset.path;
+        const newPath = `${base}.${i}`;
+        row.querySelector(':scope > .rv-row__head .rv-row__num').textContent = `#${i + 1}`;
+        if (oldPath === newPath) return;
+        const rewrite = (el) => {
+            const p = el.dataset.path;
+            if (p === oldPath) el.dataset.path = newPath;
+            else if (p && p.startsWith(oldPath + '.')) el.dataset.path = newPath + p.slice(oldPath.length);
+        };
+        rewrite(row);
+        row.querySelectorAll('[data-path]').forEach(rewrite);
     });
 }
 
@@ -1730,6 +1848,7 @@ function refreshErrorBadges() {
     });
 
     updateSummary(grandTotal);
+    syncNavPill();
 }
 
 function setBadge(navItem, count) {

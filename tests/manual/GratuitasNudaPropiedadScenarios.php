@@ -93,7 +93,8 @@ check('donación: valor_pactado → 0, empty pagos dropped', $out['escritura']['
 check('compraventa untouched', $out['escritura']['operaciones'][1]['inmueble']['valor_pactado'] === null && count($out['escritura']['operaciones'][1]['pagos']) === 1);
 $txt = (new Modules\AvisosUif\V1\Exporter())->export(['referencia_aviso'=>'26464','operaciones'=>[['fecha_operacion'=>'2025-12-19','tipo_transmision'=>'3','adquirentes'=>[],'vendedores'=>[],
   'inmueble'=>['tipo_bien'=>'3','valor_pactado'=>0,'valor_avaluo'=>2565800,'domicilio'=>[]],'pagos'=>[]]]], 'txt');
-check('export: no 930017 lines for a donación', !str_contains($txt, '930017'));
+check('export: a donación without pagos emits ONE automatic liquidación fecha|0|0|1|valor avalúo (as in the real aviso 26464)',
+  preg_match_all('/^930017/m', $txt) === 1 && str_contains($txt, '930017-Datos inmuebles liquidaciones-grid:19/12/2025|0|0|1|2565800.00|02646400-0000-0001-0000-000000000001'));
 check('export: 930016 carries valor_pactado 0.00 and avalúo 2565800.00', (bool) preg_match('/^930016[^:]*:3\|0\.00\|.*\|2565800\.00\|/m', $txt));
 echo $fail ? "\n$fail FAILED\n" : "\nALL PASSED\n";
 }

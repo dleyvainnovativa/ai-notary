@@ -81,7 +81,9 @@ class UploadController extends Controller
     {
         abort_unless($document->user_id === $request->user()->id, 403);
         abort_unless($document->parent_document_id === null, 422, 'Agrega la escritura al documento principal.');
-        // abort_unless($document->status === 'requires_review', 409, 'El documento ya no está en revisión.');
+        // Exported documents accept more deeds too (while their data still exists);
+        // the merge moves them back to "Por revisar".
+        abort_unless($document->isReviewable(), 409, 'Los datos de este documento ya no están disponibles.');
 
         $registry = app(\App\Modules\ModuleRegistry::class);
         $config = $registry->manifest($document->module_slug)['append'] ?? null;
@@ -90,8 +92,7 @@ class UploadController extends Controller
 
         $request->validate([
             $inputKey => [
-                'required',
-                'file',
+                'required', 'file',
                 'mimetypes:' . implode(',', config('documents.accepted_mimes')),
                 'max:' . (config('documents.max_size_bytes') / 1024),
             ],
