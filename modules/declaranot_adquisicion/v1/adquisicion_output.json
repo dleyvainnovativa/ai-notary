@@ -1,0 +1,44 @@
+{
+    "numero_escritura": "15482",
+    "fecha_firma_escritura": "2025-01-15",
+    "tipo_inmueble": "1",
+    "especifica_inmueble": null,
+    "avaluo_inmueble": 3250000,
+    "monto_operacion": 0,
+    "enajenantes": [
+        {
+            "tipo_enajenante": "1",
+            "rfc": "CABJ850210ABC",
+            "nombre": "JUAN",
+            "apellido_paterno": "CABALLERO",
+            "apellido_materno": "BENITEZ",
+            "curp": "CABJ850210HVZRNN01",
+            "razon_social": null,
+            "nacionalidad": null,
+            "fecha_nacimiento": null,
+            "documento_oficial": null,
+            "folio": null
+        }
+    ],
+    "adquirientes": [
+        {
+            "tipo_adquiriente": "2",
+            "rfc": "XEXX010101000",
+            "nombre": "MICHAEL",
+            "apellido_paterno": "SMITH",
+            "apellido_materno": null,
+            "curp": null,
+            "razon_social": "Extranjero",
+            "nacionalidad": "AD",
+            "fecha_nacimiento": "1998-08-16",
+            "documento_oficial": "PASAPORTE",
+            "folio": "XEXX010101000"
+        }
+    ],
+    "valor_calculo": {
+        "derecho_transmitido": "pleno_dominio",
+        "valor_total": null,
+        "valor_explicito": null,
+        "porcentajes": []
+    }
+}

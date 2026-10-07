@@ -40,7 +40,9 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            // MUST exceed the longest job timeout (ProcessDocumentJob: 420 s); otherwise a slow
+            // job is handed to a second worker and processed twice.
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 480),
             'after_commit' => false,
         ],
 

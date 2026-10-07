@@ -1,0 +1,103 @@
+{
+    "schema_version": "1.0.0",
+    "global_rules": {
+        "date_format": "YYYY-MM-DD",
+        "number_format": "decimal",
+        "empty_values": [
+            null,
+            ""
+        ],
+        "normalization_rules": [
+            "Return enum values exactly as defined",
+            "Remove currency symbols from numbers",
+            "Convert dates to YYYY-MM-DD",
+            "Return null when value is missing",
+            "Do not infer missing data"
+        ]
+    },
+    "fields": {
+        "pago": {
+            "type": "array",
+            "ai_description": "Un elemento por cada pago de ISR por adquisición de bienes (normalmente uno).",
+            "items": {
+                "ingreso_acumulable": {
+                    "type": "number",
+                    "ai_description": "Ingreso acumulable / base del impuesto por adquisición de bienes."
+                },
+                "isr_federacion": {
+                    "type": "number",
+                    "ai_description": "ISR pagado a la Federación."
+                },
+                "numero_operacion": {
+                    "type": "text",
+                    "ai_description": "Número de operación o folio del pago (tal como aparece, puede tener letras)."
+                },
+                "fecha_pago": {
+                    "type": "date",
+                    "ai_description": "Fecha del pago."
+                }
+            }
+        },
+        "copropiedad": {
+            "type": "object",
+            "items": {
+                "existe_copropiedad": {
+                    "type": "select",
+                    "source": "catalogo_datos_informativos",
+                    "default_if_missing_label": "No",
+                    "default_if_missing_value": "2",
+                    "derive_from_array_length": {
+                        "path": "copropiedad.integrantes",
+                        "if_gt": 0,
+                        "true_value": "1",
+                        "false_value": "2"
+                    }
+                },
+                "integrantes": {
+                    "type": "array",
+                    "enabled_if": {
+                        "existe_copropiedad": "1"
+                    },
+                    "items": {
+                        "rfc": {
+                            "type": "text"
+                        },
+                        "porcentaje": {
+                            "type": "number"
+                        },
+                        "monto_operacion": {
+                            "type": "number",
+                            "ai_description": "Parte del monto de la operación que corresponde al integrante."
+                        },
+                        "valor_avaluo": {
+                            "type": "number",
+                            "ai_description": "Parte del avalúo que corresponde al integrante."
+                        },
+                        "ingreso_acumulable": {
+                            "type": "number"
+                        },
+                        "isr_federacion": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "representante_comun": {
+            "type": "object",
+            "items": {
+                "existe_representante_comun": {
+                    "type": "select",
+                    "default_if_missing_label": "No",
+                    "source": "catalogo_datos_informativos"
+                },
+                "rfc_representante": {
+                    "type": "text",
+                    "required_if": {
+                        "existe_representante_comun": "1"
+                    }
+                }
+            }
+        }
+    }
+}

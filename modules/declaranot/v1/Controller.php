@@ -75,8 +75,9 @@ class Controller implements ModuleControllerContract
                 'required' => true,
                 'money' => true,
                 'help' => [
-                    'title' => '¿Qué valor de avalúo debo señalar en el aplicativo DeclaraNOT en línea, cuando los contribuyentes no estén obligados a practicar un avalúo?',
-                    'body' => 'En caso de que se trate de contribuyentes que realicen la enajenación o adquisición de bienes en una entidad federativa en la que, conforme a la legislación de dicha entidad, no estén obligados a realizar un avalúo, puedes señalar el valor cero en lugar del valor de avalúo. Fundamento legal. Regla 2.7.1.43. de la RMF para 2025, publicada en el DOF el 30 de diciembre de 2024.',
+                    'title' => 'Información del valor del avaluo de bienes enajenados a través del DeclaraNOT en línea',
+                    'body' => 'Para los efectos del articulo 27, apartado A, fracción V, apartado B, fracción X y apartado D, fracción VI del CFF, los fedatarios públicos cumplirán la obligación de proporcionar la información correspondiente al valor del avalúo de cada bien enajenado con la presentación de la declaración de enajenación o adquisición de bienes según corresponda, a través del
+DeclaraNOT en linea, en donde se señalará entre otros, lo siguiente: El valor del bien de que se trate según el avalio, el cual deberá cumplir con lo establecido en el articulo 3 del Reglamento del CFF y la regla 2.1.35. El valor de la contraprestación o ingresos por la enajenación. CFF 27, RCFF 3, RMF 2.1.35., 2.7.1.20., 2.12.12.',
                 ],
             ],
             'pagos_inmueble' => [

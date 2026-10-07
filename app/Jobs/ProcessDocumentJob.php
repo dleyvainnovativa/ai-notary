@@ -21,7 +21,8 @@ class ProcessDocumentJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 1;
-    public int $timeout = 120;
+    // Up to 2 AI calls (declaranot: escritura + cálculo), each 90 s + one retry → keep under queue retry_after (480).
+    public int $timeout = 420;
 
     // The extracted text arrives here in the payload — not from any store.
     public function __construct(public int $documentId, public array $extractedTextByInput) {}

@@ -1357,7 +1357,7 @@ function setDraftStatus(state) {
  * into this document's draft; we then re-render from the server.
  */
 const APPEND_POLL_MS = 2000;
-const APPEND_MAX_POLLS = 90;
+const APPEND_MAX_POLLS = 150;   // ~5 min
 
 function ensureAppendControls() {
     if (!APPEND || DOCUMENT_ID === 'debug') return;

@@ -24,15 +24,17 @@ class OpenAiExtractor implements AiExtractor
             . "\n\nDOCUMENT:\n" . $documentText;
 
         try {
-            $response = OpenAI::chat()->create([
+            // One retry (after 3 s) on timeouts / connection drops / 429 / 5xx — never on bad requests.
+            $response = (new RetryPolicy(maxAttempts: 2, backoffSeconds: [3]))->run(fn() => OpenAI::chat()->create([
                 'model' => $model,
                 'temperature' => 0,
                 'messages' => [
                     ['role' => 'system', 'content' => $systemPrompt],
                     ['role' => 'user', 'content' => $userPrompt],
                 ],
-            ]);
+            ]));
         } catch (\Throwable $e) {
+            Log::warning('OpenAI request failed', ['transient' => RetryPolicy::isTransient($e), 'error' => $e->getMessage()]);
             throw new AiProviderException('OpenAI request failed: ' . $e->getMessage(), 0, $e);
         }
 

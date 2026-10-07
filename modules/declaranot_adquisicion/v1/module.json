@@ -1,0 +1,34 @@
+{
+  "slug": "declaranot_adquisicion",
+  "version": "1",
+  "name": "DeclaraNOT por adquisición de bienes",
+  "active": true,
+  "extends": "../../declaranot/v1",
+  "exports": [
+    "txt"
+  ],
+  "catalogs_used": [
+    "catalogo_inmuebles",
+    "catalogo_tipos_pago",
+    "catalogo_bancos",
+    "catalogo_tipos_domicilio",
+    "catalogo_datos_informativos"
+  ],
+  "controller_class": "Modules\\DeclaranotAdquisicion\\V1\\Controller",
+  "exporter_class": "Modules\\DeclaranotAdquisicion\\V1\\Exporter",
+  "importer_class": "Modules\\DeclaranotAdquisicion\\V1\\Importer",
+  "references": {
+    "deed_date": [
+      "escritura.fecha_firma_escritura"
+    ],
+    "address_keys": [
+      "domicilio"
+    ],
+    "partial_values": [
+      {
+        "object": "escritura",
+        "target": "avaluo_inmueble"
+      }
+    ]
+  }
+}

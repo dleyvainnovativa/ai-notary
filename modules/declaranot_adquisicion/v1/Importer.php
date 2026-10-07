@@ -1,39 +1,31 @@
 <?php
 
-namespace Modules\Declaranot\V1;
+namespace Modules\DeclaranotAdquisicion\V1;
 
 use App\Modules\ImporterContract;
 use App\Modules\ImportException;
 use App\Modules\ImportResult;
 use App\Services\Import\TxtDecoder;
 
+require_once __DIR__ . '/Exporter.php';
+
 /**
- * Parses a DeclaraNOT TXT (900001…900013) back into review form data.
- * Column order mirrors Exporter::generateDeclaranotTXT — keep both in sync;
- * ImportService's round-trip check catches any drift on every import.
- * Values are kept as the file's strings (the exporter prints them verbatim).
+ * Parses a DeclaraNOT por adquisición TXT (910001…910011) back into review form
+ * data. Column order mirrors Exporter — ImportService's round-trip check catches drift.
+ * Persona MORAL rows with 10 columns (no CURP, as in the SAT example) are accepted.
  */
 class Importer implements ImporterContract
 {
-    private const PERSONA_COLS = ['tipo', 'rfc', 'nombre', 'apellido_paterno', 'apellido_materno', 'curp',
-        'razon_social', 'nacionalidad', 'fecha_nacimiento', 'documento_oficial', 'folio'];
-
-    private const PAGO_ISR_COLS = ['ingresos_enajenacion', 'ingresos_exentos', 'ingreso_sismo_2017', 'deducciones_autorizadas',
-        'ganancia_perdida', 'years_adquisicion_venta', 'ganancia_acumulable', 'ganancia_no_acumulable', 'isr_federacion',
-        'numero_operacion_federacion', 'fecha_pago_federacion', 'isr_entidad', 'numero_operacion_entidad',
-        'fecha_pago_entidad', 'total_isr_pagado'];
-
-    private const INTEGRANTE_COLS = ['rfc', 'porcentaje', 'ingresos_enajenacion', 'deducciones_autorizadas', 'ganancia_perdida',
-        'ganancia_acumulable', 'ganancia_no_acumulable', 'isr_federacion', 'isr_entidad'];
+    private const PAGO_COLS = ['ingreso_acumulable', 'isr_federacion', 'numero_operacion', 'fecha_pago'];
+    private const INTEGRANTE_COLS = ['rfc', 'porcentaje', 'monto_operacion', 'valor_avaluo', 'ingreso_acumulable', 'isr_federacion'];
 
     public function parse(string $text): ImportResult
     {
         $r = new ImportResult([]);
         $data = [
             'numero_escritura' => null, 'fecha_firma_escritura' => null, 'tipo_inmueble' => null,
-            'especifica_inmueble' => null, 'avaluo_inmueble' => null,
-            'pagos_inmueble' => [], 'enajenantes' => [], 'adquirientes' => [], 'pago' => [],
-            'datos_informativos' => ['ingresos_exentos' => null, 'monto' => null, 'impuesto' => null],
+            'especifica_inmueble' => null, 'avaluo_inmueble' => null, 'monto_operacion' => null,
+            'adquirientes' => [], 'enajenantes' => [], 'pago' => [],
             'copropiedad' => ['existe_copropiedad' => null, 'integrantes' => []],
             'representante_comun' => ['existe_representante_comun' => null, 'rfc_representante' => null],
         ];
@@ -48,71 +40,62 @@ class Importer implements ImporterContract
 
             switch ($tag) {
                 case 'Configuracion':
-                    // {año}|001|035|24|{fecha}: 4th field is the declaration type (24 enajenación,
-                    // 25 adquisición), NOT the notaría — so no "different notaría" banner here.
                     $r->meta['configuracion'] = ['tipo_declaracion' => $f[1] ?? '', 'clave' => $f[2] ?? '', 'tipo' => $f[3] ?? ''];
-                    if (($f[3] ?? '') === '25') {
-                        $r->warn('Este archivo es una DeclaraNOT por adquisición de bienes (tipo 25); impórtalo en ese módulo.');
+                    if (($f[3] ?? '') !== '' && $f[3] !== '25') {
+                        $r->warn("El archivo indica tipo de declaración {$f[3]} (25 = adquisición de bienes).");
                     }
                     break;
 
-                case '900001':
+                case '910001':
                     $seen = true;
                     $data['numero_escritura'] = $this->s($f[0] ?? null);
                     $data['fecha_firma_escritura'] = $this->date($f[1] ?? null, 'fecha_firma_escritura', $r);
                     $data['tipo_inmueble'] = $this->s($f[2] ?? null);
-                    $data['especifica_inmueble'] = $this->s($f[3] ?? null);
-                    $data['avaluo_inmueble'] = $this->s($f[4] ?? null);
+                    $data['avaluo_inmueble'] = $this->s($f[3] ?? null);
+                    $data['monto_operacion'] = $this->s($f[4] ?? null);
+                    $data['especifica_inmueble'] = $this->s($f[5] ?? null);
                     break;
 
-                case '900002':
-                    $data['pagos_inmueble'][] = [
-                        'monto' => $this->s($f[0] ?? null), 'tipo_pago_inmueble' => $this->s($f[1] ?? null),
-                        'institucion_financiera' => $this->s($f[2] ?? null), 'numero_cuenta' => $this->s($f[3] ?? null),
-                        'otro_pago' => $this->s($f[4] ?? null), 'otro' => null,
-                    ];
-                    break;
-
-                case '900003': case '900005':
-                    $c = $this->combine(self::PERSONA_COLS, $f, $tag, $n, $r);
+                case '910002': case '910003':
+                    $list = $tag === '910002' ? 'adquirientes' : 'enajenantes';
+                    $tipoKey = $tag === '910002' ? 'tipo_adquiriente' : 'tipo_enajenante';
+                    $cols = Exporter::PERSONA_COLS;
+                    if (count($f) === count($cols) - 1 && Exporter::isMoral($f[1] ?? null)) {
+                        array_splice($f, 5, 0, ['']);   // moral row without CURP column
+                    }
+                    $c = $this->combine($cols, $f, $tag, $n, $r);
                     if ($this->allEmpty($c)) break;
-                    $tipoKey = $tag === '900003' ? 'tipo_enajenante' : 'tipo_adquiriente';
-                    $row = [$tipoKey => $c['tipo']] + array_diff_key($c, ['tipo' => 1]);
-                    $data[$tag === '900003' ? 'enajenantes' : 'adquirientes'][] = $row;
+                    $i = count($data[$list]);
+                    $c['fecha_nacimiento'] = $this->date($c['fecha_nacimiento'], "{$list}.{$i}.fecha_nacimiento", $r);
+                    $data[$list][] = [$tipoKey => $c['tipo']] + array_diff_key($c, ['tipo' => 1]);
                     break;
 
-                case '900004':
-                    $data['datos_informativos'] = [
-                        'ingresos_exentos' => $this->s($f[0] ?? null), 'monto' => $this->s($f[1] ?? null), 'impuesto' => $this->s($f[2] ?? null),
-                    ];
-                    break;
-
-                case '900006':
-                    $c = $this->combine(self::PAGO_ISR_COLS, $f, $tag, $n, $r);
+                case '910004':
+                    $c = $this->combine(self::PAGO_COLS, $f, $tag, $n, $r);
+                    if ($this->allEmpty($c)) break;
                     $i = count($data['pago']);
-                    $c['fecha_pago_federacion'] = $this->date($c['fecha_pago_federacion'], "pago.{$i}.fecha_pago_federacion", $r);
-                    $c['fecha_pago_entidad'] = $this->date($c['fecha_pago_entidad'], "pago.{$i}.fecha_pago_entidad", $r);
+                    $c['fecha_pago'] = $this->date($c['fecha_pago'], "pago.{$i}.fecha_pago", $r);
                     $data['pago'][] = $c;
                     break;
 
-                case '900010':
+                case '910005':
                     $data['copropiedad']['existe_copropiedad'] = $this->s($f[0] ?? null);
                     break;
 
-                case '900013':
+                case '910011':
                     $data['representante_comun']['existe_representante_comun'] = $this->s($f[0] ?? null);
                     break;
 
-                case '900009':
+                case '910006':
                     $data['representante_comun']['rfc_representante'] = $this->s($f[0] ?? null);
                     break;
 
-                case '900007':
+                case '910007':
                     $c = $this->combine(self::INTEGRANTE_COLS, $f, $tag, $n, $r);
                     if (!$this->allEmpty($c)) $data['copropiedad']['integrantes'][] = $c;
                     break;
 
-                case '900011':
+                case '910009':
                     $declaredTotal = trim($f[0] ?? '');
                     break;
 
@@ -122,7 +105,7 @@ class Importer implements ImporterContract
         }
 
         if (!$seen) {
-            throw new ImportException('El archivo no parece ser una DeclaraNOT (falta el registro 900001).');
+            throw new ImportException('El archivo no parece ser una DeclaraNOT por adquisición de bienes (falta el registro 910001).');
         }
         if ($declaredTotal !== null && $declaredTotal !== '' && $data['copropiedad']['integrantes']) {
             $sum = array_sum(array_map(fn($i) => (float) ($i['porcentaje'] ?? 0), $data['copropiedad']['integrantes']));

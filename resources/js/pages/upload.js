@@ -206,7 +206,7 @@ function setProcessingState(state, message) {
 
 /* ---------- Status polling ---------- */
 async function pollStatus(documentId, attempt = 0, errorStreak = 0, autoOpen = false) {
-    if (attempt > 90) { setProcessingState('failed', 'Sigue procesando — check back shortly.'); return; }
+    if (attempt > 150) { setProcessingState('failed', 'Sigue procesando. Vuelve en unos minutos: lo encontrarás en el inicio.'); return; }
     if (errorStreak >= 3) { setProcessingState('failed', 'Conexión Perdida. Favor de recargar.'); return; }
 
     try {

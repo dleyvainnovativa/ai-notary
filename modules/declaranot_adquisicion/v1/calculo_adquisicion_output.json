@@ -1,0 +1,35 @@
+{
+    "pago": [
+        {
+            "ingreso_acumulable": 2546325,
+            "isr_federacion": 200000,
+            "numero_operacion": "PT70100",
+            "fecha_pago": "2025-01-20"
+        }
+    ],
+    "copropiedad": {
+        "existe_copropiedad": "1",
+        "integrantes": [
+            {
+                "rfc": "LOPR920101ABC",
+                "porcentaje": 50,
+                "monto_operacion": 1273163,
+                "valor_avaluo": 1273163,
+                "ingreso_acumulable": 636581,
+                "isr_federacion": 100000
+            },
+            {
+                "rfc": "MARG930202DEF",
+                "porcentaje": 50,
+                "monto_operacion": 1273163,
+                "valor_avaluo": 1273163,
+                "ingreso_acumulable": 636581,
+                "isr_federacion": 100000
+            }
+        ]
+    },
+    "representante_comun": {
+        "existe_representante_comun": "1",
+        "rfc_representante": "LOPR920101ABC"
+    }
+}

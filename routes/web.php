@@ -17,8 +17,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/documents/{document}/review-data', [DocumentController::class, 'reviewData'])->name('document.review-data');
     Route::post('/documents/{document}/review-validate', [DocumentController::class, 'reviewValidate'])->name('document.review-validate');
-    Route::post('/documents/{document}/draft', [DocumentController::class, 'saveDraft'])->name('document.draft');
-    Route::match(['get', 'post'], '/documents/{document}/pdf', [DocumentController::class, 'pdf'])->name('document.pdf');
+    Route::post('/documents/{document}/draft', [DocumentController::class, 'saveDraft'])->middleware('throttle:drafts')->name('document.draft');
+    Route::match(['get', 'post'], '/documents/{document}/pdf', [DocumentController::class, 'pdf'])->middleware('throttle:pdf')->name('document.pdf');
     Route::post('/documents/{document}/export', [DocumentController::class, 'export'])
         ->middleware('auth')->name('document.export');
 
@@ -45,10 +45,10 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('upload');
 
-    Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
-    Route::post('/import', [\App\Http\Controllers\ImportController::class, 'store'])->name('import.store');
+    Route::post('/upload', [UploadController::class, 'store'])->middleware('throttle:uploads')->name('upload.store');
+    Route::post('/import', [\App\Http\Controllers\ImportController::class, 'store'])->middleware('throttle:uploads')->name('import.store');
     Route::get('/documents/{document}/status', [UploadController::class, 'status'])->name('document.status');
-    Route::post('/documents/{document}/append', [UploadController::class, 'append'])->name('document.append');
+    Route::post('/documents/{document}/append', [UploadController::class, 'append'])->middleware('throttle:uploads')->name('document.append');
     Route::get('/debug/review-data', [DocumentController::class, 'reviewDebug'])
         ->middleware('auth')->name('debug.review-data');
     Route::get('/debug-review', fn() => view('debug-review'))

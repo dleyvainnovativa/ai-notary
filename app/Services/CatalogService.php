@@ -46,7 +46,7 @@ class CatalogService
      */
     public function load(string $catalogName, string $moduleDir): ?array
     {
-        $path = "{$moduleDir}/catalogs/{$catalogName}.json";
+        $path = $this->catalogPath($catalogName, $moduleDir);
 
         return Cache::remember(
             "catalog:" . md5($path),
@@ -60,6 +60,25 @@ class CatalogService
                 return is_array($data) ? $data : null;
             }
         );
+    }
+
+    /**
+     * The module's own catalogs/ first; if the file isn't there and the module's
+     * module.json declares "extends" (e.g. "../../declaranot/v1"), the parent's
+     * catalogs/ — so a derived module reuses the SAT catalogs instead of copying them.
+     */
+    public function catalogPath(string $catalogName, string $moduleDir): string
+    {
+        $own = "{$moduleDir}/catalogs/{$catalogName}.json";
+        if (file_exists($own)) return $own;
+
+        $manifest = @json_decode((string) @file_get_contents("{$moduleDir}/module.json"), true);
+        $parent = is_array($manifest) ? ($manifest['extends'] ?? null) : null;
+        if (is_string($parent) && $parent !== '') {
+            $inherited = rtrim($moduleDir, '/') . '/' . trim($parent, '/') . "/catalogs/{$catalogName}.json";
+            if (file_exists($inherited)) return $inherited;
+        }
+        return $own;
     }
 
     /**

@@ -29,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Per-user rate limits (shared hosting has a small pool of PHP processes).
+        $key = fn(\Illuminate\Http\Request $r) => (string) ($r->user()?->id ?? $r->ip());
+        \Illuminate\Support\Facades\RateLimiter::for('uploads', fn($r) => \Illuminate\Cache\RateLimiting\Limit::perMinute(10)->by($key($r)));
+        \Illuminate\Support\Facades\RateLimiter::for('pdf', fn($r) => \Illuminate\Cache\RateLimiting\Limit::perMinute(20)->by($key($r)));
+        \Illuminate\Support\Facades\RateLimiter::for('drafts', fn($r) => \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($key($r)));
     }
 }

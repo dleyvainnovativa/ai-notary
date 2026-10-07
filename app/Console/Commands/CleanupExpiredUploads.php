@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Document;
+use App\Services\TokenService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,11 +19,31 @@ class CleanupExpiredUploads extends Command
         $ttl = config('documents.temp_ttl_minutes');
         $deleted = 0;
 
-        // 1. Sweep orphaned temp files (existing)
+        // 1. Sweep orphaned temp files — but NEVER the file of a deed still waiting in the
+        //    queue (a backlog longer than the TTL used to delete it before extraction).
+        //    Hard limit for privacy: after 24 h the file goes anyway and the document fails.
+        $pending = [];
+        Document::whereIn('status', ['uploaded', 'extracting'])->whereNotNull('inputs_json')
+            ->get(['id', 'inputs_json', 'created_at'])
+            ->each(function ($d) use (&$pending) {
+                foreach ((array) $d->inputs_json as $meta) {
+                    if (!empty($meta['temp_path'])) $pending[$meta['temp_path']] = $d;
+                }
+            });
+
         foreach ($disk->files($dir) as $file) {
-            if ($disk->lastModified($file) < now()->subMinutes($ttl)->timestamp) {
-                $disk->delete($file);
-                $deleted++;
+            if ($disk->lastModified($file) >= now()->subMinutes($ttl)->timestamp) continue;
+            $owner = $pending[$file] ?? null;
+            if ($owner && $owner->created_at > now()->subHours(24)) continue;   // still queued: keep
+            $disk->delete($file);
+            $deleted++;
+            if ($owner) {
+                $doc = Document::find($owner->id);
+                $doc?->update(['inputs_json' => null]);
+                $doc?->markFailed('El documento no se procesó a tiempo. Tu token fue devuelto; súbelo de nuevo.');
+                if ($doc?->reservation && $doc->reservation->status === 'active') {
+                    app(TokenService::class)->release($doc->reservation);
+                }
             }
         }
 
