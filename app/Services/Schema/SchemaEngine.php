@@ -298,6 +298,7 @@ class SchemaEngine
                 if (!empty($def['enabled_if']) && !$this->conditionMet($def['enabled_if'], $data)) {
                     continue;
                 }
+                $this->checkSum($def, $value, $fieldPath, $path);
                 $classifier = $def['classifier'] ?? null;
                 foreach (($value ?? []) as $i => $row) {
                     $kase = null;
@@ -367,6 +368,7 @@ class SchemaEngine
                 if (!empty($def['enabled_if']) && !$this->conditionMet($def['enabled_if'], $data)) {
                     continue;
                 }
+                $this->checkSum($def, $value, $fieldPath, $path);
                 $classifier = $def['classifier'] ?? null;
                 foreach (($value ?? []) as $i => $subRow) {
                     $subKase = null;
@@ -390,6 +392,8 @@ class SchemaEngine
 
             // NEW: recurse into nested objects inside a row
             if ($type === 'object') {
+                // an object can be shown only for some persona cases (e.g. UIF representante legal)
+                if ((!empty($def['show_in_cases']) || !empty($def['required_in_cases'])) && !$this->isVisible($def, $data, $kase)) continue;
                 $this->ancestors[] = $data;
                 $this->validateRow($def['itemSchema'], $value ?? [], $moduleDir, $fieldPath, null);
                 array_pop($this->ancestors);
@@ -513,6 +517,72 @@ class SchemaEngine
         if ($type === 'date' && !$this->validDate((string) $value)) {
             $this->addIssue($fieldPath, $name, 'format', 'Fecha inválida (YYYY-MM-DD).');
         }
+
+        // less_than: 'less_than' => ['field' => 'ganancia_acumulable', 'label' => 'Ganancia Acumulable']
+        // A positive value must be smaller than the sibling field (0 / empty is always fine).
+        if (!empty($def['less_than']) && is_numeric($value)) {
+            $msg = self::lessThanMessage($def, $value, $scope[$def['less_than']['field']] ?? null);
+            if ($msg !== null) $this->addIssue($fieldPath, $name, 'less_than', $msg);
+        }
+    }
+
+    /** Message when a less_than rule fails, else null. Public so tests / presenters can reuse it. */
+    public static function lessThanMessage(array $def, $value, $other): ?string
+    {
+        $v = (float) $value;
+        $o = is_numeric($other) ? (float) $other : 0.0;
+        if ($v <= 0 || $v < $o) return null;
+        $lt = $def['less_than'];
+        $otherLabel = $lt['label'] ?? $lt['field'];
+        $fmt = fn(float $n) => !empty($def['money']) ? '$' . number_format($n, 0, '.', ',') : rtrim(rtrim(number_format($n, 2, '.', ','), '0'), '.');
+        return ($def['label'] ?? 'El valor') . ' (' . $fmt($v) . ') debe ser menor que ' . $otherLabel
+            . ' (' . (is_numeric($other) ? $fmt($o) : 'vacío') . ').';
+    }
+
+    /**
+     * sum_equals on an array: 'sum_equals' => ['field' => 'porcentaje', 'value' => 100,
+     *   'label' => 'porcentajes', 'empty_field' => 'existe_copropiedad']
+     * The error goes on every row's field (so it shows next to each input); with no rows
+     * it goes on 'empty_field' in the array's own scope. Only runs when the array is enabled.
+     */
+    private function checkSum(array $def, $rows, string $arrayPath, string $scopePath): void
+    {
+        if (empty($def['sum_equals'])) return;
+        $rule = $def['sum_equals'];
+        $rows = is_array($rows) ? array_values($rows) : [];
+        $msg = self::sumMessage($rule, $rows);
+        if ($msg === null) return;
+        if (!$rows) {
+            if (!empty($rule['empty_field'])) {
+                $p = $scopePath === '' ? $rule['empty_field'] : "{$scopePath}.{$rule['empty_field']}";
+                $this->addIssue($p, $rule['empty_field'], 'sum_equals', $msg);
+            }
+            return;
+        }
+        foreach ($rows as $i => $_) {
+            $this->addIssue("{$arrayPath}.{$i}.{$rule['field']}", $rule['field'], 'sum_equals', $msg);
+        }
+    }
+
+    public static function sumMessage(array $rule, array $rows): ?string
+    {
+        $target = (float) ($rule['value'] ?? 100);
+        $label = $rule['label'] ?? $rule['field'];
+        if (!$rows) {
+            return 'Agrega los integrantes: la suma de ' . $label . ' debe ser ' . self::n($target) . '%.';
+        }
+        $sum = 0.0;
+        foreach ($rows as $r) {
+            $x = is_array($r) ? ($r[$rule['field']] ?? null) : null;
+            if (is_numeric($x)) $sum += (float) $x;
+        }
+        if (abs($sum - $target) < 0.001) return null;
+        return 'La suma de ' . $label . ' es ' . self::n($sum) . '%; debe ser ' . self::n($target) . '%.';
+    }
+
+    private static function n(float $x): string
+    {
+        return rtrim(rtrim(number_format($x, 2, '.', ''), '0'), '.');
     }
 
     private function conditionMet(array $condition, array $data): bool

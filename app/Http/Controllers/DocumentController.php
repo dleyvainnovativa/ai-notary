@@ -134,8 +134,10 @@ class DocumentController extends Controller
             $data = $document->review_data_encrypted ?? $this->flatten($raw);
         }
 
-        $data = $this->engine->process($formSchema, $data, $dir)->data;   // derived values (dates from CURP…)
-        $sections = $presenter->present($formSchema, $data, $notes);
+        $processed = $this->engine->process($formSchema, $data, $dir);   // derived values (dates from CURP…)
+        $data = $processed->data;
+        $errors = collect($processed->blockingIssues())->map(fn($i) => ['path' => $i->path, 'message' => $i->message])->all();
+        $sections = $presenter->present($formSchema, $data, $notes, $errors);
 
         $reference = (string) ($data['numero_escritura'] ?? $data['referencia_aviso'] ?? $document->id);
         $tz = config('app.display_timezone', 'America/Mexico_City');
@@ -211,8 +213,9 @@ class DocumentController extends Controller
         $diffs = $this->diff($original, $result->data);
 
         return response()->json([
-            'valid' => true,
-            // 'valid' => $result->isValid(),
+            // Only the blocking rules (copropiedad 100%, ISR < ingreso…) stop the export;
+            // the other issues are shown but don't block (see EngineResult::BLOCKING_RULES).
+            'valid' => !$result->blockingIssues(),
             'data' => $result->data,   // engine may have recomputed totals
             'issues' => collect($result->issues)->map(fn($i) => [
                 'path' => $i->path,
@@ -253,6 +256,15 @@ class DocumentController extends Controller
         //         ])->values(),
         //     ], 422);
         // }
+
+        if ($blocking = $result->blockingIssues()) {
+            return response()->json([
+                'message' => 'Corrige los errores marcados antes de exportar.',
+                'issues' => collect($blocking)->map(fn($i) => [
+                    'path' => $i->path, 'field' => $i->field, 'rule' => $i->rule, 'message' => $i->message,
+                ])->values(),
+            ], 422);
+        }
 
         // Build the file via the module's exporter
         $manifest = $this->registry->manifest($document->module_slug);

@@ -80,11 +80,11 @@ class Exporter implements ExporterContract
             $lines[] =
                 '900003-DatosEnajenante-grid:' .
                 $v($enajenante['tipo_enajenante'])              . '|' .
-                $v($enajenante['rfc'])               . '|' .
+                $v(self::id($enajenante['rfc'] ?? null))               . '|' .
                 $v($enajenante['nombre'])            . '|' .
                 $v($enajenante['apellido_paterno'])  . '|' .
                 $v($enajenante['apellido_materno'])  . '|' .
-                $v($enajenante['curp'])              . '|' .
+                $v(self::id($enajenante['curp'] ?? null))              . '|' .
                 $v($enajenante['razon_social'])              . '|' .
                 $v($enajenante['nacionalidad'])              . '|' .
                 $v($enajenante['fecha_nacimiento'])              . '|' .
@@ -111,11 +111,11 @@ class Exporter implements ExporterContract
             $lines[] =
                 '900005-DatosAdquiriente-grid:' .
                 $v($adquiriente['tipo_adquiriente']) . '|' .
-                $v($adquiriente['rfc'])              . '|' .
+                $v(self::id($adquiriente['rfc'] ?? null))              . '|' .
                 $v($adquiriente['nombre'])           . '|' .
                 $v($adquiriente['apellido_paterno']) . '|' .
                 $v($adquiriente['apellido_materno']) . '|' .
-                $v($adquiriente['curp'])             . '|' .
+                $v(self::id($adquiriente['curp'] ?? null))             . '|' .
                 $v($adquiriente['razon_social'])      . '|' .
                 $v($adquiriente['nacionalidad'])      . '|' .
                 $v($adquiriente['fecha_nacimiento'])  . '|' .
@@ -167,7 +167,7 @@ class Exporter implements ExporterContract
 
         $lines[] =
             '900009-RepresentanteLegal:' .
-            $v($rfcRepresentante);
+            $v(self::id($rfcRepresentante));
 
         if (!empty($integrantes)) {
             $totalPorcentaje = 0;
@@ -175,7 +175,7 @@ class Exporter implements ExporterContract
                 $totalPorcentaje += (float) ($integrante['porcentaje'] ?? 0);
                 $lines[] =
                     '900007-DatosCopropiedad-grid:' .
-                    $v($integrante['rfc'])                   . '|' .
+                    $v(self::id($integrante['rfc'] ?? null))                   . '|' .
                     $v($integrante['porcentaje'])            . '|' .
                     $v($integrante['ingresos_enajenacion'])  . '|' .
                     $v($integrante['deducciones_autorizadas']) . '|' .
@@ -192,5 +192,11 @@ class Exporter implements ExporterContract
         }
 
         return implode("\n", $lines);
+    }
+
+    /** RFC / CURP always go out in uppercase (trimmed). */
+    private static function id($value): string
+    {
+        return mb_strtoupper(trim((string) ($value ?? '')), 'UTF-8');
     }
 }

@@ -13,6 +13,15 @@ class EngineResult
         public array $issues,
     ) {}
 
+    /** Rules whose errors stop the export (the rest only inform the reviewer). */
+    public const BLOCKING_RULES = ['sum_equals', 'less_than'];
+
+    /** @return ValidationIssue[] */
+    public function blockingIssues(): array
+    {
+        return array_values(array_filter($this->issues, fn($i) => in_array($i->rule, self::BLOCKING_RULES, true)));
+    }
+
     public function isValid(): bool
     {
         return empty($this->issues);

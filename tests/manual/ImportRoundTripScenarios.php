@@ -61,7 +61,7 @@ check('colonia keeps its accent (Juárez) — SAT catalog spelling', $m['domicil
 $f = $byTipo($o['vendedores'], '1')[0];
 check('foreign address kept (país/ciudad)', $f['domicilio']['tipo_domicilio'] === '2' && $f['domicilio']['ciudad'] === 'HOUSTON');
 $msgs = implode(' | ', array_column($r->warnings, 'message'));
-check('warns: form can\'t show the representante', str_contains($msgs, 'representante legal'));
+check('no "form can\'t show the representante" warning anymore (the form shows it)', !str_contains($msgs, 'representante legal'));
 check('warns: form has no país/teléfono/correo fields', str_contains($msgs, 'país') && str_contains($msgs, 'correo'));
 check('warnings point at the right persona', in_array('operaciones.0.vendedores.0.domicilio', array_column($r->warnings, 'path'), true));
 

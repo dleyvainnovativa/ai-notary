@@ -49,6 +49,17 @@ Legal Representation (CRITICAL):
 - When a person acts "en representación de", "como apoderado de", "en nombre y
   representación de", or similar, extract the data of the REPRESENTED PARTY.
 - If the person represents themselves, extract their own data.
+- Representante legal (personas morales y fideicomisos ÚNICAMENTE):
+  - For a persona moral (tipo_persona "2") or fideicomiso ("3"), put the natural
+    person who signs on its behalf (apoderado, administrador único, representante
+    legal, delegado fiduciario) in that persona's "representante" object: rfc,
+    curp, fecha_nacimiento, nombre, apellido_paterno, apellido_materno.
+  - If several people sign for it, use only the FIRST one that appears.
+  - The company / fideicomiso itself stays as the adquirente or vendedor; the
+    representative never replaces it.
+  - For a persona física (tipo_persona "1"), "representante" is null — even if an
+    apoderado signs for that person.
+  - Same RFC/CURP rules: only what is explicitly written; otherwise null.
 
 RFC extraction (CRITICAL):
 - Only extract an RFC EXPLICITLY written in the document for that specific person.

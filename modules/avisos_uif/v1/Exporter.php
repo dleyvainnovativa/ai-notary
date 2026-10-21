@@ -30,53 +30,11 @@ class Exporter implements ExporterContract
     private const KEEP_ACCENTS = ['colonia'];
 
     private const FOLD = [
-        'Á' => 'A',
-        'É' => 'E',
-        'Í' => 'I',
-        'Ó' => 'O',
-        'Ú' => 'U',
-        'á' => 'a',
-        'é' => 'e',
-        'í' => 'i',
-        'ó' => 'o',
-        'ú' => 'u',
-        'À' => 'A',
-        'È' => 'E',
-        'Ì' => 'I',
-        'Ò' => 'O',
-        'Ù' => 'U',
-        'à' => 'a',
-        'è' => 'e',
-        'ì' => 'i',
-        'ò' => 'o',
-        'ù' => 'u',
-        'Ä' => 'A',
-        'Ë' => 'E',
-        'Ï' => 'I',
-        'Ö' => 'O',
-        'Ü' => 'U',
-        'ä' => 'a',
-        'ë' => 'e',
-        'ï' => 'i',
-        'ö' => 'o',
-        'ü' => 'u',
-        'Â' => 'A',
-        'Ê' => 'E',
-        'Î' => 'I',
-        'Ô' => 'O',
-        'Û' => 'U',
-        'â' => 'a',
-        'ê' => 'e',
-        'î' => 'i',
-        'ô' => 'o',
-        'û' => 'u',
-        'Ñ' => 'N',
-        'ñ' => 'n',
-        'Ç' => 'C',
-        'ç' => 'c',
-        'Ý' => 'Y',
-        'ý' => 'y',
-        'ÿ' => 'y',
+        'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u',
+        'À' => 'A', 'È' => 'E', 'Ì' => 'I', 'Ò' => 'O', 'Ù' => 'U', 'à' => 'a', 'è' => 'e', 'ì' => 'i', 'ò' => 'o', 'ù' => 'u',
+        'Ä' => 'A', 'Ë' => 'E', 'Ï' => 'I', 'Ö' => 'O', 'Ü' => 'U', 'ä' => 'a', 'ë' => 'e', 'ï' => 'i', 'ö' => 'o', 'ü' => 'u',
+        'Â' => 'A', 'Ê' => 'E', 'Î' => 'I', 'Ô' => 'O', 'Û' => 'U', 'â' => 'a', 'ê' => 'e', 'î' => 'i', 'ô' => 'o', 'û' => 'u',
+        'Ñ' => 'N', 'ñ' => 'n', 'Ç' => 'C', 'ç' => 'c', 'Ý' => 'Y', 'ý' => 'y', 'ÿ' => 'y',
     ];
 
     /**
@@ -129,20 +87,16 @@ class Exporter implements ExporterContract
         // 930003 — solicitante
         $s = $json['solicitante'] ?? [];
         $lines[] = '930003-Datos persona solicita formalizacion-grid:' .
-            $v($s['rfc'] ?? '') . '|' . $v($s['curp'] ?? '') . '|' . $date($s['fecha_nacimiento'] ?? null) . '|' .
+            $v(self::id($s['rfc'] ?? '')) . '|' . $v(self::id($s['curp'] ?? '')) . '|' . $date($s['fecha_nacimiento'] ?? null) . '|' .
             $v($s['nombre'] ?? '') . '|' . $v($s['apellido_paterno'] ?? '') . '|' . $v($s['apellido_materno'] ?? '');
 
         // 930004 — ¿operaciones acumuladas? 1 = Sí, 2 = No (catalogo_operaciones_acumuladas).
         // Verified against a real 2-operation aviso (26464): "930004-DetalleOperaciones:1".
         // It is NOT the operation count. Without a usable value: Sí when there are 2+ operations.
-        // $ops = array_values($json['operaciones'] ?? []);
-        // $acum = (string) ($json['operaciones_acumuladas'] ?? '');
-        // if (!in_array($acum, ['1', '2'], true)) $acum = count($ops) > 1 ? '1' : '2';
-        // $lines[] = '930004-DetalleOperaciones:' . $acum;
-        $ops = $json['operaciones'] ?? [];
-        $detalleOps = count($ops) > 1 ? 1 : 2; // TODO: confirm SAT limit, examples show 2
-        $lines[] = '930004-DetalleOperaciones:' . $detalleOps;
-
+        $ops = array_values($json['operaciones'] ?? []);
+        $acum = (string) ($json['operaciones_acumuladas'] ?? '');
+        if (!in_array($acum, ['1', '2'], true)) $acum = count($ops) > 1 ? '1' : '2';
+        $lines[] = '930004-DetalleOperaciones:' . $acum;
 
         // Records are emitted BY TYPE across all operations, in SAT order (verified vs the
         // real 2-operation aviso 26464): every 930005 (op 1, op 2…), then every 930006, …,
@@ -152,21 +106,8 @@ class Exporter implements ExporterContract
         //  - personas morales continue that sequence in emission order (all 930007, then all 930012)
         //  - inmueble of op N = …-0000-0001-0000-00000000000N (its 930017 lines point to it)
         // A single operation yields exactly the GUIDs verified against real avisos.
-        $order = [
-            '930005',
-            '930006',
-            '930007',
-            '930008',
-            '930009',
-            '930010',
-            '930011',
-            '930012',
-            '930013',
-            '930014',
-            '930015',
-            '930016',
-            '930017'
-        ];
+        $order = ['930005', '930006', '930007', '930008', '930009', '930010', '930011',
+                  '930012', '930013', '930014', '930015', '930016', '930017'];
         $byTag = array_fill_keys($order, []);
         $collect = function (array $tmp) use (&$byTag) {
             foreach ($tmp as $line) $byTag[substr($line, 0, 6)][] = $line;
@@ -246,13 +187,8 @@ class Exporter implements ExporterContract
                 // Gratuitous transmission (herencia, donación, cesión gratuita, servidumbre sin
                 // indemnización): SAT still expects one liquidación — operation date, forma 0,
                 // instrumento 0, moneda 1 (MXN), monto = valor avalúo. Verified vs aviso 26464.
-                $pagos = [[
-                    'fecha_pago' => $op['fecha_operacion'] ?? null,
-                    'forma_pago' => '0',
-                    'instrumento' => '0',
-                    'moneda' => '1',
-                    'monto' => $inm['valor_avaluo'] ?? 0
-                ]];
+                $pagos = [['fecha_pago' => $op['fecha_operacion'] ?? null, 'forma_pago' => '0', 'instrumento' => '0',
+                           'moneda' => '1', 'monto' => $inm['valor_avaluo'] ?? 0]];
             }
             foreach ($pagos as $pago) {
                 $byTag['930017'][] = '930017-Datos inmuebles liquidaciones-grid:' .
@@ -295,14 +231,8 @@ class Exporter implements ExporterContract
         foreach ($personas as $p) {
             $tipo = (string) ($p['tipo_persona'] ?? '');
             if ($tipo === '3') continue; // TODO: fideicomiso columns (930009/930014) not verified yet
-            if ($tipo === '2') {
-                $morales[] = $p;
-                continue;
-            }
-            if ($tipo === '1') {
-                $fisicas[] = $p;
-                continue;
-            }
+            if ($tipo === '2') { $morales[] = $p; continue; }
+            if ($tipo === '1') { $fisicas[] = $p; continue; }
 
             $rfc = strtoupper(trim((string) ($p['rfc'] ?? '')));
             if (preg_match('/^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/u', $rfc)) $morales[] = $p;
@@ -324,8 +254,8 @@ class Exporter implements ExporterContract
         $esExtranjero = ($v($d['tipo_domicilio'] ?? '') === '2');
 
         return [
-            'rfc'                 => $v($p['rfc'] ?? ''),
-            'curp'                => $v($p['curp'] ?? ''),
+            'rfc'                 => $v(self::id($p['rfc'] ?? '')),
+            'curp'                => $v(self::id($p['curp'] ?? '')),
             'fecha_nacimiento'    => $date($p['fecha_nacimiento'] ?? null),
             'nombre'              => $v($p['nombre'] ?? ''),
             'apellido_paterno'    => $v($p['apellido_paterno'] ?? ''),
@@ -373,7 +303,7 @@ class Exporter implements ExporterContract
         $esExtranjero = ($v($d['tipo_domicilio'] ?? '') === '2');
 
         return [
-            'rfc'                => $v($p['rfc'] ?? ''),
+            'rfc'                => $v(self::id($p['rfc'] ?? '')),
             'razon_social'       => $v($p['razon_social'] ?? ''),
             'fecha_constitucion' => $date($p['fecha_constitucion'] ?? ($p['fecha_nacimiento'] ?? null)),
             'pais_nacionalidad'  => $v($p['nacionalidad'] ?? 'MX'),
@@ -417,8 +347,8 @@ class Exporter implements ExporterContract
     private function repCols(array $rep, string $personGuid, $v, $date): array
     {
         return [
-            'rfc'              => $v($rep['rfc'] ?? ''),
-            'curp'             => $v($rep['curp'] ?? ''),
+            'rfc'              => $v(self::id($rep['rfc'] ?? '')),
+            'curp'             => $v(self::id($rep['curp'] ?? '')),
             'fecha_nacimiento' => $date($rep['fecha_nacimiento'] ?? null),
             'nombre'           => $v($rep['nombre'] ?? ''),
             'apellido_paterno' => $v($rep['apellido_paterno'] ?? ''),
@@ -457,9 +387,11 @@ class Exporter implements ExporterContract
             $personGuid = $this->guid($prefix, 0, ++$seq);
             $lines[] = $tag . ':' . $this->row($this->moralCols($p, $opGuid, $personGuid, $v, $date));
 
+            // the form always sends the object (all-null when nobody was captured) → treat as absent
             $rep = $p['representante'] ?? null;
+            $hasRep = is_array($rep) && array_filter($rep, fn($x) => $x !== null && trim((string) $x) !== '');
             $lines[] = $repTag . ':' . $this->row(
-                $rep ? $this->repCols($rep, $personGuid, $v, $date) : $this->repColsEmpty()
+                $hasRep ? $this->repCols($rep, $personGuid, $v, $date) : $this->repColsEmpty()
             );
         }
         return $seq;
@@ -500,5 +432,11 @@ class Exporter implements ExporterContract
             return 'unknown';
         }
         return 'unknown';
+    }
+
+    /** RFC / CURP always go out in uppercase (trimmed). */
+    private static function id($value): string
+    {
+        return mb_strtoupper(trim((string) ($value ?? '')), 'UTF-8');
     }
 }

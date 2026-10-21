@@ -60,6 +60,8 @@ class Controller extends \Modules\Declaranot\V1\Controller
         $base = parent::formSchema();
         $bf = $base['fields'];
         $money = ['type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true];
+        // blocking: a positive ISR must be smaller than the ingreso acumulable of its row
+        $menorQueIngreso = ['field' => 'ingreso_acumulable', 'label' => 'Ingreso Acumulable'];
 
         $fields = [];
         foreach (['numero_escritura', 'fecha_firma_escritura', 'tipo_inmueble', 'especifica_inmueble', 'avaluo_inmueble'] as $k) {
@@ -76,7 +78,7 @@ class Controller extends \Modules\Declaranot\V1\Controller
             'type' => 'array',
             'itemSchema' => [
                 'ingreso_acumulable' => ['label' => 'Ingreso Acumulable', 'required' => true] + $money,
-                'isr_federacion' => ['label' => 'ISR Federación', 'required' => true] + $money,
+                'isr_federacion' => ['label' => 'ISR Federación', 'required' => true, 'less_than' => $menorQueIngreso] + $money,
                 'numero_operacion' => ['label' => 'Número de Operación', 'type' => 'text', 'required_if' => ['isr_federacion' => ['op' => '>', 'value' => 0]]],
                 'fecha_pago' => ['label' => 'Fecha de Pago', 'type' => 'date', 'required_if' => ['isr_federacion' => ['op' => '>', 'value' => 0]]],
             ],
@@ -89,7 +91,7 @@ class Controller extends \Modules\Declaranot\V1\Controller
             'monto_operacion' => ['label' => 'Monto de la Operación'] + $money,
             'valor_avaluo' => ['label' => 'Valor de Avalúo'] + $money,
             'ingreso_acumulable' => ['label' => 'Ingreso Acumulable'] + $money,
-            'isr_federacion' => ['label' => 'ISR Federación'] + $money,
+            'isr_federacion' => ['label' => 'ISR Federación', 'less_than' => $menorQueIngreso] + $money,
         ];
         $fields['copropiedad'] = $cop;
         $fields['representante_comun'] = $bf['representante_comun'];

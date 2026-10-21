@@ -9,7 +9,10 @@
  */
 $e = fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 
-$renderNotes = function (array $notes) use ($e) {
+$renderNotes = function (array $notes, array $errors = []) use ($e) {
+    foreach ($errors as $n) {
+        echo '<div class="note note--error"><span class="note__tag">Error</span> ' . $e($n) . '</div>';
+    }
     foreach ($notes as $n) {
         echo '<div class="note"><span class="note__tag">Verificar</span> ' . $e($n) . '</div>';
     }
@@ -44,7 +47,7 @@ $renderGrid = function (array $items) use ($e, $renderNotes) {
             } else {
                 echo '<div class="cell__value cell__value--empty">—</div>';
             }
-            $renderNotes($it['notes']);
+            $renderNotes($it['notes'], $it['errors'] ?? []);
             echo '</td>';
         }
         for ($i = count($row) * $span; $i < 3; $i++) echo '<td class="cell"></td>';
@@ -88,6 +91,7 @@ $renderBlocks = function (array $blocks, int $depth = 0) use (&$renderBlocks, $r
                         elseif ($c['value'] !== null) echo $e($c['value']);
                         elseif ($c['missing']) echo '<span class="missing">Falta</span>';
                         else echo '<span class="muted">—</span>';
+                        foreach ($c['errors'] ?? [] as $n) echo '<div class="note note--inline note--error"><span class="note__tag">Error</span> ' . $e($n) . '</div>';
                         foreach ($c['notes'] as $n) echo '<div class="note note--inline"><span class="note__tag">Verificar</span> ' . $e($n) . '</div>';
                         echo '</td>';
                     }
@@ -168,6 +172,8 @@ $renderBlocks = function (array $blocks, int $depth = 0) use (&$renderBlocks, $r
     /* Resolver notes */
     .note { font-size: 6.8pt; color: #1d4ed8; margin-top: 2px; }
     .note--inline { margin-top: 1px; }
+    .note--error { color: #b91c1c; }
+    .note--error .note__tag { background: #fee2e2; }
     .note__tag { font-weight: bold; text-transform: uppercase; font-size: 6pt; letter-spacing: 0.4pt; background: #dbeafe; padding: 0 3px; border-radius: 2px; }
 
     /* Objects */

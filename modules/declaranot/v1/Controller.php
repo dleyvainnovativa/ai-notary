@@ -61,6 +61,9 @@ class Controller implements ModuleControllerContract
         $catalogNacionalidad   = $cat('catalogo_nacionalidad');
         $catalogDatosInformativos = $cat('catalogo_datos_informativos');
 
+        // blocking: a positive ISR must be smaller than the ganancia acumulable of its row
+        $menorQueGanancia = ['field' => 'ganancia_acumulable', 'label' => 'Ganancia Acumulable'];
+
         $fields = [
             'numero_escritura' => ['label' => 'Número de Escritura', 'type' => 'text', 'required' => true],
             'fecha_firma_escritura' => ['label' => 'Fecha de Firma', 'type' => 'date', 'required' => true],
@@ -75,9 +78,8 @@ class Controller implements ModuleControllerContract
                 'required' => true,
                 'money' => true,
                 'help' => [
-                    'title' => 'Información del valor del avaluo de bienes enajenados a través del DeclaraNOT en línea',
-                    'body' => 'Para los efectos del articulo 27, apartado A, fracción V, apartado B, fracción X y apartado D, fracción VI del CFF, los fedatarios públicos cumplirán la obligación de proporcionar la información correspondiente al valor del avalúo de cada bien enajenado con la presentación de la declaración de enajenación o adquisición de bienes según corresponda, a través del
-DeclaraNOT en linea, en donde se señalará entre otros, lo siguiente: El valor del bien de que se trate según el avalio, el cual deberá cumplir con lo establecido en el articulo 3 del Reglamento del CFF y la regla 2.1.35. El valor de la contraprestación o ingresos por la enajenación. CFF 27, RCFF 3, RMF 2.1.35., 2.7.1.20., 2.12.12.',
+                    'title' => '¿Qué valor de avalúo debo señalar en el aplicativo DeclaraNOT en línea, cuando los contribuyentes no estén obligados a practicar un avalúo?',
+                    'body' => 'En caso de que se trate de contribuyentes que realicen la enajenación o adquisición de bienes en una entidad federativa en la que, conforme a la legislación de dicha entidad, no estén obligados a realizar un avalúo, puedes señalar el valor cero en lugar del valor de avalúo. Fundamento legal. Regla 2.7.1.43. de la RMF para 2025, publicada en el DOF el 30 de diciembre de 2024.',
                 ],
             ],
             'pagos_inmueble' => [
@@ -106,7 +108,7 @@ DeclaraNOT en linea, en donde se señalará entre otros, lo siguiente: El valor 
                     'nombre' => ['label' => 'Nombre', 'type' => 'text', 'required_in_cases' => ['nacional_fisica', 'extranjera_fisica']],
                     'apellido_paterno' => ['label' => 'Apellido Paterno', 'type' => 'text', 'show_in_cases' => ['nacional_fisica', 'extranjera_fisica']],
                     'apellido_materno' => ['label' => 'Apellido Materno', 'type' => 'text', 'show_in_cases' => ['nacional_fisica', 'extranjera_fisica']],
-                    'curp' => ['label' => 'CURP', 'type' => 'text', 'validation' => ['format' => 'curp'], 'required_in_cases' => ['nacional_fisica']],
+                    'curp' => ['label' => 'CURP', 'type' => 'text', 'validation' => ['format' => 'curp'], 'show_in_cases' => ['nacional_fisica']],   // optional: the RFC (required) identifies the person
                     'razon_social' => ['label' => 'Razón Social', 'type' => 'text', 'col' => 'full', 'required_in_cases' => ['nacional_moral', 'extranjera_moral']],
                     'nacionalidad' => ['label' => 'Nacionalidad', 'type' => 'select', 'options' => $catalogNacionalidad, 'required_in_cases' => ['extranjera_fisica', 'extranjera_moral']],
                     'fecha_nacimiento' => ['label' => 'Fecha de Nacimiento', 'type' => 'date', 'required_in_cases' => ['extranjera_fisica'], 'derive' => ['rule' => 'birthdate_from_id', 'curp' => 'curp', 'rfc' => 'rfc']],
@@ -179,7 +181,7 @@ DeclaraNOT en linea, en donde se señalará entre otros, lo siguiente: El valor 
                     'nombre' => ['label' => 'Nombre', 'type' => 'text', 'required_in_cases' => ['nacional_fisica', 'extranjera_fisica']],
                     'apellido_paterno' => ['label' => 'Apellido Paterno', 'type' => 'text', 'show_in_cases' => ['nacional_fisica', 'extranjera_fisica']],
                     'apellido_materno' => ['label' => 'Apellido Materno', 'type' => 'text', 'show_in_cases' => ['nacional_fisica', 'extranjera_fisica']],
-                    'curp' => ['label' => 'CURP', 'type' => 'text', 'validation' => ['format' => 'curp'], 'required_in_cases' => ['nacional_fisica']],
+                    'curp' => ['label' => 'CURP', 'type' => 'text', 'validation' => ['format' => 'curp'], 'show_in_cases' => ['nacional_fisica']],   // optional: the RFC (required) identifies the person
                     'razon_social' => ['label' => 'Razón Social', 'type' => 'text', 'col' => 'full', 'required_in_cases' => ['nacional_moral', 'extranjera_moral']],
                     'nacionalidad' => ['label' => 'Nacionalidad', 'type' => 'select', 'options' => $catalogNacionalidad, 'required_in_cases' => ['extranjera_fisica', 'extranjera_moral']],
                     'fecha_nacimiento' => ['label' => 'Fecha de Nacimiento', 'type' => 'date', 'required_in_cases' => ['extranjera_fisica'], 'derive' => ['rule' => 'birthdate_from_id', 'curp' => 'curp', 'rfc' => 'rfc']],
@@ -243,10 +245,10 @@ DeclaraNOT en linea, en donde se señalará entre otros, lo siguiente: El valor 
                     'years_adquisicion_venta' => ['label' => 'Años entre Adquisición y Venta', 'required' => true, 'type' => 'number', 'max' => 20, 'format' => 'round', 'integer' => true],
                     'ganancia_acumulable' => ['label' => 'Ganancia Acumulable', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
                     'ganancia_no_acumulable' => ['label' => 'Ganancia No Acumulable', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
-                    'isr_federacion' => ['label' => 'ISR Federación', 'type' => 'number', 'required' => true, 'format' => 'round', 'integer' => true, 'money' => true],
+                    'isr_federacion' => ['label' => 'ISR Federación', 'type' => 'number', 'required' => true, 'format' => 'round', 'integer' => true, 'money' => true, 'less_than' => $menorQueGanancia],
                     'numero_operacion_federacion' => ['label' => 'Número de Operación Federación', 'required_if' => ['isr_federacion' => ['op' => '>', 'value' => 0]], 'type' => 'text'],
                     'fecha_pago_federacion' => ['label' => 'Fecha de Pago Federación', 'required_if' => ['isr_federacion' => ['op' => '>', 'value' => 0]], 'type' => 'date'],
-                    'isr_entidad' => ['label' => 'ISR Entidad', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
+                    'isr_entidad' => ['label' => 'ISR Entidad', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true, 'less_than' => $menorQueGanancia],
                     'numero_operacion_entidad' => ['label' => 'Número de Operación Entidad', 'required_if' => ['isr_entidad' => ['op' => '>', 'value' => 0]], 'type' => 'text'],
                     'fecha_pago_entidad' => ['label' => 'Fecha de Pago Entidad', 'required_if' => ['isr_entidad' => ['op' => '>', 'value' => 0]], 'type' => 'date'],
                     'total_isr_pagado' => ['label' => 'Total ISR Pagado', 'type' => 'computed', 'formula' => 'isr_federacion + isr_entidad'],
@@ -264,6 +266,8 @@ DeclaraNOT en linea, en donde se señalará entre otros, lo siguiente: El valor 
                         'col' => 'full',
                         'type' => 'array',
                         'enabled_if' => ['existe_copropiedad' => '1'],
+                        // blocking: the integrantes' porcentajes must add up to 100
+                        'sum_equals' => ['field' => 'porcentaje', 'value' => 100, 'label' => 'porcentajes', 'empty_field' => 'existe_copropiedad'],
                         'itemSchema' => [
                             'rfc' => ['label' => 'RFC', 'type' => 'text'],
                             'porcentaje' => ['label' => 'Porcentaje (%)', 'type' => 'number', 'format' => 'round', 'integer' => true],
@@ -272,8 +276,8 @@ DeclaraNOT en linea, en donde se señalará entre otros, lo siguiente: El valor 
                             'ganancia_perdida' => ['label' => 'Ganancia / Pérdida', 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
                             'ganancia_acumulable' => ['label' => 'Ganancia Acumulable', 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
                             'ganancia_no_acumulable' => ['label' => 'Ganancia No Acumulable', 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
-                            'isr_federacion' => ['label' => 'ISR Federación', 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
-                            'isr_entidad' => ['label' => 'ISR Entidad', 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
+                            'isr_federacion' => ['label' => 'ISR Federación', 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true, 'less_than' => $menorQueGanancia],
+                            'isr_entidad' => ['label' => 'ISR Entidad', 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true, 'less_than' => $menorQueGanancia],
                         ],
                     ],
                 ],

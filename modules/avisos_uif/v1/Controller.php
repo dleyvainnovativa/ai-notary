@@ -133,6 +133,22 @@ class Controller implements ModuleControllerContract
             // --- País de nacionalidad (física + moral; not fideicomiso per manual) ---
             'nacionalidad' => ['label' => 'País de Nacionalidad', 'type' => 'select', 'options' => $catNacionalidad, 'required_in_cases' => ['fisica', 'moral']],
 
+            // --- Representante legal (moral + fideicomiso) → 930008 / 930013 (fideicomiso: 930010 / 930015, not exported yet) ---
+            'representante' => [
+                'label' => 'Representante Legal',
+                'type' => 'object',
+                'col' => 'full',
+                'show_in_cases' => ['moral', 'fideicomiso'],
+                'itemSchema' => [
+                    'rfc' => ['label' => 'RFC', 'type' => 'text', 'validation' => ['format' => 'rfc']],
+                    'curp' => ['label' => 'CURP', 'type' => 'text', 'validation' => ['format' => 'curp']],
+                    'fecha_nacimiento' => ['label' => 'Fecha de Nacimiento', 'type' => 'date', 'derive' => ['rule' => 'birthdate_from_id', 'curp' => 'curp', 'rfc' => 'rfc']],
+                    'nombre' => ['label' => 'Nombre(s)', 'type' => 'text', 'required' => true],
+                    'apellido_paterno' => ['label' => 'Apellido Paterno', 'type' => 'text', 'required' => true],
+                    'apellido_materno' => ['label' => 'Apellido Materno', 'type' => 'text'],
+                ],
+            ],
+
             // --- Domicilio (all cases) ---
             'domicilio' => $domicilio(),
         ];

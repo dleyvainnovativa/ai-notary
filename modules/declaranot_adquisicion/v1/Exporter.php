@@ -81,14 +81,14 @@ class Exporter implements ExporterContract
 
         $L[] = '910005-IngresoCopropiedadOSucesion:' . self::s($cop['existe_copropiedad'] ?? null, '2');
         $L[] = '910011-PreguntaExisteRepresentanteLegal:' . self::s($rep['existe_representante_comun'] ?? null, '2');
-        $L[] = '910006-RepresentanteLegal:' . self::s($rep['rfc_representante'] ?? null);
+        $L[] = '910006-RepresentanteLegal:' . self::s(self::id($rep['rfc_representante'] ?? null));
 
         if ($integrantes) {
             $total = 0.0;
             foreach ($integrantes as $i) {
                 $total += (float) ($i['porcentaje'] ?? 0);
                 $L[] = '910007-DatosCopropiedad-grid:' . self::row([
-                    $i['rfc'] ?? null, $i['porcentaje'] ?? null, $i['monto_operacion'] ?? null,
+                    self::id($i['rfc'] ?? null), $i['porcentaje'] ?? null, $i['monto_operacion'] ?? null,
                     $i['valor_avaluo'] ?? null, $i['ingreso_acumulable'] ?? null, $i['isr_federacion'] ?? null,
                 ]);
             }
@@ -105,11 +105,11 @@ class Exporter implements ExporterContract
     {
         $cols = [
             $p[$tipoKey] ?? ($p['tipo'] ?? null),
-            $p['rfc'] ?? null,
+            self::id($p['rfc'] ?? null),
             $p['nombre'] ?? null,
             $p['apellido_paterno'] ?? null,
             $p['apellido_materno'] ?? null,
-            $p['curp'] ?? null,
+            self::id($p['curp'] ?? null),
             $p['razon_social'] ?? null,
             $p['nacionalidad'] ?? null,
             self::dmy($p['fecha_nacimiento'] ?? null),
@@ -165,5 +165,11 @@ class Exporter implements ExporterContract
         if (preg_match('/^(\d{4})-\d{2}-\d{2}/', $v, $m)) return $m[1];
         if (preg_match('#^\d{2}/\d{2}/(\d{4})$#', $v, $m)) return $m[1];
         return '';
+    }
+
+    /** RFC / CURP always go out in uppercase (trimmed). */
+    private static function id($value): string
+    {
+        return mb_strtoupper(trim((string) ($value ?? '')), 'UTF-8');
     }
 }

@@ -137,7 +137,6 @@ class Importer implements ImporterContract
                         'nombre' => $this->s($c['nombre']), 'apellido_paterno' => $this->s($c['apellido_paterno']),
                         'apellido_materno' => $this->s($c['apellido_materno']),
                     ];
-                    $result->warn('Trae representante legal de la persona moral; el formulario aún no lo muestra, pero se conserva al exportar mientras no se elimine la persona.', "operaciones.{$o}.{$side}.{$i}");
                     break;
 
                 case '930009': case '930010': case '930014': case '930015':

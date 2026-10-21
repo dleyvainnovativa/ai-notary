@@ -981,7 +981,8 @@ function applyConditional() {
     });
 
     // Then: each field's visibility/required
-    document.querySelectorAll('.rv-field, .rv-array').forEach(node => {
+    // (.rv-subsection = objects: e.g. the UIF "Representante Legal" only for moral / fideicomiso)
+    document.querySelectorAll('.rv-field, .rv-array, .rv-subsection').forEach(node => {
         const def = defForPath(node.dataset.path);
         if (!def) return;
 
@@ -1048,7 +1049,70 @@ function validateLive() {
         if (msg) { col.classList.add('has-error'); errEl.textContent = msg; if (!first) first = col; }
         else clear(col, errEl);
     });
+    const sumErr = validateSums();
+    return first || sumErr;
+}
+
+/* sum_equals on arrays (mirror of SchemaEngine::checkSum): e.g. copropiedad porcentajes = 100.
+ * The message goes on every row's field; with no rows, on 'empty_field' next to the array. */
+function validateSums() {
+    let first = null;
+    document.querySelectorAll('.rv-array').forEach(arr => {
+        if (arr.offsetParent === null) return;
+        const def = defForPath(arr.dataset.path);
+        const rule = def?.sum_equals;
+        if (!rule) return;
+        const rows = [...arr.querySelectorAll(':scope > .rv-array__rows > .rv-row')];
+        const vals = rows.map(r => ({ [rule.field]: r.querySelector(`:scope > .rv-grid > .rv-field[data-field="${rule.field}"] .rv-input`)?.value }));
+        const msg = sumMessage(rule, vals);
+        if (!msg) return;
+        let cols;
+        if (rows.length) {
+            cols = rows.map(r => r.querySelector(`:scope > .rv-grid > .rv-field[data-field="${rule.field}"]`));
+        } else {
+            const parts = arr.dataset.path.split('.'); parts.pop();
+            const p = [...parts, rule.empty_field].filter(Boolean).join('.');
+            cols = rule.empty_field ? [document.querySelector(`.rv-field[data-path="${cssEsc(p)}"]`)] : [];
+        }
+        for (const col of cols) {
+            if (!col || col.offsetParent === null || col.classList.contains('has-error')) continue;
+            col.classList.add('has-error');
+            const errEl = col.querySelector('.rv-field__error');
+            if (errEl) errEl.textContent = msg;
+            if (!first) first = col;
+        }
+    });
     return first;
+}
+
+function fmtRuleNumber(n) {
+    return String(Math.round(n * 100) / 100);
+}
+
+function sumMessage(rule, rows) {
+    const target = Number(rule.value ?? 100);
+    const label = rule.label ?? rule.field;
+    if (!rows.length) return `Agrega los integrantes: la suma de ${label} debe ser ${fmtRuleNumber(target)}%.`;
+    let sum = 0;
+    for (const r of rows) {
+        const x = r?.[rule.field];
+        if (x !== '' && x != null && !Number.isNaN(Number(x))) sum += Number(x);
+    }
+    if (Math.abs(sum - target) < 0.001) return null;
+    return `La suma de ${label} es ${fmtRuleNumber(sum)}%; debe ser ${fmtRuleNumber(target)}%.`;
+}
+
+/* less_than (mirror of SchemaEngine::lessThanMessage): a positive value must be smaller than a sibling. */
+function lessThanMessage(def, value, other) {
+    const v = Number(value);
+    const hasOther = other !== '' && other != null && !Number.isNaN(Number(other));
+    const o = hasOther ? Number(other) : 0;
+    if (Number.isNaN(v) || v <= 0 || v < o) return null;
+    const fmt = n => def.money
+        ? '$' + Math.round(n).toLocaleString('en-US')
+        : fmtRuleNumber(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const lt = def.less_than;
+    return `${def.label ?? 'El valor'} (${fmt(v)}) debe ser menor que ${lt.label ?? lt.field} (${hasOther ? fmt(o) : 'vacío'}).`;
 }
 
 function validateField(def, value, col) {
@@ -1093,6 +1157,10 @@ function validateField(def, value, col) {
     if (fmt === 'rfc' && !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/i.test(value)) return 'RFC inválido.';
     if (fmt === 'curp' && !/^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/i.test(value)) return 'CURP inválido.';
     if (def.type === 'date' && !/^\d{4}-\d{2}-\d{2}$/.test(value)) return 'Fecha inválida (YYYY-MM-DD).';
+    if (def.less_than) {
+        const m = lessThanMessage(def, value, siblings(col.dataset.path)[def.less_than.field]);
+        if (m) return m;
+    }
     return null;
 }
 
@@ -1669,6 +1737,14 @@ async function exportTxt(data) {
             body: JSON.stringify({ data }),
         });
 
+        if (res.status === 422) {
+            // blocking validation (copropiedad 100%, ISR < ingreso acumulable…)
+            const body = await res.json().catch(() => ({}));
+            if (Array.isArray(body.issues)) { applyServerIssues(body.issues); refreshErrorBadges(); }
+            notify.error(body.message || 'Corrige los errores marcados antes de exportar.');
+            document.querySelector('.rv-field.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
         if (!res.ok) {
             notify.error('No se pudo generar el archivo.');
             return;

@@ -23,17 +23,25 @@ use App\Services\Schema\SchemaEngine;
 class ReviewPdfPresenter
 {
     private array $notes = [];
+    private array $errors = [];
 
     public function __construct(private SchemaEngine $engine) {}
 
     /**
      * @param array $notes [{path, message}] from the ReferenceResolver (already mapped to form paths)
      */
-    public function present(array $formSchema, array $data, array $notes = []): array
+    public function present(array $formSchema, array $data, array $notes = [], array $errors = []): array
     {
         $this->notes = [];
         foreach ($notes as $n) {
             if (!empty($n['path']) && !empty($n['message'])) $this->notes[$n['path']][] = $n['message'];
+        }
+        // Blocking validation errors (SchemaEngine sum_equals / less_than), printed in red.
+        $this->errors = [];
+        foreach ($errors as $n) {
+            if (!empty($n['path']) && !empty($n['message']) && !in_array($n['message'], $this->errors[$n['path']] ?? [], true)) {
+                $this->errors[$n['path']][] = $n['message'];
+            }
         }
 
         $fields = $formSchema['fields'] ?? [];
@@ -182,6 +190,7 @@ class ReviewPdfPresenter
             'full' => ($def['col'] ?? null) === 'full' || ($display !== null && mb_strlen($display) > 70),
             'numeric' => in_array($def['type'] ?? '', ['number', 'computed'], true),
             'notes' => $this->notes[$path] ?? [],
+            'errors' => $this->errors[$path] ?? [],
         ];
     }
 
