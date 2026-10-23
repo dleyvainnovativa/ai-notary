@@ -21,6 +21,7 @@ class Importer implements ImporterContract
 {
     private array $fisicaKeys;
     private array $moralKeys;
+    private array $fideicomisoKeys;
     private array $repKeys;
 
     public function __construct()
@@ -33,6 +34,7 @@ class Importer implements ImporterContract
         };
         $this->fisicaKeys = $keys('fisicaColsEmpty');
         $this->moralKeys = $keys('moralColsEmpty');
+        $this->fideicomisoKeys = $keys('fideicomisoColsEmpty');
         $this->repKeys = $keys('repColsEmpty');
     }
 
@@ -47,8 +49,9 @@ class Importer implements ImporterContract
         $op = -1;                 // index of the last operation seen (fallback when a line has no GUID)
         $opGuidToOp = [];         // records are grouped BY TYPE across operations → link lines by GUID
         $inmGuidToOp = [];
-        $personGuidTo = [];       // persona moral GUID => [op, side, index] (for its representante line)
+        $personGuidTo = [];       // persona moral / fideicomiso GUID => [op, side, index] (for its representante line)
         $lastMoral = [];          // fallback: side => [op, index] of the last persona moral
+        $lastFideicomiso = [];    // fallback: side => [op, index] of the last fideicomiso
         $seen930002 = false;
 
         foreach (TxtDecoder::lines($text) as $n => $line) {
@@ -139,10 +142,35 @@ class Importer implements ImporterContract
                     ];
                     break;
 
-                case '930009': case '930010': case '930014': case '930015':
-                    if (!$this->allEmpty($f)) {
-                        $result->warn('El archivo trae datos de fideicomiso (' . $tag . '); aún no se admiten y se perderán al exportar.');
+                case '930009': case '930014':
+                    $this->requireOp($op, $tag);
+                    $side = $tag === '930009' ? 'adquirentes' : 'vendedores';
+                    $c = $this->cols($this->fideicomisoKeys, $f, $tag, $n, $result);
+                    if ($this->allEmpty($c)) break;   // placeholder line
+                    $o = $opGuidToOp[trim($c['op_guid'])] ?? $op;
+                    $i = count($data['operaciones'][$o][$side]);
+                    $data['operaciones'][$o][$side][] = $this->fideicomiso($c, "operaciones.{$o}.{$side}.{$i}", $result);
+                    if (trim($c['person_guid']) !== '') $personGuidTo[trim($c['person_guid'])] = [$o, $side, $i];
+                    $lastFideicomiso[$side] = [$o, $i];
+                    break;
+
+                case '930010': case '930015':
+                    $this->requireOp($op, $tag);
+                    $side = $tag === '930010' ? 'adquirentes' : 'vendedores';
+                    $c = $this->cols($this->repKeys, $f, $tag, $n, $result);
+                    if ($this->allEmpty($c)) break;
+                    $owner = $personGuidTo[trim($c['person_guid'])] ?? (isset($lastFideicomiso[$side]) ? [$lastFideicomiso[$side][0], $side, $lastFideicomiso[$side][1]] : null);
+                    if (!$owner) {
+                        $result->warn("Apoderado del fideicomiso (línea " . ($n + 1) . ") sin fideicomiso al que pertenezca; se ignoró.");
+                        break;
                     }
+                    [$o, $side, $i] = $owner;
+                    $data['operaciones'][$o][$side][$i]['representante'] = [
+                        'rfc' => $this->s($c['rfc']), 'curp' => $this->s($c['curp']),
+                        'fecha_nacimiento' => TxtDecoder::ymd($c['fecha_nacimiento']),
+                        'nombre' => $this->s($c['nombre']), 'apellido_paterno' => $this->s($c['apellido_paterno']),
+                        'apellido_materno' => $this->s($c['apellido_materno']),
+                    ];
                     break;
 
                 case '930016':
@@ -238,6 +266,20 @@ class Importer implements ImporterContract
             'giro_mercantil' => $this->s($c['giro_mercantil']),
             'curp' => null, 'fecha_nacimiento' => null, 'nombre' => null, 'apellido_paterno' => null,
             'apellido_materno' => null, 'actividad_economica' => null, 'numero_fideicomiso' => null,
+            'domicilio' => $this->domicilio($c, "{$path}.domicilio", $r),
+        ];
+    }
+
+    private function fideicomiso(array $c, string $path, ImportResult $r): array
+    {
+        return [
+            'tipo_persona' => '3',
+            'rfc' => $this->s($c['rfc']),
+            'razon_social' => $this->s($c['razon_social']),
+            'numero_fideicomiso' => $this->s($c['numero_fideicomiso']),
+            'curp' => null, 'fecha_nacimiento' => null, 'nombre' => null, 'apellido_paterno' => null,
+            'apellido_materno' => null, 'actividad_economica' => null, 'fecha_constitucion' => null,
+            'giro_mercantil' => null, 'nacionalidad' => null,
             'domicilio' => $this->domicilio($c, "{$path}.domicilio", $r),
         ];
     }

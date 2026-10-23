@@ -147,6 +147,27 @@ FORMA_PAGO (formas_de_pago):
   - Permuta (intercambio de bienes) → 5 (Permuta)
   - Si no se especifica claramente la forma de pago, retorna null.
 
+Casos especiales de liquidación (cuadro SAT de "Datos de Liquidación"):
+- Liquidación que se realizará DESPUÉS de presentar el aviso (pago diferido a
+  futuro): forma_pago = 2 (Financiamiento), instrumento = 99 (Otros),
+  monto = el de la operación, fecha_pago = la fecha del acto.
+- Enajenación cuya obligación de pago se cumple ENTREGANDO UN BIEN distinto al
+  dinero (dación en pago): forma_pago = 3 (Dación en pago); instrumento = 16
+  (Activos virtuales) si se pagó con activos virtuales, de lo contrario 99 (Otros);
+  monto = el de la operación.
+- Liquidación mediante ACTIVOS VIRTUALES: forma_pago = 3 (Dación en pago),
+  instrumento = 16 (Activos virtuales).
+- Entrega de inmuebles como pago de un crédito previo (suele ser cesión onerosa):
+  forma_pago = 1 (Contado), instrumento = 99 (Otros), monto = lo que se paga con la
+  entrega del inmueble.
+- Adjudicación directa o por remate judicial (cesión onerosa): forma_pago = 1
+  (Contado), instrumento = 99 (Otros), monto = valor de adjudicación.
+- Servidumbre con indemnización: forma_pago = 1 (Contado), instrumento = 99 (Otros),
+  monto = el pago de la indemnización.
+- En actos a título gratuito (donación, herencia, cesión gratuita, servidumbre sin
+  indemnización) NO generes pagos: deja "pagos": [] (ver "Transmisiones gratuitas");
+  el sistema registra automáticamente la liquidación que exige el SAT.
+
 Ejemplo:
 - Texto: "LA CANTIDAD DE $50,000.00 LA PAGÓ POR TRANSFERENCIA ELECTRÓNICA DEL
   BANCO MERCANTIL DEL NORTE... A LA CUENTA... DEL MISMO BANCO MERCANTIL DEL NORTE"

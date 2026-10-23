@@ -140,12 +140,9 @@ class Exporter implements ExporterContract
             $guidSeq = $this->emitPersonasMorales($tmp, '930007-Datos comprador Persona Moral-grid', '930008-Representante legal realiza operacion a nombre persona moral-grid', $split[$i]['comp'][1], $guidPrefix, $opGuids[$i], $guidSeq, $v, $date);
             $collect($tmp);
         }
-        foreach ($ops as $i => $op) {
-            // empty fideicomiso lines (930009/930010). Real avisos: 25 and 7 cols.
-            $byTag['930009'][] = '930009-Datos comprador fideicomiso-grid:' . str_repeat('|', 24);
-            $byTag['930010'][] = '930010-Representante legal realiza operacion a nombre fideicomiso-grid:' . str_repeat('|', 6);
-
+        foreach ($ops as $i => $op) {   // 930009 + 930010 (rep) — fideicomisos take GUIDs after the morales
             $tmp = [];
+            $guidSeq = $this->emitFideicomisos($tmp, '930009-Datos comprador fideicomiso-grid', '930010-Representante legal realiza operacion a nombre fideicomiso-grid', $split[$i]['comp'][2], $guidPrefix, $opGuids[$i], $guidSeq, $v, $date);
             $this->emitPersonasFisicas($tmp, '930011-Datos vendedor Persona Fisica-grid', $split[$i]['vend'][0], $guidPrefix, $opGuids[$i], 0, $v, $date);
             $collect($tmp);
         }
@@ -154,9 +151,10 @@ class Exporter implements ExporterContract
             $guidSeq = $this->emitPersonasMorales($tmp, '930012-Datos vendedor Persona Moral-grid', '930013-Representante legal realiza operacion a nombre persona moral-grid', $split[$i]['vend'][1], $guidPrefix, $opGuids[$i], $guidSeq, $v, $date);
             $collect($tmp);
         }
-        foreach ($ops as $i => $op) {
-            $byTag['930014'][] = '930014-Datos vendedor fideicomiso-grid:' . str_repeat('|', 24);
-            $byTag['930015'][] = '930015-Representante legal realiza operacion a nombre fideicomiso-grid:' . str_repeat('|', 6);
+        foreach ($ops as $i => $op) {   // 930014 + 930015 (rep) — vendedor fideicomisos
+            $tmpF = [];
+            $guidSeq = $this->emitFideicomisos($tmpF, '930014-Datos vendedor fideicomiso-grid', '930015-Representante legal realiza operacion a nombre fideicomiso-grid', $split[$i]['vend'][2], $guidPrefix, $opGuids[$i], $guidSeq, $v, $date);
+            $collect($tmpF);
 
             // 930016 — inmueble
             $inm = $op['inmueble'] ?? [];
@@ -221,16 +219,18 @@ class Exporter implements ExporterContract
      * UIF tipo_persona (catalogo_persona): 1 = física, 2 = moral, 3 = fideicomiso.
      * (Previously this reused declaranot's rule, where '2' means *extranjera*, so a
      * persona moral selected in the UIF form was emitted as a física line.)
-     * Without a usable tipo, fall back to the RFC shape: 12 chars = moral, else física.
-     * Fideicomisos are not emitted yet (930009/930014 stay empty) — see TODO.
+     * Without a usable tipo, fall back to the RFC shape: 12 chars = moral, else física
+     * (a fideicomiso can't be inferred from the RFC, so it must carry tipo_persona = 3).
+     * Returns [físicas, morales, fideicomisos].
      */
     private function splitByCase(array $personas): array
     {
         $fisicas = [];
         $morales = [];
+        $fideicomisos = [];
         foreach ($personas as $p) {
             $tipo = (string) ($p['tipo_persona'] ?? '');
-            if ($tipo === '3') continue; // TODO: fideicomiso columns (930009/930014) not verified yet
+            if ($tipo === '3') { $fideicomisos[] = $p; continue; }
             if ($tipo === '2') { $morales[] = $p; continue; }
             if ($tipo === '1') { $fisicas[] = $p; continue; }
 
@@ -238,7 +238,7 @@ class Exporter implements ExporterContract
             if (preg_match('/^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/u', $rfc)) $morales[] = $p;
             else $fisicas[] = $p;
         }
-        return [$fisicas, $morales];
+        return [$fisicas, $morales, $fideicomisos];
     }
 
     /** Join an ordered, named column map into a pipe-delimited row body. */
@@ -343,6 +343,60 @@ class Exporter implements ExporterContract
         return $cols;
     }
 
+    /**
+     * Fideicomiso person columns (930009/930014), 25 cols.
+     *
+     * ⚠ NOT byte-verified against a real SAT fideicomiso aviso (we have none). The layout
+     * is the persona moral layout (moralCols) minus the three fields the official
+     * "DECLARANOT en línea" guide says a fideicomiso does NOT capture (fecha de
+     * constitución, país de nacionalidad, giro mercantil), plus "numero_fideicomiso".
+     * That reconciles exactly to the 25-column placeholder these files have always
+     * emitted. Confirm against one SAT-accepted fideicomiso file before relying on it.
+     */
+    private function fideicomisoCols(array $p, string $opGuid, string $personGuid, $v, $date): array
+    {
+        $d = $p['domicilio'] ?? [];
+        $esExtranjero = ($v($d['tipo_domicilio'] ?? '') === '2');
+
+        return [
+            'rfc'                => $v(self::id($p['rfc'] ?? '')),
+            'razon_social'       => $v($p['razon_social'] ?? ''),   // denominación del fiduciario
+            'numero_fideicomiso' => $v($p['numero_fideicomiso'] ?? ''),
+            'tipo_domicilio'     => $v($d['tipo_domicilio'] ?? '1'),
+
+            'nac_entidad'   => $esExtranjero ? '' : $v($d['entidad_federativa'] ?? ''),
+            'nac_calle'     => $esExtranjero ? '' : $v($d['calle'] ?? ''),
+            'nac_num_ext'   => $esExtranjero ? '' : $v($d['num_ext'] ?? ''),
+            'nac_num_int'   => $esExtranjero ? '' : $v($d['num_int'] ?? ''),
+            'nac_correo'    => $esExtranjero ? '' : $v($d['correo'] ?? ''),
+            'nac_cp'        => $esExtranjero ? '' : $v($d['codigo_postal'] ?? ''),
+            'nac_colonia'   => $esExtranjero ? '' : $v($d['colonia'] ?? ''),
+            'nac_municipio' => $esExtranjero ? '' : $v($d['municipio'] ?? ''),
+            'nac_telefono'  => $esExtranjero ? '' : $v($d['telefono'] ?? ''),
+
+            'ext_pais'      => $esExtranjero ? $v($d['pais'] ?? '') : '',
+            'ext_estado'    => $esExtranjero ? $v($d['estado'] ?? '') : '',
+            'ext_ciudad'    => $esExtranjero ? $v($d['ciudad'] ?? '') : '',
+            'ext_calle'     => $esExtranjero ? $v($d['calle'] ?? '') : '',
+            'ext_num_ext'   => $esExtranjero ? $v($d['num_ext'] ?? '') : '',
+            'ext_num_int'   => $esExtranjero ? $v($d['num_int'] ?? '') : '',
+            'ext_cp'        => $esExtranjero ? $v($d['codigo_postal'] ?? '') : '',
+            'ext_colonia'   => $esExtranjero ? $v($d['colonia'] ?? '') : '',
+            'ext_telefono'  => $esExtranjero ? $v($d['telefono'] ?? '') : '',
+            'ext_correo'    => $esExtranjero ? $v($d['correo'] ?? '') : '',
+
+            'op_guid'       => $opGuid,
+            'person_guid'   => $personGuid,
+        ];
+    }
+
+    private function fideicomisoColsEmpty(): array
+    {
+        $cols = $this->fideicomisoCols([], '', '', fn($x) => '', fn($x) => '');
+        foreach ($cols as $k => $_) $cols[$k] = '';
+        return $cols;
+    }
+
     /** Representante legal columns (930008/930013). */
     private function repCols(array $rep, string $personGuid, $v, $date): array
     {
@@ -388,6 +442,31 @@ class Exporter implements ExporterContract
             $lines[] = $tag . ':' . $this->row($this->moralCols($p, $opGuid, $personGuid, $v, $date));
 
             // the form always sends the object (all-null when nobody was captured) → treat as absent
+            $rep = $p['representante'] ?? null;
+            $hasRep = is_array($rep) && array_filter($rep, fn($x) => $x !== null && trim((string) $x) !== '');
+            $lines[] = $repTag . ':' . $this->row(
+                $hasRep ? $this->repCols($rep, $personGuid, $v, $date) : $this->repColsEmpty()
+            );
+        }
+        return $seq;
+    }
+
+    /**
+     * Fideicomisos (930009/930014) + apoderado/delegado fiduciario (930010/930015).
+     * Mirrors emitPersonasMorales: empty → one placeholder pair; otherwise one pair per
+     * fideicomiso, each consuming a person GUID. See fideicomisoCols for the layout caveat.
+     */
+    private function emitFideicomisos(array &$lines, string $tag, string $repTag, array $personas, string $prefix, string $opGuid, int $seq, $v, $date): int
+    {
+        if (empty($personas)) {
+            $lines[] = $tag . ':' . $this->row($this->fideicomisoColsEmpty());
+            $lines[] = $repTag . ':' . $this->row($this->repColsEmpty());
+            return $seq;
+        }
+        foreach ($personas as $p) {
+            $personGuid = $this->guid($prefix, 0, ++$seq);
+            $lines[] = $tag . ':' . $this->row($this->fideicomisoCols($p, $opGuid, $personGuid, $v, $date));
+
             $rep = $p['representante'] ?? null;
             $hasRep = is_array($rep) && array_filter($rep, fn($x) => $x !== null && trim((string) $x) !== '');
             $lines[] = $repTag . ':' . $this->row(
