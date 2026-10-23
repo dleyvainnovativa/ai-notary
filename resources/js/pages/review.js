@@ -709,7 +709,9 @@ function updateCount(wrap) {
  * The colonia field has two modes:
  *   text   — no CP (or the CP has no colonias in the catalog): keeps the deed's value.
  *   select — CP found: colonias from the catalog; the deed's value is preselected
- *            by fuzzy match, or kept as an extra option if it isn't in the list.
+ *            by fuzzy match. If it isn't in the catalog the field is left empty
+ *            and a warning is shown (SAT rejects an off-catalog colonia), so the
+ *            notary must pick a valid one.
  */
 const COLONIA_HINT_TEXT = 'Sin C.P.: se muestra la colonia de la escritura. Captura el C.P. para elegirla del catálogo.';
 const COLONIA_HINT_EMPTY = 'Este C.P. no tiene colonias en el catálogo: captura la colonia manualmente.';
@@ -750,10 +752,14 @@ async function cpLookup(cpInput, targetField, preserveValue = false) {
         return;
     }
 
-    // Deed/typed text → try to match it; if no match keep it visible as an extra option.
+    // Deed/typed text → try to match it against the catalog.
     const matched = matchColonia(currentValue, colonias);
-    const extra = isText && currentValue && !matched ? currentValue : null;
-    swapColonia(target, 'select', { colonias, selected: matched, extra });
+    // No catalog match: do NOT keep the deed's value — the SAT portal rejects an
+    // off-catalog colonia ("La colonia es incorrecta con respecto al código postal").
+    // Leave the select empty (required rule forces a valid pick) and warn, showing
+    // the deed's colonia so the notary can choose the right one.
+    const unmatched = isText && currentValue && !matched ? currentValue : null;
+    swapColonia(target, 'select', { colonias, selected: matched, unmatched });
     if (!preserveValue) scheduleAutosave();   // user typed a CP → persist the new colonia state
 }
 
@@ -794,7 +800,7 @@ function makeColoniaText(value) {
     return input;
 }
 
-function setColoniaHint(col, text) {
+function setColoniaHint(col, text, warn = false) {
     let sub = col.querySelector(':scope > .rv-field__subtitle');
     if (!sub) {
         sub = document.createElement('div');
@@ -802,10 +808,11 @@ function setColoniaHint(col, text) {
         col.querySelector(':scope > .rv-field__label')?.after(sub);
     }
     sub.textContent = text;
+    sub.classList.toggle('rv-field__subtitle--warn', !!warn);
 }
 
 /** Replace the colonia element (text ⇄ select) keeping path/field/pending data. */
-function swapColonia(current, mode, { value = '', hint = '', colonias = [], selected = null, extra = null } = {}) {
+function swapColonia(current, mode, { value = '', hint = '', colonias = [], selected = null, unmatched = null } = {}) {
     const col = current.closest('.rv-field');
     if (current._choices) {
         try { current._choices.destroy(); } catch (e) {}
@@ -824,12 +831,31 @@ function swapColonia(current, mode, { value = '', hint = '', colonias = [], sele
     el.dataset.pendingValue = current.dataset.pendingValue ?? '';
     current.replaceWith(el);
 
+    const defaultHint = () => col?.dataset.subtitleDefault || 'Selecciona la Colonia cargada del CP.';
+    const warnMsg = unmatched
+        ? `La colonia de la escritura ("${unmatched}") no existe en el catálogo de este C.P.; selecciona la correcta para evitar el rechazo del SAT.`
+        : '';
+
     if (col) {
         col.dataset.coloniaMode = mode;
-        setColoniaHint(col, mode === 'text' ? hint : (col.dataset.subtitleDefault || 'Selecciona la Colonia cargada del CP.'));
+        if (mode === 'text') setColoniaHint(col, hint);
+        else if (unmatched) setColoniaHint(col, warnMsg, true);
+        else setColoniaHint(col, defaultHint());
     }
-    if (mode === 'select') populateColoniaSelect(el, colonias, selected, extra);
-    else onChange();
+    if (mode === 'select') {
+        populateColoniaSelect(el, colonias, selected);
+        // Off-catalog deed colonia: field left empty — surface the required error now,
+        // and keep/clear the warning as the notary picks a valid colonia.
+        if (unmatched && col) {
+            el.addEventListener('change', () => {
+                if (el.value) setColoniaHint(col, defaultHint());
+                else setColoniaHint(col, warnMsg, true);
+            });
+            onChange();
+        }
+    } else {
+        onChange();
+    }
     return el;
 }
 
@@ -884,7 +910,7 @@ function cpEntidad(cpInput, targetField) {
     if (typeof onChange === 'function') onChange();
 }
 
-function populateColoniaSelect(select, colonias, selectedValue = null, extraValue = null) {
+function populateColoniaSelect(select, colonias, selectedValue = null) {
     if (select._choices) {
         try { select._choices.destroy(); } catch (e) {}
         select._choices = null;
@@ -897,16 +923,14 @@ function populateColoniaSelect(select, colonias, selectedValue = null, extraValu
     placeholder.textContent = 'Seleccione una colonia';
     select.appendChild(placeholder);
 
+    // Only real catalog colonias are offered. A deed colonia that isn't in the
+    // catalog is NOT added here (the SAT portal rejects it) — cpLookup leaves the
+    // field empty and warns instead, so the notary must pick a valid one.
     const choices = colonias.map(c => ({
         value: c.value,
         label: c.label,
         selected: selectedValue != null && String(selectedValue) === String(c.value),
     }));
-    // The deed's colonia isn't in this CP's catalog: keep it selectable (and selected)
-    // so nothing is lost; the user decides.
-    if (extraValue) {
-        choices.unshift({ value: extraValue, label: `${extraValue} (de la escritura, no está en el catálogo de este C.P.)`, selected: true });
-    }
 
     const instance = new Choices(select, {
         searchEnabled: true,

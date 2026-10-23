@@ -798,6 +798,8 @@ a { color: var(--text); }
 }
 
 .rv-field__subtitle { font-size: 0.75rem; color: var(--text-subtle); margin-bottom: 0.35rem; margin-top: -0.1rem; }
+.rv-field__subtitle--warn { color: #b45309; font-weight: 500; }
+[data-theme="dark"] .rv-field__subtitle--warn { color: #fbbf24; }
 
 /* ---------- Choices.js — dark theme overrides ---------- */
 [data-theme="dark"] .choices__inner {
