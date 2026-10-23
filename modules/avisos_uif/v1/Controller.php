@@ -195,7 +195,7 @@ class Controller implements ModuleControllerContract
                         'label' => 'Adquirentes',
                         'type' => 'array',
                         'classifier' => ['rule' => 'persona_tipo_select', 'tipo_field' => 'tipo_persona'],
-                        'legend' => 'Para extranjeros use un RFC genérico: EXTF900101000 (física) o EXT990101000 (moral).',
+                        'legend' => 'Coteje cuidadosamente que la información de cada parte coincida con el instrumento.<br>Para extranjeros use un RFC genérico: EXTF900101000 (física) o EXT990101000 (moral).',
                         'itemSchema' => $personaConDomicilio('Adquirente'),
                     ],
 
@@ -205,7 +205,7 @@ class Controller implements ModuleControllerContract
                         'label' => 'Vendedores',
                         'type' => 'array',
                         'classifier' => ['rule' => 'persona_tipo_select', 'tipo_field' => 'tipo_persona'],
-                        'legend' => 'Para extranjeros use un RFC genérico: EXTF900101000 (física) o EXT990101000 (moral).',
+                        'legend' => 'Coteje cuidadosamente que la información de cada parte coincida con el instrumento.<br>Para extranjeros use un RFC genérico: EXTF900101000 (física) o EXT990101000 (moral).',
                         'itemSchema' => $personaConDomicilio('Vendedor'),
                     ],
 

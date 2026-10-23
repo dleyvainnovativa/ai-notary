@@ -101,7 +101,7 @@ class Controller implements ModuleControllerContract
                 'label' => 'Enajenantes',
                 'type' => 'array',
                 'classifier' => ['rule' => 'persona_case', 'tipo_field' => 'tipo_enajenante', 'rfc_field' => 'rfc'],
-                'legend' => 'Para extranjeros use un RFC genérico: EXTF900101000 (persona física) o EXT990101000 (persona moral).',
+                'legend' => 'Coteje cuidadosamente que la información de cada parte coincida con el instrumento.<br>Para extranjeros use un RFC genérico: EXTF900101000 (persona física) o EXT990101000 (persona moral).',
                 'itemSchema' => [
                     'tipo_enajenante' => ['label' => 'Tipo', 'type' => 'select', 'required' => true, 'options' => $catalogTiposDomicilio],
                     'rfc' => ['label' => 'RFC', 'type' => 'text', 'required' => true, 'validation' => ['format' => 'rfc']],
@@ -174,7 +174,7 @@ class Controller implements ModuleControllerContract
                 'label' => 'Adquirientes',
                 'type' => 'array',
                 'classifier' => ['rule' => 'persona_case', 'tipo_field' => 'tipo_adquiriente', 'rfc_field' => 'rfc'],
-                'legend' => 'Para extranjeros use un RFC genérico: EXTF900101000 (persona física) o EXT990101000 (persona moral).',
+                'legend' => 'Coteje cuidadosamente que la información de cada parte coincida con el instrumento.<br>Para extranjeros use un RFC genérico: EXTF900101000 (persona física) o EXT990101000 (persona moral).',
                 'itemSchema' => [
                     'tipo_adquiriente' => ['label' => 'Tipo', 'type' => 'select', 'required' => true, 'options' => $catalogTiposDomicilio],
                     'rfc' => ['label' => 'RFC', 'type' => 'text', 'required' => true, 'validation' => ['format' => 'rfc']],

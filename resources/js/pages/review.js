@@ -1154,7 +1154,16 @@ function validateField(def, value, col) {
         }
     }
     const fmt = def.validation?.format;
-    if (fmt === 'rfc' && !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/i.test(value)) return 'RFC inválido.';
+    if (fmt === 'rfc') {
+        if (!/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/i.test(value)) return 'RFC inválido.';
+        // UIF: the selected tipo de persona fixes the RFC shape.
+        // Física → 13 chars (4 letters); Moral / Fideicomiso (fiduciario) → 12 chars (3 letters).
+        const tipo = siblings(col.dataset.path).tipo_persona;
+        if (tipo === '1' && !/^[A-ZÑ&]{4}\d{6}[A-Z0-9]{3}$/i.test(value))
+            return 'El RFC de persona física debe tener 13 caracteres (4 letras iniciales).';
+        if ((tipo === '2' || tipo === '3') && !/^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/i.test(value))
+            return 'El RFC de persona moral debe tener 12 caracteres (3 letras iniciales).';
+    }
     if (fmt === 'curp' && !/^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/i.test(value)) return 'CURP inválido.';
     if (def.type === 'date' && !/^\d{4}-\d{2}-\d{2}$/.test(value)) return 'Fecha inválida (YYYY-MM-DD).';
     if (def.less_than) {
@@ -1691,6 +1700,54 @@ function showPdfModal(blob, filename) {
     modal.show('rv-pdf-modal');
 }
 
+/* ---------- Export confirmation (TXT only) ----------
+ * Shown after validation passes, right before the file is generated.
+ * Resolves true only if the user presses "Confirmar y exportar". */
+function confirmExport() {
+    let el = document.getElementById('rv-confirm-export-modal');
+    if (!el) {
+        el = document.createElement('div');
+        el.className = 'modal fade';
+        el.id = 'rv-confirm-export-modal';
+        el.tabIndex = -1;
+        el.setAttribute('aria-labelledby', 'rv-confirm-export-title');
+        el.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rv-confirm-export-title">
+                            <i class="fa-solid fa-triangle-exclamation me-2"></i>Confirme antes de generar el archivo
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">Verifique que los datos capturados correspondan exactamente con la información del instrumento. Una vez presentado el aviso, la responsabilidad de su contenido recae en el fedatario.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Revisar de nuevo</button>
+                        <button type="button" class="btn btn-primary" id="rv-confirm-export-ok">
+                            <i class="fa-solid fa-check me-1"></i> Confirmar y exportar
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(el);
+    }
+    return new Promise(resolve => {
+        const okBtn = el.querySelector('#rv-confirm-export-ok');
+        let confirmed = false;
+        const onOk = () => { confirmed = true; modal.hide('rv-confirm-export-modal'); };
+        const onHidden = () => {
+            okBtn.removeEventListener('click', onOk);
+            el.removeEventListener('hidden.bs.modal', onHidden);
+            resolve(confirmed);
+        };
+        okBtn.addEventListener('click', onOk);
+        el.addEventListener('hidden.bs.modal', onHidden);
+        modal.show('rv-confirm-export-modal');
+    });
+}
+
 /* ---------- Save ---------- */
 async function save() {
     const localErr = validateLive();
@@ -1721,7 +1778,8 @@ async function save() {
         return;
     }
 
-    // Valid → request the TXT export and trigger a download
+    // Valid → confirm the data matches the instrument, then export + download
+    if (!(await confirmExport())) return;
     await exportTxt(data);
 }
 

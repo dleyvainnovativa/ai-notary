@@ -14,7 +14,7 @@ class EngineResult
     ) {}
 
     /** Rules whose errors stop the export (the rest only inform the reviewer). */
-    public const BLOCKING_RULES = ['sum_equals', 'less_than'];
+    public const BLOCKING_RULES = ['sum_equals', 'less_than', 'rfc_persona'];
 
     /** @return ValidationIssue[] */
     public function blockingIssues(): array

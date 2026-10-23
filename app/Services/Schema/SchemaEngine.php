@@ -495,6 +495,17 @@ class SchemaEngine
         if (!empty($def['validation']['format'])) {
             if (!$this->validFormat($def['validation']['format'], (string) $value)) {
                 $this->addIssue($fieldPath, $name, 'format', strtoupper($def['validation']['format']) . ' inválido.');
+            } elseif ($def['validation']['format'] === 'rfc') {
+                // UIF: the selected tipo de persona fixes the RFC shape (blocking).
+                // Física → 13 chars (4 letters); Moral / Fideicomiso (fiduciario) → 12 chars (3 letters).
+                // Only fires where a tipo_persona sibling is present (UIF persona rows).
+                $tipo = (string) ($scope['tipo_persona'] ?? '');
+                $rfc = (string) $value;
+                if ($tipo === '1' && !preg_match('/^[A-ZÑ&]{4}\d{6}[A-Z0-9]{3}$/iu', $rfc)) {
+                    $this->addIssue($fieldPath, $name, 'rfc_persona', 'El RFC de persona física debe tener 13 caracteres (4 letras iniciales).');
+                } elseif (($tipo === '2' || $tipo === '3') && !preg_match('/^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/iu', $rfc)) {
+                    $this->addIssue($fieldPath, $name, 'rfc_persona', 'El RFC de persona moral debe tener 12 caracteres (3 letras iniciales).');
+                }
             }
         }
 
