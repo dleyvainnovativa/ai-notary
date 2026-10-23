@@ -32,8 +32,19 @@ class Exporter implements ExporterContract
         return $data; // already flat
     }
 
+    /** SAT files carry every value in uppercase except colonia (not exported here). Accents kept (UTF-8). */
+    private function upperExceptColonia(array $data): array
+    {
+        foreach ($data as $k => $v) {
+            if (is_array($v)) $data[$k] = $this->upperExceptColonia($v);
+            elseif (is_string($v) && (string) $k !== 'colonia') $data[$k] = mb_strtoupper($v, 'UTF-8');
+        }
+        return $data;
+    }
+
     private function generateDeclaranotTXT(array $json): string
     {
+        $json = $this->upperExceptColonia($json);
         $lines = [];
         $v = fn($value) => $value ?? '';
         $date = function ($value) {

@@ -1933,6 +1933,12 @@ function condMet(cond, vals) {
 
         // Comparison form: { op: '>', value: 0 }
         if (expected && typeof expected === 'object' && !Array.isArray(expected) && 'op' in expected) {
+            if (expected.op === 'filled' || expected.op === 'empty') {
+                // 'filled' = has a value; 'empty' = has none (compare() only handles numbers).
+                const empty = actual === '' || actual == null;
+                if ((expected.op === 'filled') === empty) return false;
+                continue;
+            }
             if (!compare(actual, expected.op, expected.value)) return false;
             continue;
         }

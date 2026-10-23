@@ -604,7 +604,14 @@ class SchemaEngine
                 : ($data[$field] ?? null);
 
             if (is_array($expected) && isset($expected['op'])) {
-                if (!$this->compare($actual, $expected['op'], $expected['value'])) return false;
+                $op = $expected['op'];
+                if ($op === 'filled' || $op === 'empty') {
+                    // 'filled' = the field has a value; 'empty' = it doesn't. Works for strings
+                    // (compare() only handles numbers). Used by: CURP optional when RFC is filled.
+                    if (($op === 'filled') === $this->isEmpty($actual)) return false;
+                    continue;
+                }
+                if (!$this->compare($actual, $op, $expected['value'])) return false;
                 continue;
             }
 

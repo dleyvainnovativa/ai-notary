@@ -38,9 +38,10 @@ class Exporter implements ExporterContract
     ];
 
     /**
-     * Every text value loses accents/diacritics and Ñ (MUÑOZ → MUNOZ, BOCA DEL RÍO → BOCA DEL RIO),
-     * except colonia, which keeps the SAT catalog spelling ("Hípico"). The file is then
-     * Windows-1252 ("ANSI"): pure ASCII unless a colonia carries an accent.
+     * Every text value loses accents/diacritics and Ñ (MUÑOZ → MUNOZ, BOCA DEL RÍO → BOCA DEL RIO)
+     * and is UPPERCASED (maría → MARIA), except colonia, which keeps the SAT catalog spelling
+     * and case ("Hípico"). The file is then Windows-1252 ("ANSI"): pure ASCII unless a colonia
+     * carries an accent.
      */
     private function normalizeText(array $data): array
     {
@@ -48,7 +49,7 @@ class Exporter implements ExporterContract
             if (is_array($val)) {
                 $data[$k] = $this->normalizeText($val);
             } elseif (is_string($val) && !in_array((string) $k, self::KEEP_ACCENTS, true)) {
-                $data[$k] = strtr($val, self::FOLD);
+                $data[$k] = mb_strtoupper(strtr($val, self::FOLD), 'UTF-8');
             }
         }
         return $data;

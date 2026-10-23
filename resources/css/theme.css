@@ -1150,3 +1150,41 @@ a { color: var(--text); }
     .rv-row .rv-row .rv-row__head { margin-bottom: 0.35rem; }
     .rv-array__head { margin-bottom: 0.5rem; }
 }
+
+/* ============================================================
+   Theme polish — Bootstrap defaults that weren't themed for dark
+   (file inputs, modals, close button, tables, dropzone surface)
+   ============================================================ */
+
+/* Native file inputs: theme the control + its "Choose File" button so the
+   text isn't lost on a white button in dark mode. Tokens are theme-aware. */
+.form-control[type="file"] { color: var(--text); background: var(--surface); }
+.form-control[type="file"]::file-selector-button {
+    background: var(--bg-muted);
+    color: var(--text);
+    border: 0;
+    border-inline-end: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.form-control[type="file"]::file-selector-button:hover {
+    background: color-mix(in srgb, var(--bg-muted) 70%, var(--primary) 20%);
+}
+
+/* Dropzone: explicit theme-aware surface so the file card can't render white. */
+.dropzone { background: var(--surface); }
+
+/* Tables (dashboard "Documentos recientes"): borders/text follow the theme
+   instead of Bootstrap's hard-coded light grey. Works in light + dark. */
+.table {
+    --bs-table-color: var(--text);
+    --bs-table-border-color: var(--border);
+    --bs-table-hover-color: var(--text);
+    --bs-table-hover-bg: var(--bg-muted);
+}
+
+/* Bootstrap modals (confirm / PDF preview / append): dark panel + borders,
+   and a visible close button (the default is a black SVG, invisible on dark). */
+.modal-content { background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); }
+.modal-header, .modal-footer { border-color: var(--border); }
+[data-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }

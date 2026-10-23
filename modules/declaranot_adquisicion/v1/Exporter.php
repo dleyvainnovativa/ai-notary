@@ -46,6 +46,7 @@ class Exporter implements ExporterContract
         $d = (isset($validatedData['escritura']) || isset($validatedData['calculo']))
             ? array_merge($validatedData['escritura'] ?? [], $validatedData['calculo'] ?? [])
             : $validatedData;
+        $d = self::upperExceptColonia($d);   // SAT: all values uppercase (no colonia in this file)
 
         $L = [];
         $fecha = $d['fecha_firma_escritura'] ?? null;
@@ -171,5 +172,15 @@ class Exporter implements ExporterContract
     private static function id($value): string
     {
         return mb_strtoupper(trim((string) ($value ?? '')), 'UTF-8');
+    }
+
+    /** SAT files carry every value in uppercase except colonia (not exported here). Accents kept (UTF-8). */
+    private static function upperExceptColonia(array $data): array
+    {
+        foreach ($data as $k => $v) {
+            if (is_array($v)) $data[$k] = self::upperExceptColonia($v);
+            elseif (is_string($v) && (string) $k !== 'colonia') $data[$k] = mb_strtoupper($v, 'UTF-8');
+        }
+        return $data;
     }
 }

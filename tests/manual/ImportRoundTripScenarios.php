@@ -97,7 +97,7 @@ $dec = ['numero_escritura'=>'26477','fecha_firma_escritura'=>'2025-12-23','tipo_
   'representante_comun'=>['existe_representante_comun'=>'1','rfc_representante'=>'ZADE470405SG7']];
 $r = $roundTrip($dExp, $dImp, $dec, 'full declaranot (pagos, enajenante, extranjero, ISR, copropiedad)');
 check('no warnings for a clean file', $r->warnings === []);
-check('fields land in the right keys', $r->data['adquirientes'][0]['tipo_adquiriente'] === '2' && $r->data['pagos_inmueble'][1]['otro_pago'] === 'canadian imperial bank' && $r->data['pago'][0]['fecha_pago_entidad'] === '2025-12-24');
+check('fields land in the right keys', $r->data['adquirientes'][0]['tipo_adquiriente'] === '2' && $r->data['pagos_inmueble'][1]['otro_pago'] === 'CANADIAN IMPERIAL BANK' && $r->data['pago'][0]['fecha_pago_entidad'] === '2025-12-24');
 $noCop = $dec; $noCop['copropiedad'] = ['existe_copropiedad'=>'2','integrantes'=>[]]; $noCop['representante_comun'] = ['existe_representante_comun'=>'2','rfc_representante'=>null]; $noCop['datos_informativos'] = null;
 $r = $roundTrip($dExp, $dImp, $noCop, 'no copropiedad / no datos informativos (placeholder lines)');
 check('placeholder copropiedad line not imported as an integrante', $r->data['copropiedad']['integrantes'] === []);

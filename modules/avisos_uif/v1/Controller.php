@@ -115,7 +115,7 @@ class Controller implements ModuleControllerContract
 
             // --- Persona Física ---
             'rfc' => ['label' => 'RFC', 'type' => 'text', 'validation' => ['format' => 'rfc'], 'required_in_cases' => ['fisica', 'moral', 'fideicomiso']],
-            'curp' => ['label' => 'CURP', 'type' => 'text', 'validation' => ['format' => 'curp'], 'required_in_cases' => ['fisica']],
+            'curp' => ['label' => 'CURP', 'type' => 'text', 'validation' => ['format' => 'curp'], 'required_in_cases' => ['fisica'], 'optional_when' => ['rfc' => ['op' => 'filled']]],
             'fecha_nacimiento' => ['label' => 'Fecha de Nacimiento', 'type' => 'date', 'required_in_cases' => ['fisica'], 'derive' => ['rule' => 'birthdate_from_id', 'curp' => 'curp', 'rfc' => 'rfc']],
             'nombre' => ['label' => 'Nombre(s)', 'type' => 'text', 'required_in_cases' => ['fisica']],
             'apellido_paterno' => ['label' => 'Apellido Paterno', 'type' => 'text', 'required_in_cases' => ['fisica']],
