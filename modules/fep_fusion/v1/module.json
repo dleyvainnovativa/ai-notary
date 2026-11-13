@@ -1,0 +1,19 @@
+{
+  "slug": "fep_fusion",
+  "version": "1",
+  "name": "FEP — Fusión",
+  "active": true,
+  "extends": "../../fep/v1",
+  "exports": [
+    "xml"
+  ],
+  "controller_class": "Modules\\FepFusion\\V1\\Controller",
+  "exporter_class": "Modules\\FepFusion\\V1\\Exporter",
+  "importer_class": "Modules\\FepFusion\\V1\\Importer",
+  "xlsm": {
+    "template": "FedatarioFusion",
+    "version": "4_3",
+    "sheet": "Persona Objeto del aviso"
+  },
+  "xlsm_reader_class": "Modules\\FepFusion\\V1\\XlsmReader"
+}

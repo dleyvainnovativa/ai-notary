@@ -1,0 +1,19 @@
+{
+  "slug": "fep_modifpatrimonial",
+  "version": "1",
+  "name": "FEP — Modificación Patrimonial",
+  "active": true,
+  "extends": "../../fep/v1",
+  "exports": [
+    "xml"
+  ],
+  "controller_class": "Modules\\FepModifpatrimonial\\V1\\Controller",
+  "exporter_class": "Modules\\FepModifpatrimonial\\V1\\Exporter",
+  "importer_class": "Modules\\FepModifpatrimonial\\V1\\Importer",
+  "xlsm": {
+    "template": "FedatarioModifPatrimonial",
+    "version": "4_4",
+    "sheet": "Persona Objeto del aviso"
+  },
+  "xlsm_reader_class": "Modules\\FepModifpatrimonial\\V1\\XlsmReader"
+}

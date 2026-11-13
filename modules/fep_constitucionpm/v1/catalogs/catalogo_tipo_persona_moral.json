@@ -1,0 +1,70 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Asociación Civil (A.C.)",
+    "value": "1"
+  },
+  {
+    "label": "Sociedad Civil (S.C.)",
+    "value": "2"
+  },
+  {
+    "label": "Sociedad en Nombre Colectivo",
+    "value": "3"
+  },
+  {
+    "label": "Comandita Simple (S. en C.)",
+    "value": "4"
+  },
+  {
+    "label": "Comandita por Acciones (S. en C. por A.)",
+    "value": "5"
+  },
+  {
+    "label": "Sociedad Anónima (S.A.)",
+    "value": "6"
+  },
+  {
+    "label": "Sociedad de Responsabilidad Limitada (S. de R. L.)",
+    "value": "7"
+  },
+  {
+    "label": "Sociedad Cooperativa Limitada (S. C. L.)",
+    "value": "8"
+  },
+  {
+    "label": "Sociedad Cooperativa Suplementada (S. C. S.)",
+    "value": "9"
+  },
+  {
+    "label": "Sociedad Mutualista de Seguros de Vida o de Daño",
+    "value": "11"
+  },
+  {
+    "label": "Sociedad Nacional de Crédito y/o Institución Bancaria de Desarrollo (S. N. C.)",
+    "value": "12"
+  },
+  {
+    "label": "Sociedad de Solidaridad Social (S. de S. S.)",
+    "value": "13"
+  },
+  {
+    "label": "Sociedad de Producción Rural de Responsabilidad Limitada",
+    "value": "14"
+  },
+  {
+    "label": "Sociedad de Producción Rural de Responsabilidad Ilimitada",
+    "value": "15"
+  },
+  {
+    "label": "Sociedad de Producción Rural de Responsabilidad Suplementada",
+    "value": "16"
+  },
+  {
+    "label": "Otra (especificar)",
+    "value": "99"
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Aumento",
+    "value": "1"
+  },
+  {
+    "label": "Disminución",
+    "value": "2"
+  },
+  {
+    "label": "Sin modificación",
+    "value": "3"
+  }
+]

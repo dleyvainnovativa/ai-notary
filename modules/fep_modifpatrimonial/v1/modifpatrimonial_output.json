@@ -1,0 +1,37 @@
+{
+  "referencia_aviso": "AAA333",
+  "prioridad": null,
+  "alerta": { "tipo_alerta": null, "descripcion_alerta": null },
+  "personas_aviso": [
+    { "nombre": "ALMA", "apellido_paterno": "SALAS", "apellido_materno": "VILLA", "fecha_nacimiento": "1977-10-15", "rfc": null, "curp": null }
+  ],
+  "operaciones": [
+    {
+      "instrumento_publico": "4500",
+      "fecha_operacion": "2014-01-01",
+      "actividad": {
+        "persona_moral_modifica": {
+          "denominacion_razon": "CHOCOLATE AZTECA",
+          "fecha_constitucion": "2000-08-11",
+          "rfc": "CHO000811KJL",
+          "pais_nacionalidad": "MX",
+          "giro_mercantil": "5231100",
+          "numero_total_acciones": 12334.55,
+          "motivo_modificacion": "3",
+          "instrumento_publico": "4500"
+        },
+        "datos_modificacion": {
+          "tipo_modificacion_capital_fijo": "2",
+          "inicial_capital_fijo": 12300.55,
+          "final_capital_fijo": 11560.25,
+          "tipo_modificacion_capital_variable": "2",
+          "inicial_capital_variable": 10056.00,
+          "final_capital_variable": 100567.34,
+          "accionistas": [
+            { "tipo": "fisica", "nombre": "ALMA", "apellido_paterno": "SALAS", "apellido_materno": "VILLA", "fecha_nacimiento": "1977-10-15", "pais_nacionalidad": "MX", "numero_acciones": 50.00 }
+          ]
+        }
+      }
+    }
+  ]
+}

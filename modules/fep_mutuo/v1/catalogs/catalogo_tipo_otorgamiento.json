@@ -1,0 +1,14 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Otorgamiento de Mutuo, Préstamo o Crédito sin Garantía",
+    "value": "1"
+  },
+  {
+    "label": "Otorgamiento de Mutuo, Préstamo o Crédito con Garantía",
+    "value": "2"
+  }
+]

@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0.0",
+  "global_rules": {
+    "date_format": "YYYY-MM-DD",
+    "number_format": "decimal",
+    "normalization_rules": [
+      "Return catalog values exactly as the catalog code (string).",
+      "Remove currency symbols/separators from numbers.",
+      "Convert dates to YYYY-MM-DD.",
+      "Return null when missing; do not infer.",
+      "Names/denominación in UPPERCASE without accents."
+    ]
+  },
+  "fields": {
+    "referencia_aviso": { "type": "text" },
+    "prioridad": { "type": "select", "source": "catalogo_prioridad" },
+    "alerta": { "type": "object", "fields": { "tipo_alerta": { "type": "text" }, "descripcion_alerta": { "type": "text" } } },
+    "personas_aviso": {
+      "type": "array",
+      "item": { "nombre": { "type": "text", "required": true }, "apellido_paterno": { "type": "text", "required": true }, "apellido_materno": { "type": "text" }, "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" } }
+    },
+    "operaciones": {
+      "type": "array",
+      "item": {
+        "instrumento_publico": { "type": "text", "required": true },
+        "fecha_operacion": { "type": "date", "required": true },
+        "actividad": {
+          "type": "object",
+          "fields": {
+            "tipo_movimiento": { "type": "select", "source": "catalogo_tipo_movimiento", "required": true, "ai_description": "1 Constitución, 2 Modif-aumento, 3 Modif-disminución, 6 Modif-incorporación/destitución." },
+            "tipo_fideicomiso": { "type": "select", "source": "catalogo_tipo_fideicomiso", "required": true, "ai_description": "1 Traslativo de dominio, 2 Garantía sobre inmuebles, 3 Traslativo y garantía, 4 Otro." },
+            "descripcion": { "type": "text" },
+            "rfc": { "type": "text" },
+            "identificador_fideicomiso": { "type": "text" },
+            "denominacion_razon": { "type": "text", "required": true, "ai_description": "Denominación del fideicomiso / fiduciario." },
+            "monto_patrimonio": { "type": "number", "required": true },
+            "fideicomitentes": {
+              "type": "array",
+              "ai_description": "Quienes aportan al fideicomiso. tipo_movimiento_fideicomitente (1 Incorporación, 2 Destitución, 3 Sin modificación), persona completa, y patrimonios[].",
+              "item": {
+                "tipo_movimiento_fideicomitente": { "type": "select", "source": "catalogo_tipo_movimiento_persona", "required": true },
+                "tipo": { "type": "text" },
+                "nombre": { "type": "text" }, "apellido_paterno": { "type": "text" }, "apellido_materno": { "type": "text" },
+                "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" },
+                "denominacion_razon": { "type": "text" }, "fecha_constitucion": { "type": "date" }, "identificador_fideicomiso": { "type": "text" },
+                "pais_nacionalidad": { "type": "select", "source": "catalogo_pais" },
+                "actividad_economica": { "type": "select", "source": "catalogo_actividad_economica" },
+                "giro_mercantil": { "type": "select", "source": "catalogo_giro_mercantil" },
+                "patrimonios": {
+                  "type": "array",
+                  "ai_description": "Cada bien aportado. clase: 'monetario' (moneda, monto_operacion) | 'inmueble' (tipo_inmueble, codigo_postal, folio_real, importe_garantia) | 'otro' (descripcion, valor_bien).",
+                  "item": {
+                    "clase": { "type": "text" },
+                    "moneda": { "type": "select", "source": "catalogo_moneda" },
+                    "monto_operacion": { "type": "number" },
+                    "tipo_inmueble": { "type": "select", "source": "catalogo_tipo_inmueble" },
+                    "codigo_postal": { "type": "text" },
+                    "folio_real": { "type": "text" },
+                    "importe_garantia": { "type": "number" },
+                    "descripcion": { "type": "text" },
+                    "valor_bien": { "type": "number" }
+                  }
+                }
+              }
+            },
+            "fideicomisarios": {
+              "type": "array",
+              "ai_description": "Grupos de fideicomisarios. determinados (SI/NO) y personas[] (cada una con tipo_movimiento_fideicomisario + persona completa).",
+              "item": {
+                "determinados": { "type": "text" },
+                "personas": {
+                  "type": "array",
+                  "item": {
+                    "tipo_movimiento_fideicomisario": { "type": "select", "source": "catalogo_tipo_movimiento_persona" },
+                    "tipo": { "type": "text" },
+                    "nombre": { "type": "text" }, "apellido_paterno": { "type": "text" }, "apellido_materno": { "type": "text" },
+                    "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" },
+                    "denominacion_razon": { "type": "text" }, "fecha_constitucion": { "type": "date" }, "identificador_fideicomiso": { "type": "text" },
+                    "pais_nacionalidad": { "type": "select", "source": "catalogo_pais" },
+                    "actividad_economica": { "type": "select", "source": "catalogo_actividad_economica" },
+                    "giro_mercantil": { "type": "select", "source": "catalogo_giro_mercantil" }
+                  }
+                }
+              }
+            },
+            "comite_tecnico": {
+              "type": "object",
+              "fields": {
+                "comite_tecnico": { "type": "text", "ai_description": "SI / NO." },
+                "modificacion_comite_tecnico": { "type": "text", "ai_description": "SI / NO." }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

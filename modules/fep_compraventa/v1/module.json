@@ -1,0 +1,19 @@
+{
+  "slug": "fep_compraventa",
+  "version": "1",
+  "name": "FEP — Compraventa de Acciones",
+  "active": true,
+  "extends": "../../fep/v1",
+  "exports": [
+    "xml"
+  ],
+  "controller_class": "Modules\\FepCompraventa\\V1\\Controller",
+  "exporter_class": "Modules\\FepCompraventa\\V1\\Exporter",
+  "importer_class": "Modules\\FepCompraventa\\V1\\Importer",
+  "xlsm": {
+    "template": "FedatarioCompraVenta",
+    "version": "4_3",
+    "sheet": "Persona Objeto del aviso"
+  },
+  "xlsm_reader_class": "Modules\\FepCompraventa\\V1\\XlsmReader"
+}

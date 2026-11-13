@@ -1,0 +1,18 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "de administración",
+    "value": "1"
+  },
+  {
+    "label": "de dominio",
+    "value": "2"
+  },
+  {
+    "label": "de administración y de dominio",
+    "value": "3"
+  }
+]

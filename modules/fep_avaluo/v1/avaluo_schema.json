@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "global_rules": {
+    "date_format": "YYYY-MM-DD",
+    "number_format": "decimal",
+    "normalization_rules": [
+      "Return enum/catalog values exactly as the catalog code (string).",
+      "Remove currency symbols and thousands separators from numbers.",
+      "Convert dates to YYYY-MM-DD.",
+      "Return null when a value is missing; do not infer missing data.",
+      "Names in UPPERCASE without accents."
+    ]
+  },
+  "fields": {
+    "referencia_aviso": { "type": "text", "ai_description": "Referencia del aviso; usa el número de instrumento si no hay otra." },
+    "prioridad": { "type": "select", "source": "catalogo_prioridad", "ai_description": "Normalmente null; lo define el fedatario." },
+    "alerta": {
+      "type": "object",
+      "fields": {
+        "tipo_alerta": { "type": "select", "source": "catalogo_alerta", "ai_description": "null salvo señal clara; lo define el fedatario." },
+        "descripcion_alerta": { "type": "text" }
+      }
+    },
+    "personas_aviso": {
+      "type": "array",
+      "item": {
+        "nombre": { "type": "text", "required": true },
+        "apellido_paterno": { "type": "text", "required": true },
+        "apellido_materno": { "type": "text" },
+        "fecha_nacimiento": { "type": "date" },
+        "rfc": { "type": "text" },
+        "curp": { "type": "text" }
+      },
+      "ai_description": "Persona(s) que solicitan la formalización del instrumento."
+    },
+    "operaciones": {
+      "type": "array",
+      "item": {
+        "instrumento_publico": { "type": "text", "required": true, "ai_description": "Número de instrumento / escritura." },
+        "fecha_operacion": { "type": "date", "required": true, "ai_description": "Fecha de firma del instrumento." },
+        "actividad": {
+          "type": "object",
+          "fields": {
+            "tipo_bien": { "type": "select", "source": "catalogo_tipo_bien", "required": true, "ai_description": "Tipo de bien objeto del avalúo (1 Inmueble, 2 Vehículo terrestre, …)." },
+            "descripcion": { "type": "text", "ai_description": "Descripción del bien valuado." },
+            "valor_avaluo": { "type": "number", "required": true, "ai_description": "Valor del avalúo en M.N." },
+            "propietario": {
+              "type": "object",
+              "fields": {
+                "tipo": { "type": "text", "ai_description": "fisica | moral | fideicomiso" },
+                "propietario_solicita": { "type": "text", "ai_description": "SI si el propietario es quien solicita la formalización, NO si no." },
+                "nombre": { "type": "text" },
+                "apellido_paterno": { "type": "text" },
+                "apellido_materno": { "type": "text" },
+                "fecha_nacimiento": { "type": "date" },
+                "rfc": { "type": "text" },
+                "curp": { "type": "text" },
+                "denominacion_razon": { "type": "text", "ai_description": "Razón social (moral) o fiduciario (fideicomiso)." },
+                "fecha_constitucion": { "type": "date" },
+                "identificador_fideicomiso": { "type": "text" },
+                "pais_nacionalidad": { "type": "select", "source": "catalogo_pais" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

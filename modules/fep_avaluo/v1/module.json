@@ -1,0 +1,17 @@
+{
+  "slug": "fep_avaluo",
+  "version": "1",
+  "name": "FEP — Avalúo",
+  "active": true,
+  "extends": "../../fep/v1",
+  "exports": ["xml"],
+  "controller_class": "Modules\\FepAvaluo\\V1\\Controller",
+  "exporter_class": "Modules\\FepAvaluo\\V1\\Exporter",
+  "importer_class": "Modules\\FepAvaluo\\V1\\Importer",
+  "xlsm_reader_class": "Modules\\FepAvaluo\\V1\\XlsmReader",
+  "xlsm": {
+    "template": "FedatarioAvaluo",
+    "version": "4_3",
+    "sheet": "Persona Objeto del aviso"
+  }
+}

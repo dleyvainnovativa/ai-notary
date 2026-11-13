@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Traslativo de Dominio",
+    "value": "1"
+  },
+  {
+    "label": "Garantía sobre Inmuebles",
+    "value": "2"
+  },
+  {
+    "label": "Traslativo de domino y garantía sobre inmuebles",
+    "value": "3"
+  },
+  {
+    "label": "Otro (Especificar)",
+    "value": "4"
+  }
+]

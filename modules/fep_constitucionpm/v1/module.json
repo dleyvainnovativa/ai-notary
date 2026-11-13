@@ -1,0 +1,19 @@
+{
+  "slug": "fep_constitucionpm",
+  "version": "1",
+  "name": "FEP — Constitución de Personas Morales",
+  "active": true,
+  "extends": "../../fep/v1",
+  "exports": [
+    "xml"
+  ],
+  "controller_class": "Modules\\FepConstitucionpm\\V1\\Controller",
+  "exporter_class": "Modules\\FepConstitucionpm\\V1\\Exporter",
+  "importer_class": "Modules\\FepConstitucionpm\\V1\\Importer",
+  "xlsm": {
+    "template": "FedatarioConstitucionPM",
+    "version": "4_4",
+    "sheet": "Persona Objeto del aviso"
+  },
+  "xlsm_reader_class": "Modules\\FepConstitucionpm\\V1\\XlsmReader"
+}

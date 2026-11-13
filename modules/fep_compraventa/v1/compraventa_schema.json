@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0.0",
+  "global_rules": {
+    "date_format": "YYYY-MM-DD",
+    "number_format": "decimal",
+    "normalization_rules": [
+      "Catalog values as the catalog code (string).",
+      "Numbers without currency symbols/separators.",
+      "Dates YYYY-MM-DD.",
+      "null when missing; do not infer.",
+      "Names/denominación in UPPERCASE without accents."
+    ]
+  },
+  "fields": {
+    "referencia_aviso": { "type": "text" },
+    "prioridad": { "type": "select", "source": "catalogo_prioridad" },
+    "alerta": { "type": "object", "fields": { "tipo_alerta": { "type": "text" }, "descripcion_alerta": { "type": "text" } } },
+    "personas_aviso": { "type": "array", "item": { "nombre": { "type": "text", "required": true }, "apellido_paterno": { "type": "text", "required": true }, "apellido_materno": { "type": "text" }, "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" } } },
+    "operaciones": {
+      "type": "array",
+      "item": {
+        "instrumento_publico": { "type": "text", "required": true },
+        "fecha_operacion": { "type": "date", "required": true },
+        "actividad": {
+          "type": "object",
+          "fields": {
+            "tipo_operacion": { "type": "select", "source": "catalogo_tipo_operacion", "required": true, "ai_description": "1 Compra, 2 Venta." },
+            "sociedades": {
+              "type": "array",
+              "ai_description": "Sociedad(es) emisora(s) de las acciones. denominacion_razon, fecha_constitucion, rfc, pais_nacionalidad, valor_nominal, numero_acciones, y vendedores[]/compradores[] (persona simple + numero_acciones).",
+              "item": {
+                "denominacion_razon": { "type": "text", "required": true }, "fecha_constitucion": { "type": "date" }, "rfc": { "type": "text" },
+                "pais_nacionalidad": { "type": "select", "source": "catalogo_pais", "required": true },
+                "valor_nominal": { "type": "number", "required": true }, "numero_acciones": { "type": "number", "required": true },
+                "vendedores": { "type": "array", "item": { "tipo": { "type": "text" }, "nombre": { "type": "text" }, "apellido_paterno": { "type": "text" }, "apellido_materno": { "type": "text" }, "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" }, "denominacion_razon": { "type": "text" }, "fecha_constitucion": { "type": "date" }, "identificador_fideicomiso": { "type": "text" }, "pais_nacionalidad": { "type": "select", "source": "catalogo_pais" }, "numero_acciones": { "type": "number" } } },
+                "compradores": { "type": "array", "item": { "tipo": { "type": "text" }, "nombre": { "type": "text" }, "apellido_paterno": { "type": "text" }, "apellido_materno": { "type": "text" }, "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" }, "denominacion_razon": { "type": "text" }, "fecha_constitucion": { "type": "date" }, "identificador_fideicomiso": { "type": "text" }, "pais_nacionalidad": { "type": "select", "source": "catalogo_pais" }, "numero_acciones": { "type": "number" } } }
+              }
+            },
+            "liquidaciones": {
+              "type": "array",
+              "item": {
+                "fecha_pago": { "type": "date", "required": true },
+                "instrumento_monetario": { "type": "select", "source": "catalogo_instrumento_monetario" },
+                "moneda": { "type": "select", "source": "catalogo_moneda", "required": true },
+                "monto_operacion": { "type": "number", "required": true }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

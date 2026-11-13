@@ -1,0 +1,35 @@
+REGLAS COMPARTIDAS — INFORME FEP (Fedatario Público, SHCP/UIF)
+
+Estas reglas aplican a TODOS los tipos de actividad del informe FEP. El módulo
+agrega después las reglas propias de su tipo de actividad.
+
+FORMATO DE LOS VALORES (el sistema los normaliza, pero extrae lo más limpio posible):
+- Nombres y apellidos (<nombre>, <apellido_paterno>, <apellido_materno>): solo
+  letras MAYÚSCULAS A-Z, la Ñ y espacios. Sin acentos, sin números, sin signos.
+  Si una persona no tiene apellido paterno o materno, usa "XXXX".
+- Denominación o razón social: MAYÚSCULAS; se permiten números y los signos # - . & , _ @ ' ( ).
+- Fechas: formato AAAAMMDD (8 dígitos). Ejemplo: 1 de enero de 2014 → 20140101.
+- Montos: número con 2 decimales, punto decimal, sin separador de miles y sin signo.
+  Ejemplo: 580000.98. Si no hay monto, 0.00.
+- RFC persona física: 13 caracteres (con homoclave). RFC persona moral / fideicomiso: 12.
+- CURP: 18 caracteres.
+- País de nacionalidad: clave de 2 letras del catálogo de países (ej. MX, US, ES).
+- Actividad económica / giro mercantil: clave de 7 dígitos del catálogo correspondiente.
+- Selectores de catálogo (prioridad, tipo de alerta, tipo de bien, moneda, etc.): la clave numérica.
+
+PERSONAS (física / moral / fideicomiso):
+- Persona física: nombre, apellido paterno, apellido materno, fecha de nacimiento,
+  RFC, CURP, país de nacionalidad y actividad económica.
+- Persona moral: denominación o razón social, fecha de constitución, RFC,
+  país de nacionalidad y giro mercantil.
+- Fideicomiso: denominación del fiduciario, RFC e identificador del fideicomiso.
+- Fecha de nacimiento / RFC / CURP: al menos uno es obligatorio; da los que consten en la escritura.
+- No inventes claves de catálogo; si no puedes determinarla con certeza, deja el campo vacío
+  y márcalo para verificación en lugar de adivinar.
+
+DATOS DEL INFORME:
+- <mes_reportado> (AAAAMM), <clave_sujeto_obligado> (RFC del fedatario) y <exento> provienen
+  del perfil del fedatario / la captura, NO de la escritura. No los inventes desde el documento.
+- <referencia_aviso>: referencia alfanumérica de 1 a 14 caracteres (A-Z, Ñ, 0-9).
+- <persona_aviso>: la persona que solicita la formalización del instrumento público.
+- <instrumento_publico> y <fecha_operacion>: número de escritura y fecha del acto.

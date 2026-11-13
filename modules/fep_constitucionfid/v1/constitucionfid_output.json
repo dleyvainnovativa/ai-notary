@@ -1,0 +1,49 @@
+{
+  "referencia_aviso": "AAAA",
+  "prioridad": null,
+  "alerta": { "tipo_alerta": null, "descripcion_alerta": null },
+  "personas_aviso": [
+    { "nombre": "CARLOS", "apellido_paterno": "CRUZ", "apellido_materno": "CAMPOS", "fecha_nacimiento": "1980-12-12", "rfc": null, "curp": null }
+  ],
+  "operaciones": [
+    {
+      "instrumento_publico": "A1",
+      "fecha_operacion": "2013-12-12",
+      "actividad": {
+        "tipo_movimiento": "1",
+        "tipo_fideicomiso": "1",
+        "descripcion": "CONSTITUCION DE FIDEICOMISO",
+        "rfc": null,
+        "identificador_fideicomiso": "1A",
+        "denominacion_razon": "FIDEICOMISO EJEMPLO",
+        "monto_patrimonio": 5900000.40,
+        "fideicomitentes": [
+          {
+            "tipo_movimiento_fideicomitente": "1",
+            "tipo": "fisica",
+            "nombre": "CARLOS", "apellido_paterno": "CRUZ", "apellido_materno": "CAMPOS",
+            "fecha_nacimiento": "1990-12-12", "pais_nacionalidad": "MX", "actividad_economica": "0300004",
+            "patrimonios": [
+              { "clase": "monetario", "moneda": "1", "monto_operacion": 10000000.00 },
+              { "clase": "otro", "descripcion": "DESC OTRO BIEN", "valor_bien": 2000000.00 }
+            ]
+          }
+        ],
+        "fideicomisarios": [
+          {
+            "determinados": "NO",
+            "personas": [
+              {
+                "tipo_movimiento_fideicomisario": "1",
+                "tipo": "fisica",
+                "nombre": "CESAR", "apellido_paterno": "CANO", "apellido_materno": "CORTES",
+                "fecha_nacimiento": "1998-12-12", "pais_nacionalidad": "MX", "actividad_economica": "1300003"
+              }
+            ]
+          }
+        ],
+        "comite_tecnico": { "comite_tecnico": "SI", "modificacion_comite_tecnico": "NO" }
+      }
+    }
+  ]
+}

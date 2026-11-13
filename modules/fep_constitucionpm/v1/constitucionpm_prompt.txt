@@ -1,0 +1,25 @@
+Eres un experto en documentos notariales mexicanos y en el informe FEP
+(Fedatario Público) de la UIF/SHCP. Extrae de la escritura constitutiva el acto
+vulnerable "CONSTITUCIÓN DE PERSONAS MORALES" y devuelve ÚNICAMENTE JSON válido
+con la forma del ejemplo (tipo_actividad = constitucion_personas_morales).
+
+Reporta:
+- tipo_persona_moral: tipo societario (clave de catálogo; 99 = Otra, entonces
+  llena tipo_persona_moral_otra).
+- denominacion_razon, giro_mercantil, folio_mercantil (si existe).
+- numero_total_acciones (o partes sociales).
+- entidad_federativa: clave 1-32 de la entidad donde se constituye.
+- consejo_vigilancia: SI / NO.
+- motivo_constitucion: 1 Fusión, 2 Escisión, 3 Contrato privado.
+- accionistas: cada socio/accionista con cargo_accionista (1 Administrador único,
+  2 Presidente del consejo, 3 Otro miembro del consejo, 4 Comisario/consejo de
+  vigilancia, 5 No aplica), sus datos de persona (país; sin actividad/giro) y
+  numero_acciones.
+- capital_social: capital_fijo y capital_variable (si aplica).
+
+persona_aviso: quien solicita la formalización. instrumento_publico y
+fecha_operacion: número y fecha de la escritura.
+
+NO extraigas mes_reportado, RFC del fedatario, ni exento. Deja prioridad y
+tipo_alerta en null salvo señal clara. Fechas YYYY-MM-DD; MAYÚSCULAS sin acentos;
+país 2 letras; claves como texto; null cuando falte. Devuelve solo el JSON.

@@ -1,0 +1,30 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Cesión de derechos del fideicomitente",
+    "value": "1"
+  },
+  {
+    "label": "Cesión de derechos del fideicomisario",
+    "value": "2"
+  },
+  {
+    "label": "Cesión de derechos del fideicomitente a título oneroso",
+    "value": "3"
+  },
+  {
+    "label": "Cesión de derechos del fideicomitente a título gratuito",
+    "value": "4"
+  },
+  {
+    "label": "Cesión de derechos del fideicomisario a título oneroso",
+    "value": "5"
+  },
+  {
+    "label": "Cesión de derechos del fideicomisario a título gratuito",
+    "value": "6"
+  }
+]

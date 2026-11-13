@@ -1,0 +1,23 @@
+Eres un experto en documentos notariales mexicanos y en el informe FEP
+(Fedatario Público) de la UIF/SHCP. Extrae de la escritura el acto vulnerable
+"ESCISIÓN" de sociedades y devuelve ÚNICAMENTE JSON válido con la forma del
+ejemplo (tipo_actividad = escision).
+
+Reporta:
+- escindente: la sociedad que se escinde. Bloque de datos de sociedad
+  (denominacion_razon, fecha_constitucion, rfc, pais_nacionalidad, giro_mercantil,
+  capital_social_fijo, capital_social_variable, folio_mercantil), más
+  escindente_subsiste (SI/NO) y accionistas[] (persona simple + numero_acciones).
+- escindidas_determinadas: SI / NO.
+- escindidas: sociedades resultantes; mismo bloque + numero_total_acciones y
+  accionistas[].
+
+Una parte puede ser persona física, moral o fideicomiso; usa el tipo que
+corresponda en cada accionista.
+
+persona_aviso: quien solicita la formalización. instrumento_publico y
+fecha_operacion: número y fecha de la escritura.
+
+NO extraigas mes_reportado, RFC del fedatario, ni exento. Deja prioridad y
+tipo_alerta en null salvo señal clara. Fechas YYYY-MM-DD; MAYÚSCULAS sin acentos;
+país 2 letras; claves como texto; null cuando falte. Devuelve solo el JSON.

@@ -1,0 +1,33 @@
+{
+  "referencia_aviso": "AAA555",
+  "prioridad": null,
+  "alerta": { "tipo_alerta": null, "descripcion_alerta": null },
+  "personas_aviso": [
+    { "nombre": "ANTONIO", "apellido_paterno": "SALAZAR", "apellido_materno": "PRADO", "fecha_nacimiento": "1980-03-09", "rfc": null, "curp": null }
+  ],
+  "operaciones": [
+    {
+      "instrumento_publico": "8899",
+      "fecha_operacion": "2014-01-01",
+      "actividad": {
+        "escindente": {
+          "denominacion_razon": "AVANTE", "fecha_constitucion": "1978-07-13", "rfc": "AVA780713IIO", "pais_nacionalidad": "MX", "giro_mercantil": "5411100",
+          "capital_social_fijo": 12000036.00, "capital_social_variable": 566000333.00, "folio_mercantil": "YUT678", "escindente_subsiste": "SI",
+          "accionistas": [
+            { "tipo": "fideicomiso", "denominacion_razon": "SOLUCIONES AVANTE", "rfc": "CHO000811KJL", "identificador_fideicomiso": "YUSIDO", "numero_acciones": 25.00 }
+          ]
+        },
+        "escindidas_determinadas": "SI",
+        "escindidas": [
+          {
+            "denominacion_razon": "UFIO", "fecha_constitucion": "1990-02-01", "rfc": "UFI900201KKK", "pais_nacionalidad": "MX", "giro_mercantil": "4810000",
+            "capital_social_fijo": 1200365.00, "capital_social_variable": 23555066.00, "folio_mercantil": "RUTU8473", "numero_total_acciones": 21.00,
+            "accionistas": [
+              { "tipo": "fideicomiso", "denominacion_razon": "SOLUCIONES AVANTE", "rfc": "CHO000811KJL", "identificador_fideicomiso": "YUSIDO", "numero_acciones": 23.00 }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

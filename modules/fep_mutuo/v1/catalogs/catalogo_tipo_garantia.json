@@ -1,0 +1,62 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Sin garantía",
+    "value": "1"
+  },
+  {
+    "label": "Inmueble",
+    "value": "2"
+  },
+  {
+    "label": "Vehículo terrestre",
+    "value": "3"
+  },
+  {
+    "label": "Vehículo aéreo",
+    "value": "4"
+  },
+  {
+    "label": "Vehículo marítimo",
+    "value": "5"
+  },
+  {
+    "label": "Priedras Preciosas",
+    "value": "6"
+  },
+  {
+    "label": "Metales Preciosos",
+    "value": "7"
+  },
+  {
+    "label": "Joyas o relojes",
+    "value": "8"
+  },
+  {
+    "label": "Obras de arte o antigüedades",
+    "value": "9"
+  },
+  {
+    "label": "Acciones o partes sociales",
+    "value": "10"
+  },
+  {
+    "label": "Derechos fiduciarios",
+    "value": "11"
+  },
+  {
+    "label": "Derechos de crédito",
+    "value": "12"
+  },
+  {
+    "label": "Garantía Quirografaria",
+    "value": "15"
+  },
+  {
+    "label": "Otro (Especificar)",
+    "value": "99"
+  }
+]

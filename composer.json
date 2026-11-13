@@ -13,6 +13,7 @@
         "laravel/tinker": "^3.0",
         "openai-php/laravel": "^0.19.1",
         "phpoffice/phpword": "^1.4",
+        "phpoffice/phpspreadsheet": "^3.5",
         "smalot/pdfparser": "^2.12",
         "stripe/stripe-php": "^20.2"
     },

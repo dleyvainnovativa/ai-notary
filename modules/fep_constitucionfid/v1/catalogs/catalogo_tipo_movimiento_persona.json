@@ -1,0 +1,18 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Incorporación",
+    "value": "1"
+  },
+  {
+    "label": "Destitución",
+    "value": "2"
+  },
+  {
+    "label": "Sin modificación",
+    "value": "3"
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "slug": "fep_poder",
+  "version": "1",
+  "name": "FEP — Otorgamiento de Poder",
+  "active": true,
+  "extends": "../../fep/v1",
+  "exports": [
+    "xml"
+  ],
+  "controller_class": "Modules\\FepPoder\\V1\\Controller",
+  "exporter_class": "Modules\\FepPoder\\V1\\Exporter",
+  "importer_class": "Modules\\FepPoder\\V1\\Importer",
+  "xlsm": {
+    "template": "FedatarioPoder",
+    "version": "4_3",
+    "sheet": "Persona Objeto del aviso"
+  },
+  "xlsm_reader_class": "Modules\\FepPoder\\V1\\XlsmReader"
+}

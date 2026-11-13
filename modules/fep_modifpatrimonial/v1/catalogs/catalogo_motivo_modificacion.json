@@ -1,0 +1,18 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Fusión",
+    "value": "1"
+  },
+  {
+    "label": "Escisión",
+    "value": "2"
+  },
+  {
+    "label": "Contrato privado",
+    "value": "3"
+  }
+]

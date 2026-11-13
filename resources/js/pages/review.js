@@ -681,6 +681,11 @@ function renderArray(name, def, rows, path) {
         initChoices(row);
     };
 
+    // Seed the minimum number of rows when empty (e.g. FEP always has one operation),
+    // so required operation/activity fields are shown instead of a bare "Agregar" button.
+    if ((!rows || !rows.length) && def.min) {
+        rows = Array.from({ length: def.min }, () => ({}));
+    }
     rows.forEach((r, i) => buildRow(r, i));
     updateCount(wrap);
 

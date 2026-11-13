@@ -1,0 +1,32 @@
+{
+  "referencia_aviso": "AAA666",
+  "prioridad": null,
+  "alerta": { "tipo_alerta": null, "descripcion_alerta": null },
+  "personas_aviso": [
+    { "nombre": "ANDREA", "apellido_paterno": "ROBLES", "apellido_materno": "GONZALES", "fecha_nacimiento": "1992-11-20", "rfc": null, "curp": null }
+  ],
+  "operaciones": [
+    {
+      "instrumento_publico": "6677",
+      "fecha_operacion": "2014-01-01",
+      "actividad": {
+        "tipo_operacion": "1",
+        "sociedades": [
+          {
+            "denominacion_razon": "PEDRO", "fecha_constitucion": "1800-01-01", "pais_nacionalidad": "AL",
+            "valor_nominal": 112223215158.00, "numero_acciones": 45.00,
+            "vendedores": [
+              { "tipo": "moral", "denominacion_razon": "AZTECA", "fecha_constitucion": "1980-02-02", "pais_nacionalidad": "MX", "numero_acciones": 45.00 }
+            ],
+            "compradores": [
+              { "tipo": "fisica", "nombre": "ANDREA", "apellido_paterno": "ROBLES", "apellido_materno": "GONZALES", "fecha_nacimiento": "1992-11-20", "pais_nacionalidad": "MX", "numero_acciones": 40.00 }
+            ]
+          }
+        ],
+        "liquidaciones": [
+          { "fecha_pago": "2014-07-01", "instrumento_monetario": "1", "moneda": "1", "monto_operacion": 1800000.12 }
+        ]
+      }
+    }
+  ]
+}

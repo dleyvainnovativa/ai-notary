@@ -1,0 +1,11 @@
+{
+  "slug": "fep",
+  "version": "1",
+  "name": "FEP (base)",
+  "active": false,
+  "exports": ["xml"],
+  "controller_class": "Modules\\Fep\\V1\\Controller",
+  "exporter_class": "Modules\\Fep\\V1\\Exporter",
+  "importer_class": "Modules\\Fep\\V1\\Importer",
+  "note": "Shared base for the Fedatario Público (FEP) modules. active:false — never shown as a user module; the 10 fep_* modules extend it via \"extends\":\"../../fep/v1\"."
+}

@@ -1,0 +1,13 @@
+{
+  "slug": "fep_cesion",
+  "version": "1",
+  "name": "FEP — Cesión de Derechos (Fideicomiso)",
+  "active": true,
+  "extends": "../../fep/v1",
+  "exports": ["xml"],
+  "controller_class": "Modules\\FepCesion\\V1\\Controller",
+  "exporter_class": "Modules\\FepCesion\\V1\\Exporter",
+  "importer_class": "Modules\\FepCesion\\V1\\Importer",
+  "xlsm_reader_class": "Modules\\FepCesion\\V1\\XlsmReader",
+  "xlsm": { "template": "FedatarioCesion", "version": "4_3", "sheet": "Persona Objeto del aviso" }
+}

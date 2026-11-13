@@ -1,0 +1,29 @@
+{
+  "referencia_aviso": "AAA111",
+  "prioridad": null,
+  "alerta": { "tipo_alerta": null, "descripcion_alerta": null },
+  "personas_aviso": [
+    { "nombre": "JOSE", "apellido_paterno": "RODRIGUEZ", "apellido_materno": "SOLANO", "fecha_nacimiento": "1978-05-22", "rfc": "ROSM7805225M4", "curp": null }
+  ],
+  "operaciones": [
+    {
+      "instrumento_publico": "4456",
+      "fecha_operacion": "2014-01-01",
+      "actividad": {
+        "identificador_fideicomiso": "44564",
+        "rfc": "ROS7805225M4",
+        "denominacion_razon": "FIDEICOMISO EJEMPLO",
+        "tipo_cesion": "1",
+        "cedente": {
+          "tipo": "fisica", "nombre": "CARLOS", "apellido_paterno": "CRUZ", "apellido_materno": "CASTRO",
+          "fecha_nacimiento": "1990-12-12", "pais_nacionalidad": "MX", "actividad_economica": "0300004"
+        },
+        "cesionario": {
+          "tipo": "fisica", "nombre": "CARMEN", "apellido_paterno": "CANO", "apellido_materno": "CORONA",
+          "fecha_nacimiento": "1998-12-12", "pais_nacionalidad": "MX", "actividad_economica": "1300003"
+        },
+        "monto_cesion": 115621261.00
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Administrador único",
+    "value": "1"
+  },
+  {
+    "label": "Presidente del consejo de administración u órgano equivalente",
+    "value": "2"
+  },
+  {
+    "label": "Otro miembro del consejo de administración u órgano equivalente",
+    "value": "3"
+  },
+  {
+    "label": "Comisario o Miembro del consejo de vigilancia u órgano equivalente",
+    "value": "4"
+  },
+  {
+    "label": "No aplica",
+    "value": "5"
+  }
+]

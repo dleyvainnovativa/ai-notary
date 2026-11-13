@@ -1,0 +1,134 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "AGUASCALIENTES",
+    "value": "1"
+  },
+  {
+    "label": "BAJA CALIFORNIA",
+    "value": "2"
+  },
+  {
+    "label": "BAJA CALIFORNIA SUR",
+    "value": "3"
+  },
+  {
+    "label": "CAMPECHE",
+    "value": "4"
+  },
+  {
+    "label": "COAHUILA DE ZARAGOZA",
+    "value": "5"
+  },
+  {
+    "label": "COLIMA",
+    "value": "6"
+  },
+  {
+    "label": "CHIAPAS",
+    "value": "7"
+  },
+  {
+    "label": "CHIHUAHUA",
+    "value": "8"
+  },
+  {
+    "label": "DISTRITO FEDERAL",
+    "value": "9"
+  },
+  {
+    "label": "DURANGO",
+    "value": "10"
+  },
+  {
+    "label": "GUANAJUATO",
+    "value": "11"
+  },
+  {
+    "label": "GUERRERO",
+    "value": "12"
+  },
+  {
+    "label": "HIDALGO",
+    "value": "13"
+  },
+  {
+    "label": "JALISCO",
+    "value": "14"
+  },
+  {
+    "label": "MÉXICO",
+    "value": "15"
+  },
+  {
+    "label": "MICHOACÁN DE OCAMPO",
+    "value": "16"
+  },
+  {
+    "label": "MORELOS",
+    "value": "17"
+  },
+  {
+    "label": "NAYARIT",
+    "value": "18"
+  },
+  {
+    "label": "NUEVO LEÓN",
+    "value": "19"
+  },
+  {
+    "label": "OAXACA",
+    "value": "20"
+  },
+  {
+    "label": "PUEBLA",
+    "value": "21"
+  },
+  {
+    "label": "QUERÉTARO",
+    "value": "22"
+  },
+  {
+    "label": "QUINTANA ROO",
+    "value": "23"
+  },
+  {
+    "label": "SAN LUIS POTOSÍ",
+    "value": "24"
+  },
+  {
+    "label": "SINALOA",
+    "value": "25"
+  },
+  {
+    "label": "SONORA",
+    "value": "26"
+  },
+  {
+    "label": "TABASCO",
+    "value": "27"
+  },
+  {
+    "label": "TAMAULIPAS",
+    "value": "28"
+  },
+  {
+    "label": "TLAXCALA",
+    "value": "29"
+  },
+  {
+    "label": "VERACRUZ DE IGNACIO DE LA LLAVE",
+    "value": "30"
+  },
+  {
+    "label": "YUCATÁN",
+    "value": "31"
+  },
+  {
+    "label": "ZACATECAS",
+    "value": "32"
+  }
+]

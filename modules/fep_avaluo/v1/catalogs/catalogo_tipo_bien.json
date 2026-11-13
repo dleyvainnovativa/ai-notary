@@ -1,0 +1,42 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Inmueble",
+    "value": "1"
+  },
+  {
+    "label": "Vehículo terrestre",
+    "value": "2"
+  },
+  {
+    "label": "Vehículo aéreo",
+    "value": "3"
+  },
+  {
+    "label": "Vehículo marítimo",
+    "value": "4"
+  },
+  {
+    "label": "Priedras Preciosas",
+    "value": "5"
+  },
+  {
+    "label": "Metales Preciosos",
+    "value": "6"
+  },
+  {
+    "label": "Joyas o relojes",
+    "value": "7"
+  },
+  {
+    "label": "Obras de arte o antigüedades",
+    "value": "8"
+  },
+  {
+    "label": "Otro (Especificar)",
+    "value": "99"
+  }
+]

@@ -241,7 +241,7 @@ class DocumentController extends Controller
 
         $submitted = $request->input('data', []);
         abort_unless(is_array($submitted), 422, 'Datos inválidos.');
-        $format = $request->input('format', 'txt');
+        $format = $request->input('format');   // default resolved from the exporter below
 
         // Server re-runs the engine — authoritative validation + computed/derived
         $result = $this->engine->process($schema, $submitted, $dir);
@@ -272,7 +272,13 @@ class DocumentController extends Controller
         $exporterClass = $manifest['exporter_class'];
         $exporter = new $exporterClass();
 
-        abort_unless(in_array($format, $exporter->supportedFormats(), true), 422, 'Formato no soportado.');
+        // When the client doesn't name a format, use txt where the module supports it
+        // (UIF / DeclaraNOT) and otherwise the module's own format (FEP → xml).
+        $supported = $exporter->supportedFormats();
+        if (!$format) {
+            $format = in_array('txt', $supported, true) ? 'txt' : ($supported[0] ?? 'txt');
+        }
+        abort_unless(in_array($format, $supported, true), 422, 'Formato no soportado.');
 
         // before calling $exporter->export(...)
         $profile = $document->user->notarioProfile;

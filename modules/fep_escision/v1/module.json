@@ -1,0 +1,19 @@
+{
+  "slug": "fep_escision",
+  "version": "1",
+  "name": "FEP — Escisión",
+  "active": true,
+  "extends": "../../fep/v1",
+  "exports": [
+    "xml"
+  ],
+  "controller_class": "Modules\\FepEscision\\V1\\Controller",
+  "exporter_class": "Modules\\FepEscision\\V1\\Exporter",
+  "importer_class": "Modules\\FepEscision\\V1\\Importer",
+  "xlsm": {
+    "template": "FedatarioEscision",
+    "version": "4_3",
+    "sheet": "Persona Objeto del aviso"
+  },
+  "xlsm_reader_class": "Modules\\FepEscision\\V1\\XlsmReader"
+}

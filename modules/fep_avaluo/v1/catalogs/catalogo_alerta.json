@@ -1,0 +1,82 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Sin alerta.",
+    "value": "100"
+  },
+  {
+    "label": "Los sujetos o partes involucradas se rehúsan a proporcionar documentos personales que los identifiquen.",
+    "value": "3501"
+  },
+  {
+    "label": "La operación no es acorde con la actividad económica o giro mercantil declarado por el cliente.",
+    "value": "3502"
+  },
+  {
+    "label": "Hay indicios, o certeza, que los sujetos o partes involucradas no están actuando en nombre propio y están tratando de ocultar la identidad del beneficiario o controlador real.",
+    "value": "3503"
+  },
+  {
+    "label": "La información y documentación presentada por las partes involucradas es inconsistente o de difícil verificación por parte del Sujeto Obligado.",
+    "value": "3504"
+  },
+  {
+    "label": "Los sujetos o partes involucradas intentan sobornar, extorsionar o amenazan con el fin de realizar la operación fuera de los parámetros establecidos, o con la finalidad de evitar el envío del Aviso.",
+    "value": "3505"
+  },
+  {
+    "label": "De acuerdo con medios informativos u otras fuentes de información pública, se tiene conocimiento o sospecha de que el cliente, un familiar o persona relacionada, está vinculado con actividades ilícitas o se encuentra bajo proceso de investigación.",
+    "value": "3506"
+  },
+  {
+    "label": "El cliente o partes involucradas no quiere(n) ser relacionado(s) con la operación realizada.",
+    "value": "3507"
+  },
+  {
+    "label": "Los sujetos o partes involucradas realizan múltiples operaciones en un periodo muy corto de tiempo sin justificación aparente.",
+    "value": "3508"
+  },
+  {
+    "label": "Los sujetos o partes involucradas hacen uso de un intermediario (ejemplo: apoderado o representante legal) para realizar la operación o acto sin que exista una causa que lo justifique.",
+    "value": "3509"
+  },
+  {
+    "label": "El cliente desea liquidar la operación con monedas virtuales.",
+    "value": "3510"
+  },
+  {
+    "label": "Se constituye una Sociedad por Acciones Simplificadas (SAS), en la que no hay forma de corroborar la identidad de los accionistas.",
+    "value": "3511"
+  },
+  {
+    "label": "Hay indicios, o certeza de que una de las partes involucradas está siendo presionada para que realice la operación.",
+    "value": "3512"
+  },
+  {
+    "label": "Hay indicios de que existe suplantación de identidad de alguna de las partes involucradas en la operación.",
+    "value": "3513"
+  },
+  {
+    "label": "El cliente realiza múltiples operaciones de constitución de personas morales en un periodo corto de tiempo.",
+    "value": "3514"
+  },
+  {
+    "label": "Se tiene conocimiento de que otro notario se negó a realizar la operación.",
+    "value": "3515"
+  },
+  {
+    "label": "El pago de la operación es realizado por un tercero sin relación aparente con el cliente o alguna de las partes involucradas.",
+    "value": "3516"
+  },
+  {
+    "label": "El cliente (personas físicas y  morales), declara una ocupación o actividad distinta a la que aparece en su Cédula de Identificación Fiscal.",
+    "value": "3517"
+  },
+  {
+    "label": "Otra alerta.",
+    "value": "9999"
+  }
+]

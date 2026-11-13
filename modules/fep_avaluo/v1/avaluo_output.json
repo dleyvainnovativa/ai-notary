@@ -1,0 +1,37 @@
+{
+  "referencia_aviso": "AAA111",
+  "prioridad": null,
+  "alerta": { "tipo_alerta": null, "descripcion_alerta": null },
+  "personas_aviso": [
+    {
+      "nombre": "MARIA",
+      "apellido_paterno": "CASTILLO",
+      "apellido_materno": "OLIVARES",
+      "fecha_nacimiento": "1982-03-09",
+      "rfc": null,
+      "curp": null
+    }
+  ],
+  "operaciones": [
+    {
+      "instrumento_publico": "1234568790",
+      "fecha_operacion": "2014-01-01",
+      "actividad": {
+        "tipo_bien": "1",
+        "descripcion": null,
+        "valor_avaluo": 580000.98,
+        "propietario": {
+          "tipo": "fisica",
+          "propietario_solicita": "NO",
+          "nombre": "MARIA",
+          "apellido_paterno": "CASTILLO",
+          "apellido_materno": "OLIVARES",
+          "fecha_nacimiento": "1982-09-03",
+          "rfc": null,
+          "curp": null,
+          "pais_nacionalidad": "MX"
+        }
+      }
+    }
+  ]
+}

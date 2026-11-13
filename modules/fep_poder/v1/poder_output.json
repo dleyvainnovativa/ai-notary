@@ -1,0 +1,23 @@
+{
+  "referencia_aviso": "201406",
+  "prioridad": null,
+  "alerta": { "tipo_alerta": null, "descripcion_alerta": null },
+  "personas_aviso": [
+    { "nombre": "JOSE", "apellido_paterno": "RODRIGUEZ", "apellido_materno": "SOLANO", "fecha_nacimiento": "1978-05-22", "rfc": null, "curp": null }
+  ],
+  "operaciones": [
+    {
+      "instrumento_publico": "234234",
+      "fecha_operacion": "2014-01-01",
+      "actividad": {
+        "poderdantes": [
+          { "tipo": "moral", "denominacion_razon": "AZTECA", "fecha_constitucion": "1980-02-02", "rfc": null, "pais_nacionalidad": "MX", "giro_mercantil": "5313110" }
+        ],
+        "apoderados": [
+          { "tipo": "fisica", "tipo_poder": "2", "nombre": "ANDREA", "apellido_paterno": "ROBLES", "apellido_materno": "GONZALES", "fecha_nacimiento": "1992-11-20", "pais_nacionalidad": "MX" },
+          { "tipo": "fisica", "tipo_poder": "1", "nombre": "YARELY", "apellido_paterno": "BARGAS", "apellido_materno": "PEREZ", "fecha_nacimiento": "1989-04-12", "pais_nacionalidad": "MX" }
+        ]
+      }
+    }
+  ]
+}

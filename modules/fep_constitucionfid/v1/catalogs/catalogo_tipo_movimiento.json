@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Seleccionar opción",
+    "value": "0"
+  },
+  {
+    "label": "Constitucion",
+    "value": "1"
+  },
+  {
+    "label": "Modificación - Aumento del patrimonio",
+    "value": "2"
+  },
+  {
+    "label": "Modificación - Disminución del patrimonio",
+    "value": "3"
+  },
+  {
+    "label": "Modificación de incorporación y/o destitución sin cambios al patrimonio",
+    "value": "6"
+  }
+]

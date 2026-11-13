@@ -1,0 +1,31 @@
+{
+  "referencia_aviso": "AAA222",
+  "prioridad": null,
+  "alerta": { "tipo_alerta": null, "descripcion_alerta": null },
+  "personas_aviso": [
+    { "nombre": "MARIBEL", "apellido_paterno": "FLORES", "apellido_materno": "RIO", "fecha_nacimiento": "1977-03-17", "rfc": null, "curp": null }
+  ],
+  "operaciones": [
+    {
+      "instrumento_publico": "12549655",
+      "fecha_operacion": "2014-01-01",
+      "actividad": {
+        "tipo_persona_moral": "2",
+        "tipo_persona_moral_otra": null,
+        "denominacion_razon": "LA AZTECA",
+        "giro_mercantil": "4640000",
+        "folio_mercantil": "231GH",
+        "numero_total_acciones": 12334.00,
+        "entidad_federativa": "7",
+        "consejo_vigilancia": "NO",
+        "motivo_constitucion": "3",
+        "instrumento_publico": "12549655",
+        "accionistas": [
+          { "cargo_accionista": "1", "tipo": "fisica", "nombre": "MARIBEL", "apellido_paterno": "FLORES", "apellido_materno": "RIO", "fecha_nacimiento": "1977-03-17", "pais_nacionalidad": "MX", "numero_acciones": 30.00 },
+          { "cargo_accionista": "5", "tipo": "fisica", "nombre": "SAUL", "apellido_paterno": "CASTRO", "apellido_materno": "DOMINGUEZ", "fecha_nacimiento": "1978-06-11", "pais_nacionalidad": "MX", "numero_acciones": 20.00 }
+        ],
+        "capital_social": { "capital_fijo": 12810.00, "capital_variable": 1541800.44 }
+      }
+    }
+  ]
+}

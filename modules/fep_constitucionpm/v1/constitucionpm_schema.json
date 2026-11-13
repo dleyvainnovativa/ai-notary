@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "global_rules": {
+    "date_format": "YYYY-MM-DD",
+    "number_format": "decimal",
+    "normalization_rules": [
+      "Return catalog values exactly as the catalog code (string).",
+      "Remove currency symbols/separators from numbers.",
+      "Convert dates to YYYY-MM-DD.",
+      "Return null when missing; do not infer.",
+      "Names in UPPERCASE without accents."
+    ]
+  },
+  "fields": {
+    "referencia_aviso": { "type": "text" },
+    "prioridad": { "type": "select", "source": "catalogo_prioridad" },
+    "alerta": { "type": "object", "fields": { "tipo_alerta": { "type": "text" }, "descripcion_alerta": { "type": "text" } } },
+    "personas_aviso": {
+      "type": "array",
+      "item": { "nombre": { "type": "text", "required": true }, "apellido_paterno": { "type": "text", "required": true }, "apellido_materno": { "type": "text" }, "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" } }
+    },
+    "operaciones": {
+      "type": "array",
+      "item": {
+        "instrumento_publico": { "type": "text", "required": true },
+        "fecha_operacion": { "type": "date", "required": true },
+        "actividad": {
+          "type": "object",
+          "fields": {
+            "tipo_persona_moral": { "type": "select", "source": "catalogo_tipo_persona_moral", "required": true, "ai_description": "Tipo societario (6 S.A., 7 S.A. de C.V., …; 99 Otra)." },
+            "tipo_persona_moral_otra": { "type": "text", "ai_description": "Solo si tipo_persona_moral = 99." },
+            "denominacion_razon": { "type": "text", "required": true },
+            "giro_mercantil": { "type": "select", "source": "catalogo_giro_mercantil", "required": true },
+            "folio_mercantil": { "type": "text" },
+            "numero_total_acciones": { "type": "number", "required": true },
+            "entidad_federativa": { "type": "select", "source": "catalogo_entidad_federativa", "required": true, "ai_description": "Entidad de constitución (clave 1-32)." },
+            "consejo_vigilancia": { "type": "text", "ai_description": "SI / NO." },
+            "motivo_constitucion": { "type": "select", "source": "catalogo_motivo_constitucion", "required": true, "ai_description": "1 Fusión, 2 Escisión, 3 Contrato privado." },
+            "instrumento_publico": { "type": "text" },
+            "accionistas": {
+              "type": "array",
+              "ai_description": "Socios/accionistas. cargo_accionista (1 Administrador único…5 No aplica), persona (simple: país, sin actividad/giro), numero_acciones.",
+              "item": {
+                "cargo_accionista": { "type": "select", "source": "catalogo_cargo_accionista", "required": true },
+                "tipo": { "type": "text" },
+                "nombre": { "type": "text" }, "apellido_paterno": { "type": "text" }, "apellido_materno": { "type": "text" },
+                "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" },
+                "denominacion_razon": { "type": "text" }, "fecha_constitucion": { "type": "date" }, "identificador_fideicomiso": { "type": "text" },
+                "pais_nacionalidad": { "type": "select", "source": "catalogo_pais" },
+                "numero_acciones": { "type": "number", "required": true }
+              }
+            },
+            "capital_social": {
+              "type": "object",
+              "fields": {
+                "capital_fijo": { "type": "number", "required": true },
+                "capital_variable": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

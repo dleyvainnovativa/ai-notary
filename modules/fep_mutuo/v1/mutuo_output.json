@@ -1,0 +1,34 @@
+{
+  "referencia_aviso": "AAA999",
+  "prioridad": null,
+  "alerta": { "tipo_alerta": null, "descripcion_alerta": null },
+  "personas_aviso": [
+    { "nombre": "CARLOS", "apellido_paterno": "CRUZ", "apellido_materno": "CAMPOS", "fecha_nacimiento": "1980-12-12", "rfc": null, "curp": null }
+  ],
+  "operaciones": [
+    {
+      "instrumento_publico": "9900",
+      "fecha_operacion": "2014-01-01",
+      "actividad": {
+        "tipo_otorgamiento": "2",
+        "acreedores": [
+          { "tipo": "fisica", "nombre": "CARLOS", "apellido_paterno": "CRUZ", "apellido_materno": "CAMPOS", "fecha_nacimiento": "1980-12-12", "pais_nacionalidad": "MX", "actividad_economica": "1300003" }
+        ],
+        "deudores": [
+          { "tipo": "fisica", "nombre": "CESAR", "apellido_paterno": "CANO", "apellido_materno": "CORONA", "fecha_nacimiento": "1980-12-12", "pais_nacionalidad": "MX", "actividad_economica": "1300003" }
+        ],
+        "garantias": [
+          {
+            "tipo_garantia": "2",
+            "clase_bien": "inmueble",
+            "tipo_inmueble": "1", "valor_referencia": 1000000.00, "codigo_postal": "06000", "folio_real": "1111111",
+            "garante": { "tipo": "fisica", "nombre": "CARLOS", "apellido_paterno": "CRUZ", "apellido_materno": "CAMPOS", "fecha_nacimiento": "1980-12-12" }
+          }
+        ],
+        "liquidaciones": [
+          { "moneda": "1", "monto_operacion": 1000000.00 }
+        ]
+      }
+    }
+  ]
+}

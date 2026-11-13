@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "global_rules": {
+    "date_format": "YYYY-MM-DD",
+    "number_format": "decimal",
+    "normalization_rules": [
+      "Catalog values as the catalog code (string).",
+      "Numbers without currency symbols/separators.",
+      "Dates YYYY-MM-DD.",
+      "null when missing; do not infer.",
+      "Names/denominación in UPPERCASE without accents."
+    ]
+  },
+  "fields": {
+    "referencia_aviso": { "type": "text" },
+    "prioridad": { "type": "select", "source": "catalogo_prioridad" },
+    "alerta": { "type": "object", "fields": { "tipo_alerta": { "type": "text" }, "descripcion_alerta": { "type": "text" } } },
+    "personas_aviso": { "type": "array", "item": { "nombre": { "type": "text", "required": true }, "apellido_paterno": { "type": "text", "required": true }, "apellido_materno": { "type": "text" }, "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" } } },
+    "operaciones": {
+      "type": "array",
+      "item": {
+        "instrumento_publico": { "type": "text", "required": true },
+        "fecha_operacion": { "type": "date", "required": true },
+        "actividad": {
+          "type": "object",
+          "fields": {
+            "tipo_otorgamiento": { "type": "select", "source": "catalogo_tipo_otorgamiento", "required": true },
+            "acreedores": { "type": "array", "ai_description": "Quien otorga el crédito (persona completa: país + actividad/giro).", "item": { "tipo": { "type": "text" }, "nombre": { "type": "text" }, "apellido_paterno": { "type": "text" }, "apellido_materno": { "type": "text" }, "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" }, "denominacion_razon": { "type": "text" }, "fecha_constitucion": { "type": "date" }, "identificador_fideicomiso": { "type": "text" }, "pais_nacionalidad": { "type": "select", "source": "catalogo_pais" }, "actividad_economica": { "type": "select", "source": "catalogo_actividad_economica" }, "giro_mercantil": { "type": "select", "source": "catalogo_giro_mercantil" } } },
+            "deudores": { "type": "array", "ai_description": "Quien recibe el crédito (persona completa).", "item": { "tipo": { "type": "text" }, "nombre": { "type": "text" }, "apellido_paterno": { "type": "text" }, "apellido_materno": { "type": "text" }, "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" }, "denominacion_razon": { "type": "text" }, "fecha_constitucion": { "type": "date" }, "identificador_fideicomiso": { "type": "text" }, "pais_nacionalidad": { "type": "select", "source": "catalogo_pais" }, "actividad_economica": { "type": "select", "source": "catalogo_actividad_economica" }, "giro_mercantil": { "type": "select", "source": "catalogo_giro_mercantil" } } },
+            "garantias": {
+              "type": "array",
+              "ai_description": "Garantías del crédito. tipo_garantia; clase_bien: '' (sin bien) | 'inmueble' (tipo_inmueble, valor_referencia, codigo_postal, folio_real) | 'otro' (descripcion_garantia). garante opcional (persona sin país/actividad).",
+              "item": {
+                "tipo_garantia": { "type": "select", "source": "catalogo_tipo_garantia", "required": true },
+                "clase_bien": { "type": "text" },
+                "tipo_inmueble": { "type": "select", "source": "catalogo_tipo_inmueble" },
+                "valor_referencia": { "type": "number" }, "codigo_postal": { "type": "text" }, "folio_real": { "type": "text" },
+                "descripcion_garantia": { "type": "text" },
+                "garante": { "type": "object", "fields": { "tipo": { "type": "text" }, "nombre": { "type": "text" }, "apellido_paterno": { "type": "text" }, "apellido_materno": { "type": "text" }, "fecha_nacimiento": { "type": "date" }, "rfc": { "type": "text" }, "curp": { "type": "text" }, "denominacion_razon": { "type": "text" }, "fecha_constitucion": { "type": "date" }, "identificador_fideicomiso": { "type": "text" } } }
+              }
+            },
+            "liquidaciones": {
+              "type": "array",
+              "item": { "moneda": { "type": "select", "source": "catalogo_moneda", "required": true }, "monto_operacion": { "type": "number", "required": true } }
+            }
+          }
+        }
+      }
+    }
+  }
+}

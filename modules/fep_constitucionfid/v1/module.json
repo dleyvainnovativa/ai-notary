@@ -1,0 +1,19 @@
+{
+  "slug": "fep_constitucionfid",
+  "version": "1",
+  "name": "FEP — Constitución/Modificación de Fideicomiso",
+  "active": true,
+  "extends": "../../fep/v1",
+  "exports": [
+    "xml"
+  ],
+  "controller_class": "Modules\\FepConstitucionfid\\V1\\Controller",
+  "exporter_class": "Modules\\FepConstitucionfid\\V1\\Exporter",
+  "importer_class": "Modules\\FepConstitucionfid\\V1\\Importer",
+  "xlsm": {
+    "template": "FedatarioConstitucionFid",
+    "version": "4_8",
+    "sheet": "Persona Objeto del aviso"
+  },
+  "xlsm_reader_class": "Modules\\FepConstitucionfid\\V1\\XlsmReader"
+}
