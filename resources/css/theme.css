@@ -1,4 +1,3 @@
-
 /* ============================================================
    THEME.CSS — central theme (Linear meets Stripe)
    Bootstrap handles spacing/grid/utilities; this handles
@@ -1200,3 +1199,50 @@ a { color: var(--text); }
 .modal-content { background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); }
 .modal-header, .modal-footer { border-color: var(--border); }
 [data-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+/* ------------------------------------------------------------------ *
+ * Toasts (resources/js/helpers/toast.js). The JS builds .toast-stack
+ * and .app-toast[--success|--error|--info]; styles live here. Themed
+ * via tokens so they follow light/dark automatically.
+ * ------------------------------------------------------------------ */
+.toast-stack {
+    position: fixed;
+    top: calc(var(--topbar-height, 60px) + 12px);
+    right: 16px;
+    z-index: 1080;                 /* above Bootstrap modals (1055) */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: min(360px, calc(100vw - 32px));
+    pointer-events: none;          /* clicks pass through the stack… */
+}
+.app-toast {
+    pointer-events: auto;          /* …but land on individual toasts */
+    background: var(--bg-elevated);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--text-subtle);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 12px 14px;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    opacity: 1;
+    transition: opacity 0.2s ease;  /* the JS fades opacity→0 before removing */
+    animation: toast-in 0.18s ease-out;
+    word-break: break-word;
+}
+.app-toast--success { border-left-color: #16a34a; }
+.app-toast--error   { border-left-color: #dc2626; }
+.app-toast--info    { border-left-color: var(--primary); }
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .app-toast { animation: none; }
+}
+@media (max-width: 480px) {
+    .toast-stack { left: 16px; right: 16px; max-width: none; }
+}

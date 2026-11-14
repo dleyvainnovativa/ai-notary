@@ -78,11 +78,15 @@ class Controller implements ModuleControllerContract
                 'required' => true,
                 'money' => true,
                 'help' => [
-                    'title' => '¿Qué valor de avalúo debo señalar en el aplicativo DeclaraNOT en línea, cuando los contribuyentes no estén obligados a practicar un avalúo?',
-                    // El cuerpo acepta HTML básico: <p> <strong>/<b> <em>/<i> <br> <ul> <ol> <li> <a href>.
-                    'body' => '<p>En caso de que se trate de contribuyentes que realicen la enajenación o adquisición de bienes en una entidad federativa en la que, conforme a la legislación de dicha entidad, <strong>no estén obligados a realizar un avalúo</strong>, puedes señalar el valor <strong>cero</strong> en lugar del valor de avalúo.</p>'
-                        . '<p><em>Fundamento legal:</em> Regla 2.7.1.43. de la RMF para 2025, publicada en el DOF el 30 de diciembre de 2024.</p>',
+                    'title' => 'Información del valor del avalúo de bienes enajenados a través del DeclaraNOT en línea',
+                    'body' => '<p><strong>2.7.1.43.</strong> Para los efectos del artículo 27, apartado A, fracción V, apartado B, fracción X y apartado D, fracción VI del CFF, los fedatarios públicos cumplirán la obligación de proporcionar la información correspondiente al valor del avalúo de cada bien enajenado con la presentación de la declaración de enajenación o adquisición de bienes según corresponda, a través del DeclaraNOT en línea, en donde se señalará entre otros, lo siguiente:</p>'
+                        . '<ol type="I">'
+                        . '<li>El valor del bien de que se trate según el avalúo, el cual deberá cumplir con lo establecido en el artículo 3 del Reglamento del CFF y la regla 2.1.35.</li>'
+                        . '<li>El valor de la contraprestación o ingresos por la enajenación.</li>'
+                        . '</ol>'
+                        . '<p><em>CFF 27, RCFF 3, RMF 2.1.35., 2.7.1.20., 2.12.12.</em></p>',
                 ],
+
             ],
             'pagos_inmueble' => [
                 'item_label' => 'Pago',
