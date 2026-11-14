@@ -10,6 +10,7 @@ namespace Carbon { class Carbon { private \DateTimeImmutable $d; function __cons
 namespace {
 function now(){ return Carbon\Carbon::parse('2026-09-25'); }
 $R = getenv('NOTARIA_ROOT') ?: dirname(__DIR__, 2);
+require_once "$R/app/Support/ExportDate.php";
 foreach (['Modules/ExporterContract','Modules/ImporterContract','Modules/ImportResult','Modules/ImportException','Services/Import/TxtDecoder'] as $f) require "$R/app/$f.php";
 require "$R/modules/avisos_uif/v1/Exporter.php";
 require "$R/modules/avisos_uif/v1/Importer.php";

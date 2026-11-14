@@ -261,7 +261,10 @@ class DocumentController extends Controller
             return response()->json([
                 'message' => 'Corrige los errores marcados antes de exportar.',
                 'issues' => collect($blocking)->map(fn($i) => [
-                    'path' => $i->path, 'field' => $i->field, 'rule' => $i->rule, 'message' => $i->message,
+                    'path' => $i->path,
+                    'field' => $i->field,
+                    'rule' => $i->rule,
+                    'message' => $i->message,
                 ])->values(),
             ], 422);
         }

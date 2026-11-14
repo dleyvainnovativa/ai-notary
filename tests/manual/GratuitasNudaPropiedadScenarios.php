@@ -6,6 +6,7 @@ function app($c){ return new $c; }
 function now(){ return Carbon\Carbon::parse('2026-10-01'); }
 function data_get($a,$path){ foreach(explode('.',$path) as $k){ if(!is_array($a)||!array_key_exists($k,$a)) return null; $a=$a[$k]; } return $a; }
 $R = getenv('NOTARIA_ROOT') ?: dirname(__DIR__, 2);
+require_once "$R/app/Support/ExportDate.php";
 foreach (['Modules/ModuleControllerContract','Modules/ModuleInput','Modules/ExporterContract','Services/References/ResolverResult','Services/References/ReferenceResolver','Services/Schema/IdDates','Services/Schema/ValidationIssue','Services/Schema/EngineResult','Services/Schema/SchemaEngine','Services/Pdf/ReviewPdfPresenter'] as $f) require "$R/app/$f.php";
 require "$R/modules/avisos_uif/v1/Controller.php";
 require "$R/modules/avisos_uif/v1/Exporter.php";

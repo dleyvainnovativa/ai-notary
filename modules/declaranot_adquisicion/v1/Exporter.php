@@ -3,6 +3,7 @@
 namespace Modules\DeclaranotAdquisicion\V1;
 
 use App\Modules\ExporterContract;
+use App\Support\ExportDate;
 
 /**
  * DeclaraNOT por adquisición de bienes — SAT layout 910xxx.
@@ -50,11 +51,11 @@ class Exporter implements ExporterContract
 
         $L = [];
         $fecha = $d['fecha_firma_escritura'] ?? null;
-        $L[] = 'Configuracion:' . self::year($fecha) . '|001|035|25|' . self::dmy($fecha);
+        $L[] = 'Configuracion:' . ExportDate::year($fecha) . '|001|035|25|' . ExportDate::dmy($fecha);
 
         $L[] = '910001-DatosOperacion:' . self::row([
             $d['numero_escritura'] ?? null,
-            self::dmy($fecha),
+            ExportDate::dmy($fecha),
             $d['tipo_inmueble'] ?? null,
             $d['avaluo_inmueble'] ?? null,
             $d['monto_operacion'] ?? null,
@@ -72,7 +73,7 @@ class Exporter implements ExporterContract
                 $p['ingreso_acumulable'] ?? null,
                 $p['isr_federacion'] ?? null,
                 $p['numero_operacion'] ?? null,
-                self::dmy($p['fecha_pago'] ?? null),
+                ExportDate::dmy($p['fecha_pago'] ?? null),
             ]);
         }
 
@@ -113,7 +114,7 @@ class Exporter implements ExporterContract
             self::id($p['curp'] ?? null),
             $p['razon_social'] ?? null,
             $p['nacionalidad'] ?? null,
-            self::dmy($p['fecha_nacimiento'] ?? null),
+            ExportDate::dmy($p['fecha_nacimiento'] ?? null),
             $p['documento_oficial'] ?? null,
             $p['folio'] ?? null,
         ];
@@ -150,22 +151,6 @@ class Exporter implements ExporterContract
     private static function list($v): array
     {
         return is_array($v) ? array_values(array_filter($v, 'is_array')) : [];
-    }
-
-    /** Y-m-d (or already d/m/Y) → d/m/Y; anything else unchanged. */
-    private static function dmy($v): string
-    {
-        $v = trim((string) $v);
-        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})/', $v, $m)) return "{$m[3]}/{$m[2]}/{$m[1]}";
-        return $v;
-    }
-
-    private static function year($v): string
-    {
-        $v = trim((string) $v);
-        if (preg_match('/^(\d{4})-\d{2}-\d{2}/', $v, $m)) return $m[1];
-        if (preg_match('#^\d{2}/\d{2}/(\d{4})$#', $v, $m)) return $m[1];
-        return '';
     }
 
     /** RFC / CURP always go out in uppercase (trimmed). */

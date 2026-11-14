@@ -87,6 +87,7 @@ class IdDates
 
     private static function ymd(int $y, int $m, int $d): ?string
     {
-        return checkdate($m, $d, $y) ? sprintf('%04d-%02d-%02d', $y, $m, $d) : null;
+        return checkdate($m, $d, $y) ? sprintf('%02d/%02d/%04d', $d, $m, $y) : null;
+        // return checkdate($m, $d, $y) ? sprintf('%04d-%02d-%02d', $y, $m, $d) : null;
     }
 }

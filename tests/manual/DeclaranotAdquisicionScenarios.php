@@ -14,6 +14,7 @@ function app($c){ return new $c; }
 function data_get($a,$path){ foreach(explode('.',$path) as $k){ if(!is_array($a)||!array_key_exists($k,$a)) return null; $a=$a[$k]; } return $a; }
 function resource_path($p){ return (getenv('NOTARIA_ROOT') ?: dirname(__DIR__, 2)) . "/resources/$p"; }
 $R = getenv('NOTARIA_ROOT') ?: dirname(__DIR__, 2);
+require_once "$R/app/Support/ExportDate.php";
 foreach (['Modules/ModuleControllerContract','Modules/ModuleInput','Modules/ExporterContract','Modules/ImporterContract','Modules/ImportResult','Modules/ImportException',
   'Services/Import/TxtDecoder','Services/Import/ImportService','Services/Schema/IdDates','Services/Schema/ValidationIssue','Services/Schema/EngineResult','Services/Schema/SchemaEngine','Services/Pdf/ReviewPdfPresenter'] as $f) require "$R/app/$f.php";
 $A = "$R/modules/declaranot_adquisicion/v1";

@@ -6,6 +6,7 @@ namespace App\Modules { interface ExporterContract { public function supportedFo
 namespace {
 function now(){ return Carbon\Carbon::parse('2026-09-25'); }
 $R = getenv('NOTARIA_ROOT') ?: dirname(__DIR__, 2);
+require_once "$R/app/Support/ExportDate.php";
 $ORIG = getenv('ORIG_EXPORTER') ?: __DIR__ . '/Exporter.v1-verified.php';
 // Load the original under another namespace so both can run side by side
 eval('?>' . str_replace('namespace Modules\AvisosUif\V1;', 'namespace Orig;', file_get_contents($ORIG)));

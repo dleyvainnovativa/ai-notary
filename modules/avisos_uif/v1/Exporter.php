@@ -3,6 +3,7 @@
 namespace Modules\AvisosUif\V1;
 
 use App\Modules\ExporterContract;
+use App\Support\ExportDate;
 use Carbon\Carbon;
 
 class Exporter implements ExporterContract
@@ -59,7 +60,7 @@ class Exporter implements ExporterContract
     {
         $json = $this->normalizeText($json);
         $v = fn($x) => ($x ?? '') === null ? '' : (string) ($x ?? '');
-        $date = fn($x) => $x ? Carbon::parse($x)->format('d/m/Y') : '';
+        $date = fn($x) => ExportDate::dmy($x);
 
         $notaria = $json['_notaria'] ?? ['clave' => '001', 'entidad' => '035', 'num_notaria' => '28'];
         $referencia = $v($json['referencia_aviso'] ?? '');

@@ -4,6 +4,7 @@ namespace App\Modules { interface ExporterContract {} }
 namespace {
 function now(){ return Carbon\Carbon::parse('2026-10-03'); }
 $R = getenv('NOTARIA_ROOT') ?: dirname(__DIR__, 2);
+require_once "$R/app/Support/ExportDate.php";
 require "$R/modules/avisos_uif/v1/Exporter.php";
 $fail = 0; function check($l,$c){ global $fail; echo ($c?'  PASS ':'  FAIL ')."$l\n"; if(!$c) $fail++; }
 $d = ['referencia_aviso'=>'1','solicitante'=>['rfc'=>'MUÑO800101AB1','nombre'=>'JOSÉ ÁNGEL','apellido_paterno'=>'MUÑOZ','apellido_materno'=>'PEÑA'],

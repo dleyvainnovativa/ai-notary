@@ -3,6 +3,7 @@ namespace Carbon { class Carbon { private $d; function __construct($d){$this->d=
 namespace {
 function now(){ return Carbon\Carbon::parse('2026-10-03'); }
 $R = getenv('NOTARIA_ROOT') ?: dirname(__DIR__, 2);
+require_once "$R/app/Support/ExportDate.php";
 // Real SAT aviso (contains personal data → not committed). Usage: AVISO_FILE=/path/AVISOS_2.txt php tests/manual/RealAvisoRoundTrip.php
 $FILE = getenv('AVISO_FILE') ?: exit("Set AVISO_FILE=/path/to/real_aviso.txt\n");
 foreach (['Modules/ExporterContract','Modules/ImporterContract','Modules/ImportResult','Modules/ImportException','Services/Import/TxtDecoder','Services/Import/ImportService'] as $f) require "$R/app/$f.php";

@@ -26,7 +26,6 @@ class SchemaEngine
         $data = $this->applyComputed($fields, $data);
         $data = $this->applyDerived($fields, $data, $moduleDir, $data);
         $this->validate($fields, $data, $moduleDir, '');
-
         return new EngineResult($data, $this->issues);
     }
 

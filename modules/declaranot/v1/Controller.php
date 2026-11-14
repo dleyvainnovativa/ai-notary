@@ -79,7 +79,9 @@ class Controller implements ModuleControllerContract
                 'money' => true,
                 'help' => [
                     'title' => '¿Qué valor de avalúo debo señalar en el aplicativo DeclaraNOT en línea, cuando los contribuyentes no estén obligados a practicar un avalúo?',
-                    'body' => 'En caso de que se trate de contribuyentes que realicen la enajenación o adquisición de bienes en una entidad federativa en la que, conforme a la legislación de dicha entidad, no estén obligados a realizar un avalúo, puedes señalar el valor cero en lugar del valor de avalúo. Fundamento legal. Regla 2.7.1.43. de la RMF para 2025, publicada en el DOF el 30 de diciembre de 2024.',
+                    // El cuerpo acepta HTML básico: <p> <strong>/<b> <em>/<i> <br> <ul> <ol> <li> <a href>.
+                    'body' => '<p>En caso de que se trate de contribuyentes que realicen la enajenación o adquisición de bienes en una entidad federativa en la que, conforme a la legislación de dicha entidad, <strong>no estén obligados a realizar un avalúo</strong>, puedes señalar el valor <strong>cero</strong> en lugar del valor de avalúo.</p>'
+                        . '<p><em>Fundamento legal:</em> Regla 2.7.1.43. de la RMF para 2025, publicada en el DOF el 30 de diciembre de 2024.</p>',
                 ],
             ],
             'pagos_inmueble' => [

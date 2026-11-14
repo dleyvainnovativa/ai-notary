@@ -46,10 +46,50 @@ function ensureHelpModal() {
     return helpModalEl;
 }
 
+/* ---------- Help: tiny allow-list HTML sanitizer ----------
+ * Help text is authored in the module Controllers (trusted, server-side),
+ * never from user or deed input. We still build the body from an explicit
+ * allow-list and real DOM nodes (no innerHTML), so the help copy can use
+ * basic formatting without ever injecting arbitrary markup.
+ *   allowed: <strong>/<b> <em>/<i> <br> <p> <ul> <ol> <li> <a href>
+ */
+const HELP_ALLOWED = { STRONG: 1, B: 1, EM: 1, I: 1, BR: 1, P: 1, UL: 1, OL: 1, LI: 1, A: 1 };
+const HELP_DROP = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'TEMPLATE', 'LINK', 'META']);
+
+function sanitizeHelpHtml(html) {
+    const parsed = new DOMParser().parseFromString(String(html ?? ''), 'text/html');
+    const frag = document.createDocumentFragment();
+    const walk = (src, dest) => {
+        src.childNodes.forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                dest.appendChild(document.createTextNode(node.nodeValue));
+                return;
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+            const tag = node.tagName.toUpperCase();
+            if (HELP_DROP.has(tag)) return;                       // drop element and its content
+            if (!HELP_ALLOWED[tag]) { walk(node, dest); return; } // unknown tag → unwrap, keep text
+            const el = document.createElement(tag.toLowerCase());
+            if (tag === 'A') {
+                const href = (node.getAttribute('href') || '').trim();
+                if (/^(https?:|mailto:)/i.test(href)) {
+                    el.setAttribute('href', href);
+                    el.setAttribute('target', '_blank');
+                    el.setAttribute('rel', 'noopener noreferrer');
+                }
+            }
+            walk(node, el);                                       // only whitelisted attrs survive
+            dest.appendChild(el);
+        });
+    };
+    walk(parsed.body, frag);
+    return frag;
+}
+
 function openHelpModal(title, body) {
     const m = ensureHelpModal();
     m.querySelector('.rv-help-modal__title').textContent = title;
-    m.querySelector('.rv-help-modal__body').textContent = body;  // textContent = safe, no HTML injection
+    m.querySelector('.rv-help-modal__body').replaceChildren(sanitizeHelpHtml(body));  // allow-list HTML only
     m.hidden = false;
     document.body.style.overflow = 'hidden';   // prevent background scroll
 }

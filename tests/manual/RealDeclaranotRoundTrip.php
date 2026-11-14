@@ -2,6 +2,7 @@
 namespace Carbon { class Carbon { private $d; function __construct($d){$this->d=$d;} static function parse($x){ return new self(new \DateTimeImmutable((string)$x)); } function format($f){ return $this->d->format($f);} } }
 namespace {
 $R = getenv('NOTARIA_ROOT') ?: dirname(__DIR__, 2);
+require_once "$R/app/Support/ExportDate.php";
 $FILE = getenv('DECLARANOT_FILE') ?: exit("Set DECLARANOT_FILE=/path/real.txt\n");
 foreach (['Modules/ExporterContract','Modules/ImporterContract','Modules/ImportResult','Modules/ImportException','Services/Import/TxtDecoder','Services/Import/ImportService'] as $f) require "$R/app/$f.php";
 require "$R/modules/declaranot/v1/Exporter.php"; require "$R/modules/declaranot/v1/Importer.php";
