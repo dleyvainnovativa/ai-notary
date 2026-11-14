@@ -93,9 +93,9 @@ class Exporter implements ExporterContract
                 $v(self::id($enajenante['curp'] ?? null))              . '|' .
                 $v($enajenante['razon_social'])              . '|' .
                 $v($enajenante['nacionalidad'])              . '|' .
-                // TODO(dates): switch to $date(...) to emit dd/mm/yyyy once the SAT portal
-                // format is confirmed (see ExportDate). Currently raw ISO passthrough.
-                $v($enajenante['fecha_nacimiento'])              . '|' .
+                // Birth date emitted as dd/mm/yyyy (portal format). Stored value is ISO;
+                // ExportDate converts. Keep storage ISO so the date input / validation work.
+                $date($enajenante['fecha_nacimiento'])           . '|' .
                 $v($enajenante['documento_oficial'])              . '|' .
                 $v($enajenante['folio']);
         }
@@ -126,9 +126,8 @@ class Exporter implements ExporterContract
                 $v(self::id($adquiriente['curp'] ?? null))             . '|' .
                 $v($adquiriente['razon_social'])      . '|' .
                 $v($adquiriente['nacionalidad'])      . '|' .
-                // TODO(dates): switch to $date(...) to emit dd/mm/yyyy once the SAT portal
-                // format is confirmed (see ExportDate). Currently raw ISO passthrough.
-                $v($adquiriente['fecha_nacimiento'])  . '|' .
+                // Birth date emitted as dd/mm/yyyy (portal format); stored value stays ISO.
+                $date($adquiriente['fecha_nacimiento']) . '|' .
                 $v($adquiriente['documento_oficial']) . '|' .
                 $v($adquiriente['folio']);
         }

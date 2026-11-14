@@ -137,9 +137,9 @@ function personaCase(tipo, rfc) {
 // UIF — user selects tipo_persona (1=física, 2=moral, 3=fideicomiso)
 function personaTipoSelect(tipo) {
     switch (String(tipo ?? '')) {
-        case '1': return 'fisica';
-        case '2': return 'moral';
-        case '3': return 'fideicomiso';
+        case '1': case 'fisica':      return 'fisica';
+        case '2': case 'moral':       return 'moral';
+        case '3': case 'fideicomiso': return 'fideicomiso';
         default:  return 'unknown';
     }
 }

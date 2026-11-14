@@ -142,9 +142,9 @@ class SchemaEngine
     private function personaTipoSelect(?string $tipo): string
     {
         return match ((string) $tipo) {
-            '1' => 'fisica',
-            '2' => 'moral',
-            '3' => 'fideicomiso',
+            '1', 'fisica' => 'fisica',
+            '2', 'moral' => 'moral',
+            '3', 'fideicomiso' => 'fideicomiso',
             default => 'unknown',
         };
     }

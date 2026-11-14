@@ -50,7 +50,10 @@ final class FepPersonas
     /** The inner persona element for a given variant, chosen by $p['tipo']. */
     public static function personaChild(FepXmlWriter $w, array $p, string $variant = 'full'): \DOMElement
     {
+        // tipo may arrive as a form-select digit (1/2/3) or a canonical name
+        // (from XLSM import / round-trip). Normalise to the name before dispatch.
         $tipo = strtolower((string) ($p['tipo'] ?? 'fisica'));
+        $tipo = ['1' => 'fisica', '2' => 'moral', '3' => 'fideicomiso'][$tipo] ?? $tipo;
         return match ($tipo) {
             'moral'       => self::moral($w, $p, $variant),
             'fideicomiso' => self::fideicomiso($w, $p),
@@ -112,7 +115,24 @@ final class FepPersonas
     {
         $variant = $opts['variant'] ?? 'full';       // full | simple | garante
         $cases   = $opts['cases'] ?? ['fisica', 'moral', 'fideicomiso'];
+
+        // "Tipo de Persona" is a fixed 3-value discriminator (física/moral/fideicomiso),
+        // not a data catalog like país. Default its options here (values 1/2/3, matching
+        // the shared 'persona_tipo_select' classifier and UIF's catalogo_persona) so no
+        // per-module catalogo_persona.json is needed. A module may still override via
+        // persona_catalog. Values are normalised back to names at export (personaChild).
         $catPersona = $opts['persona_catalog'] ?? [];
+        if (!$catPersona) {
+            $tipoMeta = [
+                'fisica'      => ['value' => '1', 'label' => 'Persona Física'],
+                'moral'       => ['value' => '2', 'label' => 'Persona Moral'],
+                'fideicomiso' => ['value' => '3', 'label' => 'Fideicomiso'],
+            ];
+            $catPersona = array_values(array_map(
+                fn ($c) => $tipoMeta[$c] ?? ['value' => $c, 'label' => ucfirst($c)],
+                $cases
+            ));
+        }
         $catPais    = $opts['pais_catalog'] ?? [];
         $catAct     = $opts['actividad_catalog'] ?? [];
         $catGiro    = $opts['giro_catalog'] ?? [];
