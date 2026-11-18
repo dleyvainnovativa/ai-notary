@@ -150,7 +150,7 @@ final class FepPersonas
             'fecha_constitucion' => ['label' => 'Fecha de Constitución', 'type' => 'date', 'show_in_cases' => ['moral'], 'derive' => ['rule' => 'date_from_rfc_moral', 'rfc' => 'rfc']],
             'identificador_fideicomiso' => ['label' => 'Identificador del Fideicomiso', 'type' => 'text', 'col' => 'full', 'show_in_cases' => ['fideicomiso']],
             // shared id
-            'rfc' => ['label' => 'RFC', 'type' => 'text', 'validation' => ['format' => 'rfc'], 'required_in_cases' => ['fideicomiso'], 'optional_when' => ['curp' => ['op' => 'filled'], 'fecha_nacimiento' => ['op' => 'filled']]],
+            'rfc' => ['label' => 'RFC', 'type' => 'text', 'validation' => ['format' => 'rfc'], 'optional_when' => ['curp' => ['op' => 'filled'], 'fecha_nacimiento' => ['op' => 'filled']]],
         ];
 
         if ($variant !== 'garante') {

@@ -99,6 +99,10 @@ function initDropzone(dz) {
         empty.hidden = true;
         filed.hidden = false;
         dz.classList.add('has-file');
+        // Legacy Word (.doc, not .docx): extraction is best-effort, so warn the user.
+        if (/\.doc$/i.test(file.name)) {
+            notify.info('Este archivo es Word versión antigua (.doc). La captura pudiera tener errores; si puedes, guárdalo como Word (.docx) y vuelve a subirlo.', 8000);
+        }
     }
     function clear() {
         input.value = '';

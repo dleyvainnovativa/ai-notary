@@ -15,6 +15,10 @@ class TextExtractor
             'application/pdf' => $this->extractPdf($absolutePath),
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             => $this->extractDocx($absolutePath),
+            // Legacy Word (.doc): PhpWord can't read the old binary format, so OpenAI
+            // extracts the text (see DocTextExtractor). Resolved lazily so the rest of
+            // the extractor stays free of the OpenAI dependency.
+            'application/msword' => app(\App\Services\Ai\DocTextExtractor::class)->extract($absolutePath),
             default => throw new \RuntimeException("Unsupported type: {$mime}"),
         };
     }

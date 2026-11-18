@@ -67,7 +67,7 @@
                         <input type="file" class="dropzone__input module-file"
                             data-input-key="{{ $input->key }}"
                             data-module="{{ $slug }}"
-                            accept=".pdf,.docx" hidden>
+                            accept=".pdf,.docx,.doc" hidden>
                         <div class="dropzone__empty">
                             <i class="fa-solid fa-cloud-arrow-up dropzone__icon"></i>
                             <span class="dropzone__text">

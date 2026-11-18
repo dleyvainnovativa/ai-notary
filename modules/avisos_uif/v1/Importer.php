@@ -134,7 +134,7 @@ class Importer implements ImporterContract
                         break;
                     }
                     [$o, $side, $i] = $owner;
-                    $data['operaciones'][$o][$side][$i]['representante'] = [
+                    $data['operaciones'][$o][$side][$i]['representantes'][] = [
                         'rfc' => $this->s($c['rfc']), 'curp' => $this->s($c['curp']),
                         'fecha_nacimiento' => TxtDecoder::ymd($c['fecha_nacimiento']),
                         'nombre' => $this->s($c['nombre']), 'apellido_paterno' => $this->s($c['apellido_paterno']),
@@ -165,7 +165,7 @@ class Importer implements ImporterContract
                         break;
                     }
                     [$o, $side, $i] = $owner;
-                    $data['operaciones'][$o][$side][$i]['representante'] = [
+                    $data['operaciones'][$o][$side][$i]['representantes'][] = [
                         'rfc' => $this->s($c['rfc']), 'curp' => $this->s($c['curp']),
                         'fecha_nacimiento' => TxtDecoder::ymd($c['fecha_nacimiento']),
                         'nombre' => $this->s($c['nombre']), 'apellido_paterno' => $this->s($c['apellido_paterno']),

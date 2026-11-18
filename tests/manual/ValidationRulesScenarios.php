@@ -119,27 +119,27 @@ check('adquisición message uses "Ingreso Acumulable"', ($byPath($r, 'pago.0.isr
 /* ============ UIF · Representante legal ============ */
 $U = "$R/modules/avisos_uif/v1";
 $ufs = (new Modules\AvisosUif\V1\Controller($U))->formSchema();
-$repDef = $ufs['fields']['operaciones']['itemSchema']['vendedores']['itemSchema']['representante'] ?? null;
+$repDef = $ufs['fields']['operaciones']['itemSchema']['vendedores']['itemSchema']['representantes'] ?? null;
 echo "UIF · Representante legal\n";
-check('adquirentes and vendedores have a "Representante Legal" object for moral + fideicomiso', $repDef && $repDef['type'] === 'object' && $repDef['show_in_cases'] === ['moral', 'fideicomiso'] && isset($ufs['fields']['operaciones']['itemSchema']['adquirentes']['itemSchema']['representante']));
+check('adquirentes and vendedores have a "Representantes Legales" array for moral + fideicomiso', $repDef && $repDef['type'] === 'array' && $repDef['show_in_cases'] === ['moral', 'fideicomiso'] && isset($ufs['fields']['operaciones']['itemSchema']['adquirentes']['itemSchema']['representantes']));
 check('fields: RFC, CURP, fecha nac., nombre, apellido paterno, apellido materno', array_keys($repDef['itemSchema']) === ['rfc','curp','fecha_nacimiento','nombre','apellido_paterno','apellido_materno']);
 check('nombre + apellido paterno required; RFC/CURP optional', !empty($repDef['itemSchema']['nombre']['required']) && !empty($repDef['itemSchema']['apellido_paterno']['required']) && empty($repDef['itemSchema']['rfc']['required']) && empty($repDef['itemSchema']['curp']['required']));
 $dom = ['tipo_domicilio'=>'1','entidad_federativa'=>'9','calle'=>'REFORMA','num_ext'=>'222','codigo_postal'=>'06600','colonia'=>'Juárez','municipio'=>'CUAUHTÉMOC'];
-$moral = fn($rep) => ['tipo_persona'=>'2','rfc'=>'ICJ950101AB1','razon_social'=>'INMOBILIARIA SA','fecha_constitucion'=>'1995-01-01','giro_mercantil'=>'1000000','nacionalidad'=>'MX','domicilio'=>$dom,'representante'=>$rep];
+$moral = fn($reps) => ['tipo_persona'=>'2','rfc'=>'ICJ950101AB1','razon_social'=>'INMOBILIARIA SA','fecha_constitucion'=>'1995-01-01','giro_mercantil'=>'1000000','nacionalidad'=>'MX','domicilio'=>$dom,'representantes'=>$reps];
 $fisica = ['tipo_persona'=>'1','rfc'=>'OEEA651127CFA','curp'=>'OEEA651127HVZRRR09','fecha_nacimiento'=>'1965-11-27','nombre'=>'ARTURO','apellido_paterno'=>'ORTEGA','actividad_economica'=>'8111000','nacionalidad'=>'MX','domicilio'=>$dom,
-  'representante'=>['rfc'=>null,'curp'=>null,'fecha_nacimiento'=>null,'nombre'=>null,'apellido_paterno'=>null,'apellido_materno'=>null]];
-$fideicomiso = fn($rep) => ['tipo_persona'=>'3','rfc'=>'BNM840515VB1','razon_social'=>'BANCO FIDUCIARIO','numero_fideicomiso'=>'F/123','domicilio'=>$dom,'representante'=>$rep];
+  'representantes'=>[]];
+$fideicomiso = fn($reps) => ['tipo_persona'=>'3','rfc'=>'BNM840515VB1','razon_social'=>'BANCO FIDUCIARIO','numero_fideicomiso'=>'F/123','domicilio'=>$dom,'representantes'=>$reps];
 $uif = fn($adq, $ven) => ['referencia_aviso'=>'1','prioridad'=>'1','tipo_alerta'=>'100','operaciones'=>[['fecha_operacion'=>'2026-01-02','tipo_transmision'=>'1','adquirentes'=>$adq,'vendedores'=>$ven,'inmueble'=>[],'pagos'=>[]]]];
-$r = $engine->process($ufs, $uif([$fisica], [$moral(['curp'=>'OEET621022MDFRSR01','nombre'=>null,'apellido_paterno'=>null])]), $U);
+$r = $engine->process($ufs, $uif([$fisica], [$moral([['curp'=>'OEET621022MDFRSR01','nombre'=>null,'apellido_paterno'=>null]])]), $U);
 $rp = array_values(array_filter($paths($r->issues), fn($p) => str_contains($p, 'representante')));
-check('moral without nombre / apellido → required errors on its representante', $rp === ['operaciones.0.vendedores.0.representante.nombre', 'operaciones.0.vendedores.0.representante.apellido_paterno']);
-check('física: representante hidden → never validated', !array_filter($paths($r->issues), fn($p) => str_contains($p, 'adquirentes.0.representante')));
-check('fecha de nacimiento derived from the representante CURP', ($r->data['operaciones'][0]['vendedores'][0]['representante']['fecha_nacimiento'] ?? null) === '1962-10-22');
-$r = $engine->process($ufs, $uif([$fideicomiso(['nombre'=>'JUAN'])], []), $U);
-check('fideicomiso: representante shown and validated too', in_array('operaciones.0.adquirentes.0.representante.apellido_paterno', $paths($r->issues), true));
-$secs = (new App\Services\Pdf\ReviewPdfPresenter($engine))->present($ufs, $engine->process($ufs, $uif([$fisica], [$moral(['nombre'=>'MARÍA TERESA','apellido_paterno'=>'ORTEGA'])]), $U)->data);
+check('moral without nombre / apellido → required errors on its representante', $rp === ['operaciones.0.vendedores.0.representantes.0.nombre', 'operaciones.0.vendedores.0.representantes.0.apellido_paterno']);
+check('física: representantes hidden → never validated', !array_filter($paths($r->issues), fn($p) => str_contains($p, 'adquirentes.0.representante')));
+check('fecha de nacimiento derived from the representante CURP', ($r->data['operaciones'][0]['vendedores'][0]['representantes'][0]['fecha_nacimiento'] ?? null) === '1962-10-22');
+$r = $engine->process($ufs, $uif([$fideicomiso([['nombre'=>'JUAN']])], []), $U);
+check('fideicomiso: representante shown and validated too', in_array('operaciones.0.adquirentes.0.representantes.0.apellido_paterno', $paths($r->issues), true));
+$secs = (new App\Services\Pdf\ReviewPdfPresenter($engine))->present($ufs, $engine->process($ufs, $uif([$fisica], [$moral([['nombre'=>'MARÍA TERESA','apellido_paterno'=>'ORTEGA']])]), $U)->data);
 $j = json_encode($secs, JSON_UNESCAPED_UNICODE);
-check('PDF: "Representante Legal" group printed once (moral), not for the física', substr_count($j, '"title":"Representante Legal"') === 1 && str_contains($j, 'MARÍA TERESA'));
+check('PDF: "Representantes Legales" group printed once (moral), not for the física', substr_count($j, '"title":"Representantes Legales"') === 1 && str_contains($j, 'MARÍA TERESA'));
 
 echo "UIF · export / import of the representante\n";
 $exp = new Modules\AvisosUif\V1\Exporter();
@@ -147,21 +147,21 @@ $full = ['referencia_aviso'=>'26763','prioridad'=>'1','tipo_alerta'=>'100','soli
   '_notaria'=>['clave'=>'001','entidad'=>'030','num_notaria'=>'36'],
   'operaciones'=>[['fecha_operacion'=>'2026-01-02','tipo_transmision'=>'1','adquirentes'=>[$fisica],'vendedores'=>[],'inmueble'=>['tipo_bien'=>'3','valor_pactado'=>100,'valor_avaluo'=>100,'domicilio'=>$dom],'pagos'=>[]]]];
 $line = fn($txt, $tag) => array_values(array_filter(preg_split('/\r?\n/', $txt), fn($l) => str_starts_with($l, $tag)))[0] ?? null;
-$withNull = $full; $withNull['operaciones'][0]['vendedores'] = [$moral(['rfc'=>null,'curp'=>null,'fecha_nacimiento'=>null,'nombre'=>null,'apellido_paterno'=>null,'apellido_materno'=>null])];
-$noKey = $full; $noKey['operaciones'][0]['vendedores'] = [$moral(null)];
+$withNull = $full; $withNull['operaciones'][0]['vendedores'] = [$moral([['rfc'=>null,'curp'=>null,'fecha_nacimiento'=>null,'nombre'=>null,'apellido_paterno'=>null,'apellido_materno'=>null]])];
+$noKey = $full; $noKey['operaciones'][0]['vendedores'] = [$moral([])];
 check('an all-empty representante (what the form sends) exports exactly like no representante', $line($exp->export($withNull, 'txt'), '930013') === $line($exp->export($noKey, 'txt'), '930013') && $line($exp->export($noKey, 'txt'), '930013') === '930013-Representante legal realiza operacion a nombre persona moral-grid:||||||');
-$withRep = $full; $withRep['operaciones'][0]['vendedores'] = [$moral(['rfc'=>'OEET621022IH3','curp'=>'OEET621022MDFRSR01','fecha_nacimiento'=>'1962-10-22','nombre'=>'MARÍA TERESA','apellido_paterno'=>'ORTEGA','apellido_materno'=>'ESCUDERO'])];
+$withRep = $full; $withRep['operaciones'][0]['vendedores'] = [$moral([['rfc'=>'OEET621022IH3','curp'=>'OEET621022MDFRSR01','fecha_nacimiento'=>'1962-10-22','nombre'=>'MARÍA TERESA','apellido_paterno'=>'ORTEGA','apellido_materno'=>'ESCUDERO']])];
 $t = $exp->export($withRep, 'txt');
 check('captured representante → 930013 filled (accents stripped like the rest of UIF)', str_starts_with($line($t, '930013'), '930013-Representante legal realiza operacion a nombre persona moral-grid:OEET621022IH3|OEET621022MDFRSR01|22/10/1962|MARIA TERESA|ORTEGA|ESCUDERO|'));
 $res = (new App\Services\Import\ImportService())->import($t, new Modules\AvisosUif\V1\Importer(), $exp);
-check('import: representante back on its moral, no "form can\'t show it" warning', ($res->data['operaciones'][0]['vendedores'][0]['representante']['nombre'] ?? null) === 'MARIA TERESA' && !array_filter($res->warnings, fn($w) => str_contains($w['message'], 'representante')));
+check('import: representante back on its moral, no "form can\'t show it" warning', ($res->data['operaciones'][0]['vendedores'][0]['representantes'][0]['nombre'] ?? null) === 'MARIA TERESA' && !array_filter($res->warnings, fn($w) => str_contains($w['message'], 'representante')));
 
 echo "UIF · AI extraction\n";
 $sch = json_decode(file_get_contents("$U/uif_schema.json"), true)['fields']['operaciones']['items'];
-check('extraction schema: representante object on both sides', isset($sch['adquirentes']['items']['representante']['items']['curp'], $sch['vendedores']['items']['representante']['items']['apellido_paterno']));
+check('extraction schema: representantes array on both sides', isset($sch['adquirentes']['items']['representantes']['items']['curp'], $sch['vendedores']['items']['representantes']['items']['apellido_paterno']));
 $prompt = file_get_contents("$U/uif_prompt.txt");
-check('prompt: moral/fideicomiso only, first signer, company stays the party', str_contains($prompt, 'use only the FIRST one') && str_contains($prompt, 'never replaces it') && str_contains($prompt, '"representante" is null'));
-check('output example has representante keys', str_contains(file_get_contents("$U/uif_output.json"), '"representante"'));
+check('prompt: moral/fideicomiso only, all signers, company stays the party', str_contains($prompt, 'include ALL of them') && str_contains($prompt, 'never replace it') && str_contains($prompt, '"representantes" is an empty array'));
+check('output example has representantes keys', str_contains(file_get_contents("$U/uif_output.json"), '"representantes"'));
 
 
 echo "RFC / CURP exported in uppercase\n";
@@ -177,7 +177,7 @@ check('Adquisición: 910002/910003 RFC + CURP, 910007 and 910006 → uppercase',
 $u = $full;
 $u['solicitante']['rfc'] = 'oeea651127cfa'; $u['solicitante']['curp'] = 'oeea651127hvzrrr09';
 $u['operaciones'][0]['adquirentes'][0]['rfc'] = 'oeea651127cfa'; $u['operaciones'][0]['adquirentes'][0]['curp'] = 'oeea651127hvzrrr09';
-$u['operaciones'][0]['vendedores'] = [['rfc'=>'icj950101ab1'] + $moral(['rfc'=>'oeet621022ih3','curp'=>'oeet621022mdfrsr01','nombre'=>'MARIA','apellido_paterno'=>'ORTEGA'])];
+$u['operaciones'][0]['vendedores'] = [['rfc'=>'icj950101ab1'] + $moral([['rfc'=>'oeet621022ih3','curp'=>'oeet621022mdfrsr01','nombre'=>'MARIA','apellido_paterno'=>'ORTEGA']])];
 $t = $exp->export($u, 'txt');
 check('UIF: solicitante, persona física, moral and representante RFC/CURP → uppercase', !preg_match('/oeea651127|icj950101|oeet621022/', $t) && str_contains($t, 'OEEA651127CFA|OEEA651127HVZRRR09') && str_contains($t, 'ICJ950101AB1') && str_contains($t, 'OEET621022IH3|OEET621022MDFRSR01'));
 check('UIF: a lowercase moral RFC is still classified as moral (930012)', str_contains($line($t, '930012') ?? '', 'ICJ950101AB1'));

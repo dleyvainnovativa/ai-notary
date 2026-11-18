@@ -31,7 +31,7 @@
                     "folio": null,
                     "actividad_economica": null,
                     "giro_mercantil": null,
-                    "representante": null,
+                    "representantes": [],
                     "domicilio": {
                         "tipo_domicilio": null,
                         "entidad_federativa": null,
@@ -60,7 +60,7 @@
                     "folio": null,
                     "actividad_economica": null,
                     "giro_mercantil": null,
-                    "representante": null,
+                    "representantes": [],
                     "domicilio": {
                         "tipo_domicilio": null,
                         "entidad_federativa": null,

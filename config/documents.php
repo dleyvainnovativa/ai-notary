@@ -6,6 +6,7 @@ return [
     'accepted_mimes' => [
         'application/pdf',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+        'application/msword', // .doc (legacy Word 97-2003) — text extracted via OpenAI
     ],
     'temp_disk' => 'local',          // storage/app — NOT public
     'temp_dir' => 'temp_uploads',

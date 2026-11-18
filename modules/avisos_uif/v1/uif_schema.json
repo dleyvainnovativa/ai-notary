@@ -134,9 +134,9 @@
                             "type": "select",
                             "source": "catalogo_actividad_economica"
                         },
-                        "representante": {
-                            "type": "object",
-                            "ai_description": "Solo para persona moral (tipo_persona 2) o fideicomiso (3): la persona física que firma en su nombre (apoderado, administrador único, representante legal, delegado fiduciario). Si hay varios, solo el PRIMERO que aparece. Para persona física (1): null.",
+                        "representantes": {
+                            "type": "array",
+                            "ai_description": "Solo para persona moral (tipo_persona 2) o fideicomiso (3): lista de las personas físicas que firman en su nombre (apoderado, administrador único, representante legal, delegado fiduciario). Incluye TODAS las que aparezcan, cada una con sus datos. Para persona física (1): lista vacía [].",
                             "items": {
                                 "rfc": {
                                     "type": "text",
@@ -265,9 +265,9 @@
                             "type": "select",
                             "source": "catalogo_actividad_economica"
                         },
-                        "representante": {
-                            "type": "object",
-                            "ai_description": "Solo para persona moral (tipo_persona 2) o fideicomiso (3): la persona física que firma en su nombre (apoderado, administrador único, representante legal, delegado fiduciario). Si hay varios, solo el PRIMERO que aparece. Para persona física (1): null.",
+                        "representantes": {
+                            "type": "array",
+                            "ai_description": "Solo para persona moral (tipo_persona 2) o fideicomiso (3): lista de las personas físicas que firman en su nombre (apoderado, administrador único, representante legal, delegado fiduciario). Incluye TODAS las que aparezcan, cada una con sus datos. Para persona física (1): lista vacía [].",
                             "items": {
                                 "rfc": {
                                     "type": "text",

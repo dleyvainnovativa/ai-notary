@@ -133,10 +133,12 @@ class Controller implements ModuleControllerContract
             // --- País de nacionalidad (física + moral; not fideicomiso per manual) ---
             'nacionalidad' => ['label' => 'País de Nacionalidad', 'type' => 'select', 'options' => $catNacionalidad, 'required_in_cases' => ['fisica', 'moral']],
 
-            // --- Representante legal (moral + fideicomiso) → 930008 / 930013 (fideicomiso: 930010 / 930015, not exported yet) ---
-            'representante' => [
-                'label' => 'Representante Legal',
-                'type' => 'object',
+            // --- Representantes legales (moral + fideicomiso) → 930008 / 930013 (fideicomiso: 930010 / 930015) ---
+            //     N per persona moral/fideicomiso: the SAT grid links each rep row to its parent by person_guid.
+            'representantes' => [
+                'label' => 'Representantes Legales',
+                'type' => 'array',
+                'item_label' => 'Representante',
                 'col' => 'full',
                 'show_in_cases' => ['moral', 'fideicomiso'],
                 'itemSchema' => [

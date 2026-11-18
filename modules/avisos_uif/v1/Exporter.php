@@ -443,14 +443,35 @@ class Exporter implements ExporterContract
             $personGuid = $this->guid($prefix, 0, ++$seq);
             $lines[] = $tag . ':' . $this->row($this->moralCols($p, $opGuid, $personGuid, $v, $date));
 
-            // the form always sends the object (all-null when nobody was captured) → treat as absent
-            $rep = $p['representante'] ?? null;
-            $hasRep = is_array($rep) && array_filter($rep, fn($x) => $x !== null && trim((string) $x) !== '');
-            $lines[] = $repTag . ':' . $this->row(
-                $hasRep ? $this->repCols($rep, $personGuid, $v, $date) : $this->repColsEmpty()
-            );
+            // N representantes: one rep row per representante, all linked to this persona's GUID.
+            // Empty → one placeholder row (keeps the 1:1 grid shape when nobody was captured).
+            $reps = $this->repsOf($p);
+            if (empty($reps)) {
+                $lines[] = $repTag . ':' . $this->row($this->repColsEmpty());
+            } else {
+                foreach ($reps as $rep) {
+                    $lines[] = $repTag . ':' . $this->row($this->repCols($rep, $personGuid, $v, $date));
+                }
+            }
         }
         return $seq;
+    }
+
+    /**
+     * Representantes of a persona moral/fideicomiso as a list of non-empty rows.
+     * Accepts the new `representantes` array and the legacy single `representante`
+     * object (so old drafts / imported data still export).
+     */
+    private function repsOf(array $p): array
+    {
+        $reps = $p['representantes'] ?? null;
+        if (!is_array($reps)) {
+            $reps = isset($p['representante']) && is_array($p['representante']) ? [$p['representante']] : [];
+        }
+        return array_values(array_filter(
+            $reps,
+            fn($r) => is_array($r) && array_filter($r, fn($x) => $x !== null && trim((string) $x) !== '')
+        ));
     }
 
     /**
@@ -469,11 +490,14 @@ class Exporter implements ExporterContract
             $personGuid = $this->guid($prefix, 0, ++$seq);
             $lines[] = $tag . ':' . $this->row($this->fideicomisoCols($p, $opGuid, $personGuid, $v, $date));
 
-            $rep = $p['representante'] ?? null;
-            $hasRep = is_array($rep) && array_filter($rep, fn($x) => $x !== null && trim((string) $x) !== '');
-            $lines[] = $repTag . ':' . $this->row(
-                $hasRep ? $this->repCols($rep, $personGuid, $v, $date) : $this->repColsEmpty()
-            );
+            $reps = $this->repsOf($p);
+            if (empty($reps)) {
+                $lines[] = $repTag . ':' . $this->row($this->repColsEmpty());
+            } else {
+                foreach ($reps as $rep) {
+                    $lines[] = $repTag . ':' . $this->row($this->repCols($rep, $personGuid, $v, $date));
+                }
+            }
         }
         return $seq;
     }

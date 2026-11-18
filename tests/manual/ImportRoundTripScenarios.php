@@ -57,7 +57,7 @@ $byTipo = fn($list, $t) => array_values(array_filter($list, fn($p) => $p['tipo_p
 check('físicas first, then morales (TXT record order)', $o['adquirentes'][0]['tipo_persona'] === '1' && $o['adquirentes'][1]['tipo_persona'] === '2');
 $m = $byTipo($o['adquirentes'], '2')[0];
 check('moral imported as tipo_persona 2 with razón social', $m['razon_social'] === 'INMOBILIARIA JUBRISA SA DE CV');
-check('representante attached to its moral', ($m['representante']['nombre'] ?? null) === 'MARIA TERESA');
+check('representante attached to its moral', ($m['representantes'][0]['nombre'] ?? null) === 'MARIA TERESA');
 check('colonia keeps its accent (Juárez) — SAT catalog spelling', $m['domicilio']['colonia'] === 'Juárez');
 $f = $byTipo($o['vendedores'], '1')[0];
 check('foreign address kept (país/ciudad)', $f['domicilio']['tipo_domicilio'] === '2' && $f['domicilio']['ciudad'] === 'HOUSTON');
