@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\FirebaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class SessionController extends Controller
 {
@@ -19,6 +20,7 @@ class SessionController extends Controller
         try {
             $claims = $this->firebase->verifyIdToken($request->idToken);
         } catch (\RuntimeException $e) {
+            Log::debug($e->getMessage());
             return response()->json(['message' => 'Authentication failed'], 401);
         }
 

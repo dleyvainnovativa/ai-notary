@@ -121,10 +121,6 @@ function classifyRow(classifier, rowValues) {
 function personaCase(tipo, rfc) {
     const r = String(rfc ?? '').trim().toUpperCase();
     const t = String(tipo ?? '');
-    // A generic foreign RFC means the party IS foreign — classify as extranjera
-    // regardless of the selected tipo (mirrors SchemaEngine::personaCase in PHP).
-    if (GENERIC_RFC.fisica.includes(r)) return 'extranjera_fisica';
-    if (GENERIC_RFC.moral.includes(r)) return 'extranjera_moral';
     if (t === '1') {
         if (/^[A-ZÑ&]{4}\d{6}[A-Z0-9]{3}$/.test(r)) return 'nacional_fisica';
         if (/^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/.test(r)) return 'nacional_moral';
@@ -237,6 +233,8 @@ function renderReview(container, payload) {
         container.addEventListener('input', onChange);
         container.addEventListener('change', onChange);
         container.addEventListener('change', onDeriveSource);   // CURP/RFC → fecha_nacimiento / fecha_constitucion
+        container.addEventListener('input', clearNoteOnEdit);   // manual edit drops the "tomado de…" legend
+        container.addEventListener('change', clearNoteOnEdit);
         container.addEventListener('input', scheduleAutosave);
         container.addEventListener('change', scheduleAutosave);
         container.addEventListener('change', updateAppendVisibility);
@@ -542,6 +540,9 @@ function renderField(name, def, value, path, readOnly) {
             input.value = value != null ? Math.round(value) : '';
         }else{
             input.value = value ?? '';
+        }
+        if (def.maxlength != null && def.type !== 'number' && def.type !== 'date') {
+            input.maxLength = def.maxlength;
         }
 
         if (def.type === 'number') {
@@ -1231,6 +1232,9 @@ function validateField(def, value, col) {
             if (def.max != null && num > def.max) return `Máximo: ${def.max}.`;
         }
     }
+    if (def.maxlength != null && String(value).trim().length > def.maxlength) {
+        return `Máximo ${def.maxlength} caracteres.`;
+    }
     const fmt = def.validation?.format;
     if (fmt === 'rfc') {
         if (!/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/i.test(value)) return 'RFC inválido.';
@@ -1381,6 +1385,20 @@ function applyNotes(notes) {
             err ? target.insertBefore(note, err) : target.appendChild(note);
         }
     }
+}
+
+/* A reference note ("Fecha tomada de la escritura…") stays while the derived
+ * value is untouched. Once the user edits that field by hand, the legend no
+ * longer applies, so drop it. Only real user edits count (e.isTrusted) — the
+ * programmatic CP lookup / date derivation never clears it. */
+function clearNoteOnEdit(e) {
+    if (!e.isTrusted) return;
+    const input = e.target;
+    if (!input || !input.classList || !input.classList.contains('rv-input')) return;
+    const field = input.closest('.rv-field.has-note');
+    if (!field) return;
+    field.querySelectorAll(':scope > .rv-note').forEach(n => n.remove());
+    field.classList.remove('has-note');
 }
 
 /* ---------- Draft autosave ----------
@@ -2029,9 +2047,6 @@ function condMet(cond, vals) {
 }
 
 function compare(actual, op, target) {
-    // Tolerate money/number formatting ("$15,000") so a formatted value still
-    // satisfies numeric conditions — mirrors SchemaEngine::compare() (PHP).
-    if (typeof actual === 'string') actual = actual.replace(/[,$\s ]/g, '');
     const a = Number(actual);
     const t = Number(target);
     if (Number.isNaN(a)) return false;   // non-numeric never satisfies a numeric comparison

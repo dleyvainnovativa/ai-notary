@@ -122,6 +122,46 @@ class ReviewPdfPresenter
         $allLeaves = !array_filter($itemSchema, fn($d) => in_array($d['type'] ?? 'text', ['object', 'array'], true));
         $classifier = $def['classifier'] ?? null;
 
+        // Wide all-leaf arrays (DeclaraNOT Pago / Copropiedad): too many money columns
+        // to fit a printed table, so lay each row out as a label/value card and add a
+        // Total card for the money columns. Narrow all-leaf arrays stay as tables.
+        if ($allLeaves && !$classifier && !empty($def['wide'])) {
+            $cards = [];
+            $totals = [];
+            foreach ($rows as $i => $row) {
+                $row = is_array($row) ? $row : [];
+                $grid = [];
+                foreach ($itemSchema as $col => $cdef) {
+                    if (!$this->engine->isVisible($cdef, $row, null)) continue;
+                    $grid[] = $this->cell($col, $cdef, $row[$col] ?? null, $row, null, "{$path}.{$i}.{$col}", $ancestors);
+                    if (!empty($cdef['money']) && is_numeric($row[$col] ?? null)) {
+                        $totals[$col] = ($totals[$col] ?? 0) + (float) $row[$col];
+                    }
+                }
+                $cards[] = [
+                    'title' => $itemLabel . ' ' . ($i + 1),
+                    'badge' => null,
+                    'notes' => $this->notes["{$path}.{$i}"] ?? [],
+                    'blocks' => $grid ? [['type' => 'grid', 'items' => $grid]] : [],
+                ];
+            }
+            if ($totals && count($rows) > 1) {
+                $titems = [];
+                foreach ($itemSchema as $col => $cdef) {
+                    if (!isset($totals[$col])) continue;
+                    $titems[] = [
+                        'label' => $cdef['label'] ?? $this->humanize($col),
+                        'value' => $this->money($totals[$col], $this->wholeNumber($cdef)),
+                        'missing' => false, 'full' => false, 'numeric' => true, 'notes' => [], 'errors' => [],
+                    ];
+                }
+                if ($titems) {
+                    $cards[] = ['title' => 'Total', 'badge' => null, 'notes' => [], 'blocks' => [['type' => 'grid', 'items' => $titems]]];
+                }
+            }
+            return ['type' => 'cards', 'title' => $title, 'count' => count($rows), 'items' => $cards];
+        }
+
         // Simple rows (Pagos, Liquidaciones…) → table
         if ($allLeaves && !$classifier) {
             $columns = [];

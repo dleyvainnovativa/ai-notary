@@ -242,6 +242,7 @@ class Controller implements ModuleControllerContract
                 'item_label' => 'Pago',
                 'label' => 'Pago',
                 'type' => 'array',
+                'wide' => true,   // PDF: too many columns for a printed table → card layout
                 'itemSchema' => [
                     'ingresos_enajenacion' => ['label' => 'Ingresos por Enajenación', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
                     'ingresos_exentos' => ['label' => 'Ingresos Exentos', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true],
@@ -255,7 +256,7 @@ class Controller implements ModuleControllerContract
                     'numero_operacion_federacion' => ['label' => 'Número de Operación Federación', 'required_if' => ['isr_federacion' => ['op' => '>', 'value' => 0]], 'type' => 'text'],
                     'fecha_pago_federacion' => ['label' => 'Fecha de Pago Federación', 'required_if' => ['isr_federacion' => ['op' => '>', 'value' => 0]], 'type' => 'date'],
                     'isr_entidad' => ['label' => 'ISR Entidad', 'required' => true, 'type' => 'number', 'format' => 'round', 'integer' => true, 'money' => true, 'less_than' => $menorQueGanancia],
-                    'numero_operacion_entidad' => ['label' => 'Número de Operación Entidad', 'required_if' => ['isr_entidad' => ['op' => '>', 'value' => 0]], 'type' => 'text'],
+                    'numero_operacion_entidad' => ['label' => 'Número de Operación Entidad', 'required_if' => ['isr_entidad' => ['op' => '>', 'value' => 0]], 'type' => 'text', 'maxlength' => 18],
                     'fecha_pago_entidad' => ['label' => 'Fecha de Pago Entidad', 'required_if' => ['isr_entidad' => ['op' => '>', 'value' => 0]], 'type' => 'date'],
                     'total_isr_pagado' => ['label' => 'Total ISR Pagado', 'type' => 'computed', 'formula' => 'isr_federacion + isr_entidad'],
                 ],
@@ -271,6 +272,7 @@ class Controller implements ModuleControllerContract
                         'label' => 'Integrantes',
                         'col' => 'full',
                         'type' => 'array',
+                        'wide' => true,   // PDF: card layout instead of an over-wide table
                         'enabled_if' => ['existe_copropiedad' => '1'],
                         // blocking: the integrantes' porcentajes must add up to 100
                         'sum_equals' => ['field' => 'porcentaje', 'value' => 100, 'label' => 'porcentajes', 'empty_field' => 'existe_copropiedad'],
