@@ -121,6 +121,10 @@ function classifyRow(classifier, rowValues) {
 function personaCase(tipo, rfc) {
     const r = String(rfc ?? '').trim().toUpperCase();
     const t = String(tipo ?? '');
+    // A generic foreign RFC means the party IS foreign — classify as extranjera
+    // regardless of the selected tipo (mirrors SchemaEngine::personaCase in PHP).
+    if (GENERIC_RFC.fisica.includes(r)) return 'extranjera_fisica';
+    if (GENERIC_RFC.moral.includes(r)) return 'extranjera_moral';
     if (t === '1') {
         if (/^[A-ZÑ&]{4}\d{6}[A-Z0-9]{3}$/.test(r)) return 'nacional_fisica';
         if (/^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/.test(r)) return 'nacional_moral';
@@ -544,6 +548,11 @@ function renderField(name, def, value, path, readOnly) {
             if (def.min != null) input.min = def.min;
             if (def.max != null) input.max = def.max;
             if (def.integer) { input.step = '1'; input.dataset.integer = '1'; }
+
+            // Don't let the mouse wheel change the value — blur so the page scrolls instead.
+            input.addEventListener('wheel', () => {
+                if (document.activeElement === input) input.blur();
+            }, { passive: true });
 
             // integer-only key filtering (you already have this)
             if (def.integer) {
@@ -2020,6 +2029,9 @@ function condMet(cond, vals) {
 }
 
 function compare(actual, op, target) {
+    // Tolerate money/number formatting ("$15,000") so a formatted value still
+    // satisfies numeric conditions — mirrors SchemaEngine::compare() (PHP).
+    if (typeof actual === 'string') actual = actual.replace(/[,$\s ]/g, '');
     const a = Number(actual);
     const t = Number(target);
     if (Number.isNaN(a)) return false;   // non-numeric never satisfies a numeric comparison

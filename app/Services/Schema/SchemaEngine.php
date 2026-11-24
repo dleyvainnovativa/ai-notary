@@ -26,6 +26,7 @@ class SchemaEngine
         $data = $this->applyComputed($fields, $data);
         $data = $this->applyDerived($fields, $data, $moduleDir, $data);
         $this->validate($fields, $data, $moduleDir, '');
+
         return new EngineResult($data, $this->issues);
     }
 
@@ -124,6 +125,12 @@ class SchemaEngine
     {
         $r = strtoupper(trim((string) $rfc));
         $t = (string) $tipo;
+
+        // A generic foreign RFC means the party IS foreign — classify as extranjera
+        // regardless of the selected tipo. (EXTF900101000 also matches the nacional
+        // física pattern, so without this it would wrongly read as nacional when tipo=1.)
+        if (in_array($r, self::GENERIC_RFC['fisica'], true)) return 'extranjera_fisica';
+        if (in_array($r, self::GENERIC_RFC['moral'], true)) return 'extranjera_moral';
 
         if ($t === '1') {
             if (preg_match('/^[A-ZÑ&]{4}\d{6}[A-Z0-9]{3}$/', $r)) return 'nacional_fisica';
@@ -622,6 +629,9 @@ class SchemaEngine
 
     private function compare($actual, string $op, $target): bool
     {
+        // Tolerate money/number formatting ("$15,000", "15,000.50") so a formatted
+        // value still satisfies numeric conditions (e.g. a pago field shown when ISR > 0).
+        if (is_string($actual)) $actual = str_replace([',', '$', ' ', "\u{00A0}"], '', $actual);
         if (!is_numeric($actual)) return false;
         $a = (float) $actual;
         $t = (float) $target;

@@ -93,7 +93,8 @@
                 "tipo_enajenante": {
                     "type": "select",
                     "required": true,
-                    "source": "catalogo_tipos_domicilio"
+                    "source": "catalogo_tipos_domicilio",
+                    "ai_description": "Tipo de enajenante: \"1\" = Nacional (mexicano/a), \"2\" = Extranjero/a. Usa \"2\" cuando la escritura indique que la persona es extranjera: nacionalidad distinta a la mexicana, se identifica con pasaporte o documento migratorio, no tiene CURP, o usa el RFC genérico de extranjero (EXTF900101000 persona física, EXT990101000 persona moral). Si la persona es claramente mexicana, usa \"1\"."
                 },
                 "rfc": {
                     "type": "text",
@@ -165,7 +166,8 @@
                 "tipo_adquiriente": {
                     "required": true,
                     "type": "select",
-                    "source": "catalogo_tipos_domicilio"
+                    "source": "catalogo_tipos_domicilio",
+                    "ai_description": "Tipo de adquirente: \"1\" = Nacional (mexicano/a), \"2\" = Extranjero/a. Usa \"2\" cuando la escritura indique que la persona es extranjera: nacionalidad distinta a la mexicana, se identifica con pasaporte o documento migratorio, no tiene CURP, o usa el RFC genérico de extranjero (EXTF900101000 persona física, EXT990101000 persona moral). Si la persona es claramente mexicana, usa \"1\"."
                 },
                 "rfc": {
                     "type": "text",
