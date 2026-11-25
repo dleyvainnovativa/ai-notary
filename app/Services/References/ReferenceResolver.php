@@ -42,6 +42,7 @@ class ReferenceResolver
     private array $notes;
     private array $datePatterns;
     private array $deedDatePaths;
+    private array $deedDateExclude;
     private array $addressKeys;
     private array $partialValues;
 
@@ -55,6 +56,7 @@ class ReferenceResolver
         $this->data = $merged;
         $this->notes = [];
         $this->deedDatePaths = (array) ($config['deed_date'] ?? []);
+        $this->deedDateExclude = (array) ($config['deed_date_exclude'] ?? []);
         $this->addressKeys = (array) ($config['address_keys'] ?? ['domicilio']);
         $this->partialValues = (array) ($config['partial_values'] ?? []);
 
@@ -106,6 +108,15 @@ class ReferenceResolver
                 && preg_match(self::DATE_PHRASE, $value);
 
             if (!$isSentinel && !$isPhrase) continue;
+
+            // Some date fields must never be inferred from the deed — e.g. the ISR
+            // payment date (fecha de pago), which the escritura never states; it comes
+            // from the bank receipt / cálculo or is captured by hand. For these, a
+            // reference to the deed resolves to null (no "tomada de la escritura" note).
+            if (in_array($this->pattern($p), $this->deedDateExclude, true)) {
+                $value = null;
+                continue;
+            }
 
             $deedDate = $this->deedDateFor($p);
             $value = $deedDate; // null when unresolvable

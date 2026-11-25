@@ -21,6 +21,9 @@
     "deed_date": [
       "escritura.fecha_firma_escritura"
     ],
+    "deed_date_exclude": [
+      "calculo.pago.*.fecha_pago"
+    ],
     "address_keys": [
       "domicilio"
     ],

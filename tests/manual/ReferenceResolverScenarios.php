@@ -49,13 +49,23 @@ check('literal phrase date -> 2026-07-30', $o['pagos'][0]['fecha_pago'] === '202
 check('literal phrase address -> copied from previous vendedor', $o['vendedores'][1]['domicilio']['codigo_postal'] === '95750');
 show($res);
 
-echo "S3 — declaranot cross-input (calculo never sees the deed)\n";
+echo "S3 — declaranot: ISR payment dates are NEVER inferred from the deed\n";
+// The escritura does not state when the ISR was paid at the bank, so a deed
+// reference ('en esta fecha' / @FECHA_ESCRITURA) must resolve to null, not the
+// escritura date. A real explicit date is kept. (deed_date_exclude)
 $res = $r->resolve(['escritura'=>['numero_escritura'=>'26763','fecha_firma_escritura'=>'2026-07-30'],
   'calculo'=>['pago'=>[['fecha_pago_federacion'=>'@FECHA_ESCRITURA','fecha_pago_entidad'=>'2026-07-31']]]],
   ['escritura'=>$decSchema,'calculo'=>$calSchema], $decRefs);
-check('calculo date resolved from escritura', $res->data['calculo']['pago'][0]['fecha_pago_federacion'] === '2026-07-30');
-check('real date untouched', $res->data['calculo']['pago'][0]['fecha_pago_entidad'] === '2026-07-31');
+check('deed-referenced payment date -> null (deed never states it)', $res->data['calculo']['pago'][0]['fecha_pago_federacion'] === null);
+check('real payment date untouched', $res->data['calculo']['pago'][0]['fecha_pago_entidad'] === '2026-07-31');
+check('no "tomada de la escritura" note for an excluded field', count($res->notes) === 0);
 check('deed date untouched', $res->data['escritura']['fecha_firma_escritura'] === '2026-07-30');
+
+// A literal phrase left in an excluded field is also blanked, not deed-filled.
+$res2 = $r->resolve(['escritura'=>['fecha_firma_escritura'=>'2026-07-30'],
+  'calculo'=>['pago'=>[['fecha_pago_entidad'=>'EN ESTA FECHA']]]],
+  ['escritura'=>$decSchema,'calculo'=>$calSchema], $decRefs);
+check('deed-phrase payment date -> null', $res2->data['calculo']['pago'][0]['fecha_pago_entidad'] === null);
 show($res);
 
 echo "S4 — multiple operations: each pago takes ITS operation's date\n";

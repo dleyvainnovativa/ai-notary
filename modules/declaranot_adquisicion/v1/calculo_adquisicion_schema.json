@@ -34,7 +34,7 @@
                 },
                 "fecha_pago": {
                     "type": "date",
-                    "ai_description": "Fecha del pago."
+                    "ai_description": "Fecha en que se pagó el ISR ante la autoridad (del comprobante o cálculo), en YYYY-MM-DD. La escritura NO indica esta fecha; si no es explícita, devuelve null. No la infieras de la fecha de la escritura."
                 }
             }
         },
